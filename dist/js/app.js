@@ -22,6 +22,10 @@ var _uniqid = require("uniqid");
 
 var _uniqid2 = _interopRequireDefault(_uniqid);
 
+var _jquery = require("jquery");
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -134,7 +138,7 @@ var App = function (_React$Component) {
                 var preferredTorrents = torrents.filter(function (item, index) {
                     if (item) {
                         var title = item.title.toUpperCase();
-                        return title.match(/^(?=.*(1080|720|HD|YIFY))(?!.*(FRENCH|ITALIAN|HDTS|HDTC|HD\.TS|HD\.TC|HD\-TS|HD\-TC|CAM))/g);
+                        return title.match(/^(?=.*(1080|720|HD|YIFY))(?!.*(HDTS|HDTC|HD\.TS|HD\.TC|HD\-TS|HD\-TC|CAM))/g);
                     }
                 });
 
@@ -195,17 +199,21 @@ var App = function (_React$Component) {
             }
         };
 
+        _this.openBackup = function () {
+            _this.setState({ backupIsOpen: true });
+        };
+
         _this.showBackup = function (simple) {
             if (simple) {
-                _this.setState({ backupIsOpen: true });
+                _this.openBackup();
             } else {
-                _this.setState({ error: true, videoIndex: false, backupIsOpen: true });
+                _this.setVideoIndex();
+                _this.setVideoError(true);
+                _this.openBackup();
             }
         };
 
         _this.applyTimeout = function () {
-            _this.changeCurrentMagnet(false);
-            _this.updateMovieTimeArray(true);
             if (_this.server) {
                 _this.server.close();
             }
@@ -213,10 +221,36 @@ var App = function (_React$Component) {
             console.log('Streaming timed out.');
         };
 
-        _this.streamTorrent = function (movie) {
-            _this.setState({ playerLoading: true, error: false, videoIndex: false });
-
+        _this.startWebTorrent = function () {
             var WebTorrent = require('webtorrent');
+            _this.setState({
+                client: new WebTorrent()
+            }, function () {
+                _this.state.client.on('error', function (err) {
+                    console.log(err);
+                });
+            });
+        };
+
+        _this.removeTorrent = function (magnet) {
+            return new Promise(function (resolve, reject) {
+                _this.state.client.remove(magnet, function () {
+                    resolve('Torrent removed.');
+                }, function (err) {
+                    reject(err);
+                });
+            }).catch(function (err) {
+                return console.log(err);
+            });
+        };
+
+        _this.setVideoError = function (error) {
+            _this.setState({ error: error });
+        };
+
+        _this.streamTorrent = function (movie) {
+            _this.resetVideo();
+            _this.changeCurrentMagnet(movie.magnet);
 
             _this.timeOut = setTimeout(function () {
                 if (_this.state.time == '00:00:00') {
@@ -224,36 +258,43 @@ var App = function (_React$Component) {
                 }
             }, 80000);
 
-            _this.setState({
-                client: new WebTorrent()
-            }, function () {
-                if (_this.state.playMovie) {
-                    _this.state.client.add(movie.magnet, function (torrent) {
-                        console.log("Attempting to stream \"" + movie.title + "\" from " + movie.magnet + ".");
-                        var videoFormats = ["avi", "mp4", "mkv", "wmv", "mov"];
-                        var fileIndex = torrent.files.findIndex(function (file) {
-                            var extension = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length);
-                            if (videoFormats.indexOf(extension) > -1 && file.length > 99999999) {
-                                return file;
-                            }
-                        });
-                        if (fileIndex !== -1) {
-                            _this.server = torrent.createServer();
-                            _this.server.listen('8888');
+            if (_this.state.playMovie) {
+                _this.state.client.add(movie.magnet, function (torrent) {
+                    console.log("Attempting to stream \"" + movie.title + "\" from " + movie.magnet + ".");
+                    var videoFormats = ["avi", "mp4", "mkv", "wmv", "mov"];
+                    var filtered = torrent.files.filter(function (file) {
+                        var extension = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length);
 
-                            _this.setState({
-                                videoIndex: fileIndex
-                            }, function () {
-                                _this.setMovieTime(_this.state.playMovie);
-                            });
-                        } else {
-                            _this.applyTimeout();
+                        if (videoFormats.indexOf(extension) > -1) {
+                            return file;
                         }
                     });
-                } else {
-                    _this.destroyClient();
-                }
-            });
+
+                    filtered.sort(function (a, b) {
+                        return b.length - a.length;
+                    });
+
+                    var file = filtered[0];
+                    var fileIndex = torrent.files.findIndex(function (item) {
+                        return file.path == item.path;
+                    });
+
+                    if (file && _this.state.playMovie) {
+                        _this.server = torrent.createServer();
+                        _this.server.listen('8888');
+
+                        _this.setVideoIndex(fileIndex).then(function () {
+                            _this.setMovieTime(_this.state.playMovie);
+                        });
+                    } else if (!file) {
+                        _this.applyTimeout();
+                    } else if (!_this.state.playMovie) {
+                        _this.removeMagnet(movie.magnet);
+                    }
+                });
+            } else {
+                _this.destroyClient();
+            }
         };
 
         _this.getSearch = function () {
@@ -296,7 +337,7 @@ var App = function (_React$Component) {
 
         _this.sortQuery = function (results, query) {
             results.sort(function (a, b) {
-                return a.popularity + b.popularity;
+                return b.popularity - a.popularity;
             });
 
             results = results.filter(function (movie) {
@@ -415,7 +456,7 @@ var App = function (_React$Component) {
         _this.checkMagnet = function (movie) {
             return new Promise(function (resolve, reject) {
                 var magnet = movie.magnet.toUpperCase();
-                if (magnet.match(/^(?!.*(FRENCH|ITALIAN|HDTS|HDTC|HD\.TS|HD\.TC|HD\-TS|HD\-TC|CAM))/g)) {
+                if (magnet.match(/^(?!.*(HDTS|HDTC|HD\.TS|HD\.TC|HD\-TS|HD\-TC|CAM))/g)) {
                     resolve(movie);
                 } else {
                     movie.magnet = false;
@@ -432,19 +473,38 @@ var App = function (_React$Component) {
                     reject('Timed out in ' + ms + 'ms.');
                 }, ms);
             }).catch(function (err) {
-                console.log(err);
+                return console.log(err);
             });
 
             return Promise.race([promise, timeout]);
         };
 
+        _this.setPlayerLoading = function (playerLoading) {
+            _this.setState({ playerLoading: playerLoading });
+        };
+
+        _this.setVideoIndex = function (videoIndex) {
+            return new Promise(function (resolve, reject) {
+                _this.setState({ videoIndex: videoIndex }, function () {
+                    resolve();
+                });
+            });
+        };
+
+        _this.resetVideo = function () {
+            _this.setPlayerLoading(true);
+            _this.setVideoIndex();
+            _this.setVideoError();
+        };
+
         _this.searchTorrent = function (movie) {
-            _this.setState({ videoIndex: false, playerLoading: true });
+            _this.resetVideo();
+
             if (movie.magnet) {
                 _this.checkMagnet(movie).then(function (cleanMovie) {
                     _this.streamTorrent(cleanMovie);
                 }).catch(function (movie) {
-                    _this.searchTorrent(movie);
+                    return _this.searchTorrent(movie);
                 });
             } else {
                 _this.fetchAttempts++;
@@ -456,18 +516,17 @@ var App = function (_React$Component) {
                     if (result.length) {
                         _this.getPreferredTorrent(result).then(function (torrents) {
                             var torrent = torrents[0];
-                            _this.changeCurrentMagnet(torrent.magnet);
-                            _this.fetchAttempts = 0;
-                            _this.streamTorrent(torrent);
                             _this.setState({
                                 backupTorrents: torrents
                             }, function () {
                                 _this.state.playMovie.preferredTorrents = _this.state.backupTorrents;
+                                _this.changeCurrentMagnet(torrent.magnet);
                                 _this.updateMovieTimeArray(true);
+                                _this.fetchAttempts = 0;
+                                _this.streamTorrent(torrent);
                             });
                         });
                     } else {
-
                         _this.setState({ error: true });
                     }
                 }).catch(function (err) {
@@ -484,28 +543,52 @@ var App = function (_React$Component) {
         _this.playMovie = function (movie) {
             movie = _this.matchMovie(movie);
             _this.initMovie(movie);
-            _this.toggleBox(false, function () {
+            _this.toggleBox().then(function () {
                 _this.searchTorrent(movie);
                 _this.addToRecentlyPlayed(movie);
             });
         };
 
         _this.destroyClient = function (backUp) {
-            clearTimeout(_this.timeOut);
-            if (_this.state.client) {
-                if (_this.server) {
-                    _this.server.close();
-                    _this.server = false;
+            return new Promise(function (resolve, reject) {
+                clearTimeout(_this.timeOut);
+                if (_this.state.client) {
+                    _this.setState({
+                        playMovie: backUp ? _this.state.playMovie : false,
+                        videoIndex: false,
+                        paused: true,
+                        backupTorrents: backUp ? _this.state.backupTorrents : false,
+                        playerLoading: backUp ? true : false
+                    }, function () {
+                        if (_this.server) {
+                            _this.server.close();
+                            _this.server = false;
+                        }
+
+                        if (backUp) {
+                            if (_this.currentMagnet) {
+                                if (_this.state.client.get(_this.currentMagnet)) {
+                                    _this.removeTorrent(_this.currentMagnet).then(function (result) {
+                                        resolve(result);
+                                    });
+                                }
+                            }
+                        } else {
+                            resolve();
+                        }
+                    });
                 }
-
-                _this.state.client.destroy();
-
-                _this.setState({ client: false, videoIndex: false, paused: true, backupTorrents: backUp ? _this.state.backupTorrents : false, time: backUp ? "00:00:00" : _this.state.time });
-            }
+            }).catch(function (err) {
+                return console.log(err);
+            });
         };
 
         _this.setFullScreen = function (full) {
             var browserWindow = require("electron").remote.getCurrentWindow();
+
+            if (full === undefined) {
+                full = false;
+            }
             browserWindow.setFullScreen(full);
         };
 
@@ -516,7 +599,6 @@ var App = function (_React$Component) {
                 }
             }, function () {
                 _this.setStorage();
-                _this.updateBucket();
             });
         };
 
@@ -528,6 +610,10 @@ var App = function (_React$Component) {
 
         _this.changeCurrentMagnet = function (magnet) {
             _this.currentMagnet = magnet;
+        };
+
+        _this.getCurrentMagnet = function () {
+            return _this.currentMagnet;
         };
 
         _this.updateMovieTimeArray = function (alt) {
@@ -550,8 +636,10 @@ var App = function (_React$Component) {
 
         _this.updateMovieTime = function (time) {
             if (_this.state.playMovie) {
-                _this.state.playMovie.currentTime = time;
-                _this.updateMovieTimeArray();
+                if (time !== 0) {
+                    _this.state.playMovie.currentTime = time;
+                    _this.updateMovieTimeArray();
+                }
             }
         };
 
@@ -560,12 +648,15 @@ var App = function (_React$Component) {
                 _this.updateMovieTime(time);
             }
             _this.setState({
-                playMovie: false,
                 error: false
             }, function () {
-                _this.destroyClient();
+                _this.destroyClient().then(function () {
+                    _this.removeTorrent(_this.currentMagnet).then(function (result) {
+                        console.log(result);
+                    });
+                });
             });
-            _this.setFullScreen(false);
+            _this.setFullScreen();
         };
 
         _this.matchMovie = function (movie) {
@@ -587,14 +678,18 @@ var App = function (_React$Component) {
             _this.setState({ movieCurrent: movie });
         };
 
-        _this.toggleBox = function (active, callback) {
-            _this.setState({
-                showBox: active
-            }, function () {
-                if (callback) {
-                    setTimeout(callback, 400);
-                }
+        _this.toggleBox = function (active) {
+            return new Promise(function (resolve, reject) {
+                _this.setState({
+                    showBox: active
+                }, function () {
+                    resolve();
+                });
             });
+        };
+
+        _this.closeBackdrop = function () {
+            _this.toggleBox();
         };
 
         _this.getHeader = function (results) {
@@ -699,7 +794,7 @@ var App = function (_React$Component) {
                     reject(error);
                 });
             }).catch(function (err) {
-                console.log(err);
+                return console.log(err);
             });
         };
 
@@ -913,7 +1008,7 @@ var App = function (_React$Component) {
                     _this.getMovies(genres[j].name, genres[j].id).then(function (genreComplete) {
                         resolve(genreComplete);
                     }).catch(function (err) {
-                        console.log(err);
+                        return console.log(err);
                     });
                 });
 
@@ -995,8 +1090,13 @@ var App = function (_React$Component) {
 
         _this.startSimperium = function () {
             if (!_this.state.isGuest && _this.state.user) {
+                _this.simperiumScript = document.createElement('script');
+                _this.simperiumScript.setAttribute('type', 'text/javascript');
+                _this.simperiumScript.setAttribute('src', './libs/simperium.min.js');
+                (0, _jquery2.default)('body').append(_this.simperiumScript);
 
                 _this.simperium = new Simperium(_this.state.simperiumId, { token: _this.state.user.token });
+
                 _this.bucket = _this.simperium.bucket('collection');
                 _this.bucket.on('notify', function (id, data) {
                     if (data) {
@@ -1026,9 +1126,9 @@ var App = function (_React$Component) {
                 var key = _this.state.simperiumKey;
                 var _url = "https://auth.simperium.com/1/" + id + "/" + (create ? 'create' : 'authorize') + "/";
 
-                var $ = require('jquery');
+                var _$ = require('jquery');
 
-                $.ajax({
+                _$.ajax({
                     url: _url,
                     type: "POST",
                     contentType: "application/json",
@@ -1092,6 +1192,8 @@ var App = function (_React$Component) {
                 user: false
             }, function () {
                 _this.setUserCredentials();
+
+                _this.simperiumScript.parentNode.removeChild(_this.simperiumScript);
             });
         };
 
@@ -1161,11 +1263,12 @@ var App = function (_React$Component) {
     _createClass(App, [{
         key: "componentDidMount",
         value: function componentDidMount() {
-            this.requireTorrent();
             this.loadLogo();
             this.getUserCredentials();
             this.getStorage();
             this.loadContent(this.state.active);
+            this.startWebTorrent();
+            this.requireTorrent();
             window.addEventListener('online', this.handleConnectionChange);
             window.addEventListener('offline', this.handleConnectionChange);
         }
@@ -1183,9 +1286,7 @@ var App = function (_React$Component) {
                 updateMenu: this.updateMenu,
                 resetSearch: this.resetSearch }) : null;
 
-            var movieBackDrop = this.state.showBox ? React.createElement("div", { className: "movie-container-bg", onClick: function onClick() {
-                    return _this2.toggleBox(false);
-                } }) : null;
+            var movieBackDrop = this.state.showBox ? React.createElement("div", { className: "movie-container-bg", onClick: this.closeBackdrop }) : null;
 
             var movieModal = this.state.showBox ? React.createElement(MovieModal, {
                 movie: this.state.movieCurrent,
@@ -1197,7 +1298,7 @@ var App = function (_React$Component) {
 
             var playerModal = this.state.playMovie ? React.createElement(Player, {
                 changeCurrentMagnet: this.changeCurrentMagnet,
-                updateMovieTimeArray: this.updateMovieTimeArray,
+                updateMovieTime: this.updateMovieTime,
                 resetClient: this.destroyClient,
                 togglePause: this.togglePause,
                 showBackup: this.showBackup,
@@ -1213,7 +1314,9 @@ var App = function (_React$Component) {
                 handleVideoClose: this.handleVideoClose,
                 setFullScreen: this.setFullScreen,
                 movie: this.state.movieCurrent,
+                getCurrentMagnet: this.getCurrentMagnet,
                 loading: this.state.playerLoading,
+                setPlayerLoading: this.setPlayerLoading,
                 setElementValue: this.setElementValue,
                 getElementValue: this.getElementValue,
                 error: this.state.error,

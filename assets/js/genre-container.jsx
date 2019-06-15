@@ -57,19 +57,19 @@ class GenreContainer extends React.Component {
                         className={"movie-genre " + (this.props.name == 'Recently Played' || this.props.name == 'Favorites'
                         ? "movie-blocked"
                         : "")}
-                        onClick={this.handleOpenGenre}>{this.props.name}</div>
+                        onClick={this.handleOpenGenre}><span>{this.props.name}</span></div>
                     {this.state.showArrows
                         ? (
                             <div className="movie-scroll-container" id={genreID}>
                                 <div
-                                    className="movie-scroll-left"
+                                    className="movie-scroll movie-scroll-left"
                                     onClick={e => this
                                     .props
                                     .scrollMovieGenre(true, e, genreID)}>
                                     <i className="mdi mdi-light mdi-24px mdi-chevron-left"/>
                                 </div>
                                 <div
-                                    className="movie-scroll-right"
+                                    className="movie-scroll movie-scroll-right"
                                     onClick={e => this
                                     .props
                                     .scrollMovieGenre(false, e, genreID)}>

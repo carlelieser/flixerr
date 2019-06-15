@@ -84,7 +84,11 @@ var GenreContainer = function (_React$Component) {
                         {
                             className: "movie-genre " + (this.props.name == 'Recently Played' || this.props.name == 'Favorites' ? "movie-blocked" : ""),
                             onClick: this.handleOpenGenre },
-                        this.props.name
+                        React.createElement(
+                            "span",
+                            null,
+                            this.props.name
+                        )
                     ),
                     this.state.showArrows ? React.createElement(
                         "div",
@@ -92,7 +96,7 @@ var GenreContainer = function (_React$Component) {
                         React.createElement(
                             "div",
                             {
-                                className: "movie-scroll-left",
+                                className: "movie-scroll movie-scroll-left",
                                 onClick: function onClick(e) {
                                     return _this2.props.scrollMovieGenre(true, e, genreID);
                                 } },
@@ -101,7 +105,7 @@ var GenreContainer = function (_React$Component) {
                         React.createElement(
                             "div",
                             {
-                                className: "movie-scroll-right",
+                                className: "movie-scroll movie-scroll-right",
                                 onClick: function onClick(e) {
                                     return _this2.props.scrollMovieGenre(false, e, genreID);
                                 } },

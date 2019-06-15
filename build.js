@@ -16,6 +16,7 @@ function getInstallerConfig() {
         exe: 'Flixerr.exe',
         setupExe: 'flixerr-setup.exe',
         setupIcon: iconFile,
+        loadingGif: path.join(rootPath, 'assets', 'imgs', 'package.gif'),
         iconUrl: 'https://dl.dropboxusercontent.com/s/oa8crfmb01sr88m/icon.ico?dl=0'
     })
 }

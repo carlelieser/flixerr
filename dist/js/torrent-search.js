@@ -10,7 +10,7 @@ var TorrentSearch = function () {
 
     var provider = {
         name: 'The Pirate Bay',
-        url: 'https://thepiratebay3.org/index.php?q='
+        url: 'https://thepiratebay3.org/index.php?video=on&category=0&page=0&orderby=99&q='
     };
 
     var getProxy = function getProxy() {

@@ -17,13 +17,13 @@ class Player extends React.Component {
     }
 
     mouseStopped = () => {
-        if(!this.props.openBackup){
+        if (!this.props.openBackup) {
             this.toggleOverlay(false);
         }
     }
 
     mouseMove = () => {
-        if(!this.props.openBackup){
+        if (!this.props.openBackup) {
             this.toggleOverlay(true);
             clearTimeout(this.state.timer);
             this.setState({
@@ -54,6 +54,7 @@ class Player extends React.Component {
                 .video
                 .pause();
         }
+        this.toggleOverlay(this.state.video.paused);
     }
 
     handleKeyPress = (e) => {
@@ -120,35 +121,57 @@ class Player extends React.Component {
     }
 
     handleTorrentClick = (torrent) => {
-        this.props.changeCurrentMagnet(torrent.magnet);
-        this.props.updateMovieTimeArray();
-        this.props.resetClient(true);
+        let currentTime = document
+            .querySelector("video")
+            .currentTime;
+        
+        this.props.setPlayerLoading(true);
+
+        this
+            .props
+            .updateMovieTime(currentTime);
+        this
+            .props
+            .resetClient(true)
+            .then((result) => {
+                console.log(result);
+                this
+                    .props
+                    .streamTorrent(torrent);
+            });
         this
             .props
             .closeBackup();
-        this
-            .props
-            .streamTorrent(torrent);
     }
 
-    handleOpenBackup = () =>{
-        if(this.props.index !== false){
-            this.state.video.pause();
+    handleOpenBackup = () => {
+        if (this.props.index !== false) {
+            this
+                .state
+                .video
+                .pause();
         }
-        this.props.showBackup(true);
+        this
+            .props
+            .showBackup(true);
     }
 
     handleBg = () => {
-        if(this.props.index !== false){
-            this.state.video.play();
+        if (this.props.index !== false) {
+            this
+                .state
+                .video
+                .play();
         }
-        this.props.closeBackup();
+        this
+            .props
+            .closeBackup();
     }
 
-    shouldComponentUpdate(nextProps, nextState){
-        if(nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextProps.backupTorrents === this.props.backupTorrents && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.index === this.props.index && nextProps.time === this.props.time){
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextProps.backupTorrents === this.props.backupTorrents && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.index === this.props.index && nextProps.time === this.props.time && nextProps.loading === this.props.loading) {
             return false;
-        } else{
+        } else {
             return true;
         }
     }
@@ -181,10 +204,13 @@ class Player extends React.Component {
             ? <BackupTorrents
                     movie={this.props.movie}
                     torrents={this.props.backupTorrents || this.props.movie.preferredTorrents}
+                    getCurrentMagnet={this.props.getCurrentMagnet}
                     handleTorrentClick={this.handleTorrentClick}
                     resetClient={this.props.resetClient}
+                    streamTorrent={this.props.streamTorrent}
                     searchTorrent={this.props.searchTorrent}
-                    closeBackup={this.props.closeBackup}/>
+                    closeBackup={this.props.closeBackup}
+                    setPlayerLoading={this.props.setPlayerLoading}/>
             : "";
         let backupContainerBg = this.props.openBackup
             ? <div className="backup-bg" onClick={this.handleBg}></div>
@@ -226,7 +252,7 @@ class Player extends React.Component {
                         <div>{this.props.movie.title}</div>
                         <i
                             className="open-backup mdi mdi-light mdi-sort-variant"
-                            onClick={this.handleOpenBackup} />
+                            onClick={this.handleOpenBackup}/>
                     </div>
                 </div>
                 <div
@@ -255,9 +281,9 @@ class Player extends React.Component {
                     autoPlay
                     onTimeUpdate={this.props.handleVideo}
                     type="video/mp4"
-                    src={this.props.index === false
-                    ? ''
-                    : `http://localhost:8888/${this.props.index}`}/>
+                    src={Number.isInteger(this.props.index)
+                    ? `http://localhost:8888/${this.props.index}`
+                    : ''}/>
             </div>
         )
     }

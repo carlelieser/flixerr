@@ -56,6 +56,7 @@ var Player = function (_React$Component) {
             } else {
                 _this.state.video.pause();
             }
+            _this.toggleOverlay(_this.state.video.paused);
         };
 
         _this.handleKeyPress = function (e) {
@@ -104,11 +105,16 @@ var Player = function (_React$Component) {
         };
 
         _this.handleTorrentClick = function (torrent) {
-            _this.props.changeCurrentMagnet(torrent.magnet);
-            _this.props.updateMovieTimeArray();
-            _this.props.resetClient(true);
+            var currentTime = document.querySelector("video").currentTime;
+
+            _this.props.setPlayerLoading(true);
+
+            _this.props.updateMovieTime(currentTime);
+            _this.props.resetClient(true).then(function (result) {
+                console.log(result);
+                _this.props.streamTorrent(torrent);
+            });
             _this.props.closeBackup();
-            _this.props.streamTorrent(torrent);
         };
 
         _this.handleOpenBackup = function () {
@@ -137,7 +143,7 @@ var Player = function (_React$Component) {
     _createClass(Player, [{
         key: "shouldComponentUpdate",
         value: function shouldComponentUpdate(nextProps, nextState) {
-            if (nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextProps.backupTorrents === this.props.backupTorrents && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.index === this.props.index && nextProps.time === this.props.time) {
+            if (nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextProps.backupTorrents === this.props.backupTorrents && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.index === this.props.index && nextProps.time === this.props.time && nextProps.loading === this.props.loading) {
                 return false;
             } else {
                 return true;
@@ -171,10 +177,13 @@ var Player = function (_React$Component) {
             var backupContainer = this.props.openBackup ? React.createElement(BackupTorrents, {
                 movie: this.props.movie,
                 torrents: this.props.backupTorrents || this.props.movie.preferredTorrents,
+                getCurrentMagnet: this.props.getCurrentMagnet,
                 handleTorrentClick: this.handleTorrentClick,
                 resetClient: this.props.resetClient,
+                streamTorrent: this.props.streamTorrent,
                 searchTorrent: this.props.searchTorrent,
-                closeBackup: this.props.closeBackup }) : "";
+                closeBackup: this.props.closeBackup,
+                setPlayerLoading: this.props.setPlayerLoading }) : "";
             var backupContainerBg = this.props.openBackup ? React.createElement("div", { className: "backup-bg", onClick: this.handleBg }) : "";
             return React.createElement(
                 "div",
@@ -256,7 +265,7 @@ var Player = function (_React$Component) {
                     autoPlay: true,
                     onTimeUpdate: this.props.handleVideo,
                     type: "video/mp4",
-                    src: this.props.index === false ? '' : "http://localhost:8888/" + this.props.index })
+                    src: Number.isInteger(this.props.index) ? "http://localhost:8888/" + this.props.index : '' })
             );
         }
     }]);
