@@ -42,7 +42,6 @@
         "react": "^16.8.6",
         "react-dom": "^16.8.6",
         "react-lazy-load": "^3.0.13",
-        "react-lazyload": "^2.6.1",
         "react-reveal": "^1.2.2",
         "react-transition-group": "^1.2.1",
         "torrent-search-api": "^2.0.8",
