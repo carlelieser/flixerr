@@ -39,6 +39,9 @@ jspm_packages/
 # TypeScript v1 declaration files
 typings/
 
+#Stupid Mac Shit
+.DS_Store
+
 # Optional npm cache directory
 .npm
 
