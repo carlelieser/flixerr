@@ -2,6 +2,12 @@
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _reactAddonsCssTransitionGroup = require("react-addons-css-transition-group");
+
+var _reactAddonsCssTransitionGroup2 = _interopRequireDefault(_reactAddonsCssTransitionGroup);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -21,16 +27,19 @@ var Player = function (_React$Component) {
         };
 
         _this.mouseStopped = function () {
-            _this.toggleOverlay(false);
+            if (!_this.props.openBackup) {
+                _this.toggleOverlay(false);
+            }
         };
 
         _this.mouseMove = function () {
-            _this.toggleOverlay(true);
-
-            clearTimeout(_this.state.timer);
-            _this.setState({
-                timer: setTimeout(_this.mouseStopped, 5000)
-            });
+            if (!_this.props.openBackup) {
+                _this.toggleOverlay(true);
+                clearTimeout(_this.state.timer);
+                _this.setState({
+                    timer: setTimeout(_this.mouseStopped, 5000)
+                });
+            }
         };
 
         _this.fullScreen = function () {
@@ -94,6 +103,28 @@ var Player = function (_React$Component) {
             e.returnValue = false;
         };
 
+        _this.handleTorrentClick = function (torrent) {
+            _this.props.changeCurrentMagnet(torrent.magnet);
+            _this.props.updateMovieTimeArray();
+            _this.props.resetClient(true);
+            _this.props.closeBackup();
+            _this.props.streamTorrent(torrent);
+        };
+
+        _this.handleOpenBackup = function () {
+            if (_this.props.index !== false) {
+                _this.state.video.pause();
+            }
+            _this.props.showBackup(true);
+        };
+
+        _this.handleBg = function () {
+            if (_this.props.index !== false) {
+                _this.state.video.play();
+            }
+            _this.props.closeBackup();
+        };
+
         _this.state = {
             video: false,
             fullScreen: false,
@@ -104,6 +135,15 @@ var Player = function (_React$Component) {
     }
 
     _createClass(Player, [{
+        key: "shouldComponentUpdate",
+        value: function shouldComponentUpdate(nextProps, nextState) {
+            if (nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextProps.backupTorrents === this.props.backupTorrents && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.index === this.props.index && nextProps.time === this.props.time) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }, {
         key: "componentDidMount",
         value: function componentDidMount() {
             this.props.setElementValue(document.querySelector(".seek-bar"), "value", 0);
@@ -128,14 +168,38 @@ var Player = function (_React$Component) {
         value: function render() {
             var _this2 = this;
 
+            var backupContainer = this.props.openBackup ? React.createElement(BackupTorrents, {
+                movie: this.props.movie,
+                torrents: this.props.backupTorrents || this.props.movie.preferredTorrents,
+                handleTorrentClick: this.handleTorrentClick,
+                resetClient: this.props.resetClient,
+                searchTorrent: this.props.searchTorrent,
+                closeBackup: this.props.closeBackup }) : "";
+            var backupContainerBg = this.props.openBackup ? React.createElement("div", { className: "backup-bg", onClick: this.handleBg }) : "";
             return React.createElement(
                 "div",
                 {
-                    className: "movie-player " + (this.state.showOverlay ? "" : "movie-hide"),
+                    className: "movie-player " + (this.state.showOverlay ? "" : this.props.openBackup ? "" : "movie-hide"),
                     style: {
-                        backgroundImage: "" + (this.props.loading ? this.props.error ? "url(assets/imgs/error.png)" : "url(assets/imgs/loading.apng)" : "")
+                        backgroundImage: "" + (this.props.loading ? this.props.error ? "none" : "url(assets/imgs/loading.apng)" : "none")
                     },
                     onMouseMove: this.mouseMove },
+                React.createElement(
+                    _reactAddonsCssTransitionGroup2.default,
+                    {
+                        transitionName: "movie-box-anim",
+                        transitionEnterTimeout: 300,
+                        transitionLeaveTimeout: 300 },
+                    backupContainer
+                ),
+                React.createElement(
+                    _reactAddonsCssTransitionGroup2.default,
+                    {
+                        transitionName: "box-anim",
+                        transitionEnterTimeout: 300,
+                        transitionLeaveTimeout: 300 },
+                    backupContainerBg
+                ),
                 React.createElement(
                     "div",
                     {
@@ -150,7 +214,10 @@ var Player = function (_React$Component) {
                             "div",
                             null,
                             this.props.movie.title
-                        )
+                        ),
+                        React.createElement("i", {
+                            className: "open-backup mdi mdi-light mdi-sort-variant",
+                            onClick: this.handleOpenBackup })
                     )
                 ),
                 React.createElement(

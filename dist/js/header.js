@@ -30,11 +30,9 @@ var Header = function (_React$Component) {
 
         _this.handleSearch = function () {
             clearTimeout(_this.state.timer);
-            _this.setState({
-                timer: setTimeout(function () {
+            _this.setState({ timer: setTimeout(function () {
                     _this.props.searchMovies();
-                }, 500)
-            });
+                }, 500) });
         };
 
         _this.state = {
@@ -57,7 +55,9 @@ var Header = function (_React$Component) {
                 React.createElement(
                     _Fade2.default,
                     { delay: 20, distance: "20%", spy: this.props.background, bottom: true },
-                    React.createElement("div", { className: "app-header-bg-real", style: {
+                    React.createElement("div", {
+                        className: "app-header-bg-real",
+                        style: {
                             backgroundImage: "" + (this.props.background ? "url(https://image.tmdb.org/t/p/original" + this.props.background : "")
                         } })
                 ),
@@ -65,9 +65,22 @@ var Header = function (_React$Component) {
                     "div",
                     { className: "app-header-bg" },
                     React.createElement(
-                        "div",
-                        { className: "app-header-title" },
-                        "Flixerr"
+                        _Fade2.default,
+                        { spy: this.props.user, distance: "10%", bottom: true },
+                        React.createElement(
+                            "div",
+                            { className: "app-header-title" },
+                            React.createElement(
+                                "div",
+                                null,
+                                "Flixerr /"
+                            ),
+                            React.createElement(
+                                "div",
+                                { className: "user-email" },
+                                this.props.user ? this.props.user.name || this.props.user.email : 'Guest'
+                            )
+                        )
                     ),
                     React.createElement(
                         _Fade2.default,
@@ -80,22 +93,15 @@ var Header = function (_React$Component) {
                     ),
                     React.createElement("i", {
                         className: "app-menu-button mdi mdi-light mdi-" + (this.props.menuActive ? "keyboard-backspace" : "menu"),
-                        onClick: this.toggleMenu
-                    }),
+                        onClick: this.toggleMenu }),
                     React.createElement(
                         "div",
                         { className: "search-bar-container" },
                         React.createElement("i", { className: "mdi mdi-24px mdi-magnify" }),
-                        React.createElement("input", {
-                            type: "text",
-                            placeholder: "Search Movies",
-                            onKeyUp: this.handleSearch
-                        }),
+                        React.createElement("input", { type: "text", placeholder: "Search Movies", onKeyUp: this.handleSearch }),
                         " ",
-                        this.props.searchContent ? React.createElement("i", {
-                            className: "mdi mdi-24px mdi-close",
-                            onClick: this.props.closeSearch
-                        }) : ""
+                        " ",
+                        this.props.searchContent ? React.createElement("i", { className: "mdi mdi-24px mdi-close", onClick: this.props.closeSearch }) : ""
                     )
                 )
             );

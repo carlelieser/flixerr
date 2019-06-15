@@ -39,7 +39,7 @@ class Genre extends React.Component {
             .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${this
             .state
             .page}&release_date.gte=${new Date()
-            .getFullYear() - 5}&release_date.lte=${new Date().getFullYear() - 1}&with_genres=${this.props.genreID}`;;
+            .getFullYear() - 5}&release_date.lte=${new Date().getFullYear() - 1}&with_genres=${this.props.genreID}`;
 
         this
             .props
@@ -48,18 +48,15 @@ class Genre extends React.Component {
                     .props
                     .setOffline();
                 let movies = response.results;
-
-                setTimeout(() => {
-                    this.setState({
-                        movies: this
-                            .state
-                            .movies
-                            .concat(this.props.visualizeResults(movies))
-                    }, () => {
-                        this.changeContainerHeight();
-                        this.processing = false;
-                    });
-                }, 400);
+                this.setState({
+                    movies: this
+                        .state
+                        .movies
+                        .concat(this.props.visualizeResults(movies))
+                }, () => {
+                    this.changeContainerHeight();
+                    this.processing = false;
+                });
             }, () => this.props.setOffline(true));
     }
 
@@ -118,11 +115,21 @@ class Genre extends React.Component {
     render() {
         return (
             <div className="paginated-genre-results" ref={this.setElementRef}>
-                <div className={`genre-bar ${this.state.changeNav ? 'genre-bar-on' : ''}`}></div>
-                <div className={`close-genre ${this.state.changeNav ? 'close-genre-on' : ''}`} onClick={() => this.props.closeGenre()}>
+                <div
+                    className={`genre-bar ${this.state.changeNav
+                    ? 'genre-bar-on'
+                    : ''}`}></div>
+                <div
+                    className={`close-genre ${this.state.changeNav
+                    ? 'close-genre-on'
+                    : ''}`}
+                    onClick={() => this.props.closeGenre()}>
                     <i className="mdi mdi-keyboard-backspace"></i>
                 </div>
-                <div className={`genre-name ${this.state.changeNav ? 'genre-name-on' : ''}`}>{this.props.genre}</div>
+                <div
+                    className={`genre-name ${this.state.changeNav
+                    ? 'genre-name-on'
+                    : ''}`}>{this.props.genre}</div>
                 <div
                     className="genre-movie-list"
                     ref={this.setListRef}

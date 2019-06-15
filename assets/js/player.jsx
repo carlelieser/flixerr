@@ -1,3 +1,5 @@
+import ReactCSSTransitionGroup from "react-addons-css-transition-group";
+
 class Player extends React.Component {
     constructor(props) {
         super(props);
@@ -15,16 +17,19 @@ class Player extends React.Component {
     }
 
     mouseStopped = () => {
-        this.toggleOverlay(false);
+        if(!this.props.openBackup){
+            this.toggleOverlay(false);
+        }
     }
 
     mouseMove = () => {
-        this.toggleOverlay(true);
-
-        clearTimeout(this.state.timer);
-        this.setState({
-            timer: setTimeout(this.mouseStopped, 5000)
-        });
+        if(!this.props.openBackup){
+            this.toggleOverlay(true);
+            clearTimeout(this.state.timer);
+            this.setState({
+                timer: setTimeout(this.mouseStopped, 5000)
+            });
+        }
     }
 
     fullScreen = () => {
@@ -101,15 +106,51 @@ class Player extends React.Component {
             .removeClient(currentTime);
     }
 
-    handleClose =(e)=>{
+    handleClose = (e) => {
         this.windowTimeout = setTimeout(() => {
             window.removeEventListener("beforeunload", this.handleClose);
             window.close();
         }, 600);
         e.preventDefault();
         this.playOrPause();
-        this.props.handleVideoClose(this.state.video);
+        this
+            .props
+            .handleVideoClose(this.state.video);
         e.returnValue = false;
+    }
+
+    handleTorrentClick = (torrent) => {
+        this.props.changeCurrentMagnet(torrent.magnet);
+        this.props.updateMovieTimeArray();
+        this.props.resetClient(true);
+        this
+            .props
+            .closeBackup();
+        this
+            .props
+            .streamTorrent(torrent);
+    }
+
+    handleOpenBackup = () =>{
+        if(this.props.index !== false){
+            this.state.video.pause();
+        }
+        this.props.showBackup(true);
+    }
+
+    handleBg = () => {
+        if(this.props.index !== false){
+            this.state.video.play();
+        }
+        this.props.closeBackup();
+    }
+
+    shouldComponentUpdate(nextProps, nextState){
+        if(nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextProps.backupTorrents === this.props.backupTorrents && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.index === this.props.index && nextProps.time === this.props.time){
+            return false;
+        } else{
+            return true;
+        }
     }
 
     componentDidMount() {
@@ -132,22 +173,48 @@ class Player extends React.Component {
             .handleVideoClose(this.state.video);
         window.removeEventListener("keydown", this.handleKeyPress);
         window.removeEventListener("beforeunload", this.handleClose);
-
     }
 
     render() {
+
+        let backupContainer = this.props.openBackup
+            ? <BackupTorrents
+                    movie={this.props.movie}
+                    torrents={this.props.backupTorrents || this.props.movie.preferredTorrents}
+                    handleTorrentClick={this.handleTorrentClick}
+                    resetClient={this.props.resetClient}
+                    searchTorrent={this.props.searchTorrent}
+                    closeBackup={this.props.closeBackup}/>
+            : "";
+        let backupContainerBg = this.props.openBackup
+            ? <div className="backup-bg" onClick={this.handleBg}></div>
+            : "";
         return (
             <div
                 className={"movie-player " + (this.state.showOverlay
                 ? ""
-                : "movie-hide")}
+                : this.props.openBackup
+                    ? ""
+                    : "movie-hide")}
                 style={{
                 backgroundImage: `${this.props.loading
                     ? this.props.error
-                        ? "url(assets/imgs/error.png)"
-                        : "url(assets/imgs/loading.apng)" : ""}`
+                        ? "none"
+                        : "url(assets/imgs/loading.apng)" : "none"}`
             }}
                 onMouseMove={this.mouseMove}>
+                <ReactCSSTransitionGroup
+                    transitionName="movie-box-anim"
+                    transitionEnterTimeout={300}
+                    transitionLeaveTimeout={300}>
+                    {backupContainer}
+                </ReactCSSTransitionGroup>
+                <ReactCSSTransitionGroup
+                    transitionName="box-anim"
+                    transitionEnterTimeout={300}
+                    transitionLeaveTimeout={300}>
+                    {backupContainerBg}
+                </ReactCSSTransitionGroup>
                 <div
                     className={"top-bar-container " + (this.state.showOverlay
                     ? ""
@@ -157,6 +224,9 @@ class Player extends React.Component {
                             className="mdi mdi-light mdi-chevron-left mdi-36px"
                             onClick={this.closeClient}/>
                         <div>{this.props.movie.title}</div>
+                        <i
+                            className="open-backup mdi mdi-light mdi-sort-variant"
+                            onClick={this.handleOpenBackup} />
                     </div>
                 </div>
                 <div

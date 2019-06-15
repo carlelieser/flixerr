@@ -32,7 +32,7 @@ var MovieItem = function (_React$Component) {
 
 		_this.handleImage = function () {
 			_this.image = new Image();
-			_this.imageURL = "https://image.tmdb.org/t/p/w780" + _this.props.movie.poster_path;
+			_this.imageURL = _this.props.movie.poster_path ? "https://image.tmdb.org/t/p/w780" + _this.props.movie.poster_path : "https://image.tmdb.org/t/p/w780" + _this.props.movie.backdrop_path;
 			_this.image.src = _this.imageURL;
 
 			_this.backdropImage = new Image();

@@ -17,7 +17,7 @@ class MovieItem extends React.Component{
 
 	handleImage = () => {
 		this.image = new Image();
-    	this.imageURL = `https://image.tmdb.org/t/p/w780${this.props.movie.poster_path}`;
+		this.imageURL = this.props.movie.poster_path ? `https://image.tmdb.org/t/p/w780${this.props.movie.poster_path}` : `https://image.tmdb.org/t/p/w780${this.props.movie.backdrop_path}`;
 		this.image.src = this.imageURL;
 
 		this.backdropImage = new Image();

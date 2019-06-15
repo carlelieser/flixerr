@@ -34,6 +34,15 @@ var Menu = function (_React$Component) {
     }
 
     _createClass(Menu, [{
+        key: 'shouldComponentUpdate',
+        value: function shouldComponentUpdate(nextProps, nextState) {
+            if (nextProps.menu !== this.props.menu) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this2 = this;

@@ -1,72 +1,101 @@
-let TorrentSearch = function () {
-    let baseURL = 'https://thepiratebay3.org/index.php?category=0&page=0&orderby=99&q=';
+let TorrentSearch = (function () {
+    process.env.UV_THREADPOOL_SIZE = 128;
+    let request = require('request');
+    let cheerio = require('cheerio');
+    let HttpsProxyAgent = require('https-proxy-agent');
 
-    return {
-        search: (query, callback) => {
-            let request = require('request');
-            let url = `${baseURL}${encodeURI(query)}`;
+    let timeout = 8000;
 
-            return new Promise((resolve, reject) => {
-                request(url, (err, response, body) => {
+    let provider = {
+        name: 'The Pirate Bay',
+        url: 'https://thepiratebay3.org/index.php?q='
+    };
+
+    let getProxy = () => {
+        return new Promise((resolve, reject) => {
+            proxyList
+                .listProxies()
+                .then(proxies => {
+                    let proxy = proxies[Math.floor(Math.random() * proxies.length)];
+                    proxy = `http://${proxy.ip}:${proxy.port}`;
+                    resolve(proxy);
+                })
+                .catch(err => reject);
+        }).catch(err => {
+            console.log(err)
+        })
+    }
+
+    let searchProvider = (uri) => {
+        return new Promise((resolve, reject) => {
+            getProxy().then(proxy => {
+                var agent = new HttpsProxyAgent(proxy);
+                request({
+                    uri,
+                    agent,
+                    timeout
+                }, (err, response, body) => {
                     if (!err) {
-                        resolve(body);
+                        handleTorrents(body).then(torrents => {
+                            resolve(torrents);
+                        }).catch(err => {
+                            reject(err)
+                        });
                     } else {
-                        reject(err);
+                        reject(err)
                     }
                 });
-            }).then(html => {
-                let cheerio = require('cheerio');
+            })
+        }).catch(err => {
+            console.log(err);
+        });
+    }
 
-                let $ = cheerio.load(html);
+    let handleTorrents = (html) => {
+        return new Promise((resolve, reject) => {
+            let $ = cheerio.load(html);
+            let torrents = [];
 
-                if ($('#resdata-').text() == 'ThePirateBay is currently unavailable. This page will be refreshed after 10 seco' +
-                        'nds or you can try later.' || $('#resdata-').text() == 'Database maintenance, please check back in 10 minutes. 12' || html.indexOf('No hits.') > -1 || $('title').text() == '503 Service Unavailable'){
-                    callback(2);
-                } else {
-                    let torrents = [];
+            $('#searchResult>tbody>tr').each(function () {
+                let title = $(this)
+                        .children('td')
+                        .eq(1)
+                        .children('.detName')
+                        .children('a')
+                        .text(),
+                    seeds = Number($(this).children('td').last().prev().text()),
+                    leechers = Number($(this).children('td').last().text()),
+                    magnet = $(this)
+                        .children('td')
+                        .eq(1)
+                        .children('a')
+                        .attr('href');
 
-                    $('#searchResult>tbody>tr')
-                        .not(':last-child')
-                        .each(function (item, i) {
-                            let target = $(this)
-                                    .children('td')
-                                    .eq(1),
-                                seeds = $(this)
-                                    .children('td')
-                                    .eq(2)
-                                    .text(),
-                                leechers = $(this)
-                                    .children('td')
-                                    .last()
-                                    .text();
-                            let torrent = {
-                                title: target
-                                    .find('.detName')
-                                    .text(),
-                                magnet: target
-                                    .children('a')
-                                    .first()
-                                    .attr('href'),
-                                seeds,
-                                leechers
-                            }
-
-                            torrents.push(torrent);
-                        });
-
-                    if (torrents.length) {
-                        callback(0, torrents);
-                    } else {
-                        callback(1);
-                    }
+                let torrent = {
+                    title,
+                    seeds,
+                    leechers,
+                    magnet
                 }
 
-            }, (err) => {
-                callback(1)
+                if (magnet) {
+                    torrents.push(torrent);
+                }
             });
-        },
-        magnet: (torrent, callback) => {
-            callback(torrent.magnet)
-        }
+            if (torrents.length) {
+                resolve(torrents);
+            } else {
+                reject('No torrents found.');
+            }
+        }).catch(err => {
+            console.log(err);
+        });
     }
-}
+
+    let search = (query) => {
+        let url = `${provider.url}${encodeURI(query)}`;
+        return searchProvider(url);
+    }
+
+    return {search}
+})();

@@ -20,6 +20,14 @@ class Menu extends React.Component {
             .resetSearch();
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        if(nextProps.menu !== this.props.menu){
+            return true
+        } else{
+            return false;
+        }
+    }
+
     render() {
         let menuItems = this
             .props

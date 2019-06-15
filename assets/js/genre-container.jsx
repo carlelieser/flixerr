@@ -1,4 +1,5 @@
 import Fade from "react-reveal/Fade"
+import uniqid from "uniqid";
 
 class GenreContainer extends React.Component {
     constructor(props) {
@@ -19,8 +20,14 @@ class GenreContainer extends React.Component {
         }
     }
 
+    handleOpenGenre = () => {
+        this
+            .props
+            .toggleGenre(true, this.props.name, this.props.genreID);
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
-        if (this.props.movies === nextProps.movies && this.state.showArrows === nextState.showArrows && this.props.name === nextProps.name) {
+        if (this.props.movies === nextProps.movies && this.state.showArrows === nextState.showArrows && this.props.name === nextProps.name && this.props.genreID === nextProps.genreID) {
             return false
         } else {
             return true
@@ -50,7 +57,7 @@ class GenreContainer extends React.Component {
                         className={"movie-genre " + (this.props.name == 'Recently Played' || this.props.name == 'Favorites'
                         ? "movie-blocked"
                         : "")}
-                        onClick={() => this.props.toggleGenre(true, this.props.name, this.props.genreID)}>{this.props.name}</div>
+                        onClick={this.handleOpenGenre}>{this.props.name}</div>
                     {this.state.showArrows
                         ? (
                             <div className="movie-scroll-container" id={genreID}>
@@ -82,9 +89,7 @@ class GenreContainer extends React.Component {
                                             movie={movie}
                                             openBox={this.props.openBox}
                                             strip={this.props.strip}
-                                            key={this
-                                            .props
-                                            .getUnique(movie.title)}/>))}
+                                            key={uniqid()}/>))}
                                 </div>
                             )
                             : ("")

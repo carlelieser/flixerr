@@ -1,6 +1,6 @@
 {
     "name": "flixerr",
-    "version": "1.0.0",
+    "version": "1.1.3",
     "description": "Flixerr is a movie torrent streaming service.",
     "main": "main.js",
     "scripts": {
@@ -11,7 +11,7 @@
         "package-linux": "electron-packager . Flixerr --platform=linux --arch=x64 --asar --prune --icon=./assets/imgs/icon.png --out=./build/ --overwrite",
         "create-installer-windows": "node build.js",
         "create-installer-mac": "electron-installer-dmg ./build/Flixerr-darwin-x64/Flixerr.app Flixerr --out=./build --background=./assets/imgs/installer-bg.png --icon=./assets/imgs/external-drive.icns --overwrite",
-        "do-everything": "npm run build && npm run package-win && npm run package-darwin && npm run create-installer-mac"
+        "do-everything": "npm run build && npm run package-win && npm run package-darwin && npm run package-linux && npm run create-installer-mac && npm run create-installer-windows"
     },
     "author": "Carlos E. Santos",
     "devDependencies": {
@@ -23,27 +23,30 @@
         "babel-preset-stage-0": "^6.24.1",
         "electron": "^1.8.8",
         "electron-installer-dmg": "^2.0.0",
-        "electron-packager": "^12.1.2"
+        "electron-packager": "^12.2.0"
     },
     "dependencies": {
-        "@mdi/font": "^2.7.94",
-        "cheerio": "^1.0.0-rc.2",
+        "@mdi/font": "^2.8.94",
+        "cheerio": "^1.0.0-rc.3",
+        "cloudscraper": "^3.9.1",
         "electron-json-storage": "^4.1.6",
         "electron-squirrel-startup": "^1.0.0",
         "electron-titlebar": "0.0.3",
-        "electron-window-state": "^5.0.2",
+        "electron-window-state": "^5.0.3",
         "electron-winstaller": "^3.0.4",
-        "get-json": "^1.0.0",
-        "jquery": "^3.3.1",
+        "get-json": "^1.0.1",
+        "https-proxy-agent": "^2.2.1",
+        "jquery": "^3.4.0",
         "mdi": "^2.2.43",
-        "npm": "^6.4.1",
-        "react": "^16.5.2",
+        "npm": "^6.9.0",
+        "react": "^16.8.6",
         "react-addons-css-transition-group": "^15.6.2",
-        "react-dom": "^16.5.2",
+        "react-dom": "^16.8.6",
         "react-lazy-load": "^3.0.13",
         "react-reveal": "^1.2.2",
         "request": "^2.88.0",
+        "torrent-search-api": "^2.0.7",
         "uniqid": "^4.1.1",
-        "webtorrent": "^0.102.4"
+        "webtorrent": "^0.103.1"
     }
 }

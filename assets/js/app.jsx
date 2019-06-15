@@ -8,6 +8,8 @@ class App extends React.Component {
     constructor(props) {
         super(props);
 
+        this.fetchAttempts = 0;
+
         this.state = {
             apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
             simperiumId: "petition-locomotive-460",
@@ -16,15 +18,18 @@ class App extends React.Component {
             account: true,
             create: false,
             user: false,
+            isGuest: false,
             menu: [
                 "Featured", "Movies", "Collection", "Sign In"
             ],
             active: "Featured",
+            backupTorrents: false,
             recentlyPlayed: [],
             favorites: [],
             movieTimeArray: [],
             magnetArray: [],
             results: [],
+            backupIsOpen: false,
             videoIndex: false,
             activeGenre: false,
             genreID: 0,
@@ -58,15 +63,12 @@ class App extends React.Component {
         this.toggleGenre()
     }
 
-    getUnique = (prefix) => {
-        return prefix + uniqid();
-    }
-
     setUserCredentials = () => {
         storage.set("userCredentials", {
             user: this.state.user,
             create: this.state.create,
-            account: this.state.account
+            account: this.state.account,
+            isGuest: this.state.isGuest
         }, error => {
             if (error) {
                 throw error;
@@ -79,7 +81,8 @@ class App extends React.Component {
             this.setState({
                 user: data.user,
                 create: data.create,
-                account: data.account
+                account: data.account,
+                isGuest: data.isGuest
             }, () => {
                 this.startSimperium();
             });
@@ -87,16 +90,16 @@ class App extends React.Component {
     }
 
     updateBucket = () => {
-        if(this.state.user){
+        if (this.state.user) {
             this
-            .bucket
-            .update('favorites');
-        this
-            .bucket
-            .update('recentlyPlayed');
-        this
-            .bucket
-            .update('movieTimeArray');
+                .bucket
+                .update('favorites');
+            this
+                .bucket
+                .update('recentlyPlayed');
+            this
+                .bucket
+                .update('movieTimeArray');
         }
     }
 
@@ -110,7 +113,7 @@ class App extends React.Component {
                 throw error;
             }
 
-            this.updateBucket();  
+            this.updateBucket();
         });
     }
 
@@ -161,28 +164,22 @@ class App extends React.Component {
             : ""}${seconds}`;
     }
 
-    cleanArray = (array, deleteValue) => {
-        for (var i = 0; i < array.length; i++) {
-            if (array[i] == deleteValue) {
-                array.splice(i, 1);
-                i--;
-            }
-        }
-        return array;
-    }
+    getPreferredTorrent = (torrents) => {
+        return new Promise((resolve, reject) => {
+            let preferredTorrents = torrents.filter((item, index) => {
+                if (item) {
+                    let title = item
+                        .title
+                        .toUpperCase();
+                    return title.match(/^(?=.*(1080|720|HD|YIFY))(?!.*(FRENCH|ITALIAN|HDTS|HDTC|HD\.TS|HD\.TC|HD\-TS|HD\-TC|CAM))/g);
+                }
+            });
 
-    getPreferredTorrent = (torrents, n) => {
-        torrents = this.cleanArray(torrents);
-        let preferredTorrents = torrents.filter((item, index) => {
-            if (item) {
-                let title = item
-                    .title
-                    .toUpperCase();
-                return ((item.magnet.indexOf('magnet:?xt=urn:') > -1) && (title.indexOf("720") > -1 || title.indexOf("1080") > -1 || title.indexOf("HD") > -1 || title.indexOf("YIFY") > -1 || index === 0) && (title.indexOf("FRENCH") === -1 && title.indexOf("ITALIAN") === -1));
-            }
+            preferredTorrents.sort((a, b) => b.seeds - a.seeds);
+            
+            resolve(preferredTorrents);
         });
 
-        return preferredTorrents[0];
     }
 
     togglePause = (paused) => {
@@ -214,7 +211,7 @@ class App extends React.Component {
     }
 
     handleVideoClose = (video) => {
-        if(video.src){
+        if (video.src) {
             this.updateMovieTime(video.currentTime);
         }
     }
@@ -229,56 +226,81 @@ class App extends React.Component {
             });
 
         if (movieMatch) {
-            video.currentTime = movieMatch.currentTime;
+            if (movieMatch.currentTime) {
+                video.currentTime = movieMatch.currentTime;
+            }
+
             this.setState({recentlyPlayed: this.state.recentlyPlayed});
         }
     }
 
-    streamTorrent = (instance, torrent) => {
+    showBackup = (simple) => {
+        if(simple){
+            this.setState({ backupIsOpen: true });
+        }else{
+            this.setState({ error: true, videoIndex: false, backupIsOpen: true });
+        }
+    }
+
+    applyTimeout = () => {
+        this.changeCurrentMagnet(false);
+        this.updateMovieTimeArray(true);
+        if(this.server){
+            this
+                .server
+                .close();
+        }
+        this.showBackup();
+        console.log('Streaming timed out.');
+    }
+
+    streamTorrent = (movie) => {
+        this.setState({playerLoading: true, error: false, videoIndex: false});
+
         const WebTorrent = require('webtorrent');
 
-        instance.magnet(torrent, (magnet) => {
-            this.setState({
-                client: new WebTorrent()
-            }, () => {
-                if (this.state.playMovie) {
-                    this
-                        .state
-                        .client
-                        .add(magnet, torrent => {
-                            let videoFormats = ["avi", "mp4", "mkv"];
-                            var file = torrent
-                                .files
-                                .findIndex(function (file) {
-                                    if (videoFormats.indexOf(file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length)) > -1 && file.length > 99999999) {
-                                        return file;
-                                    }
-                                });
-                            if (file !== -1) {
-                                this.server = torrent.createServer();
-                                this
-                                    .server
-                                    .listen('8888');
+        this.timeOut = setTimeout(() => {
+            if (this.state.time == '00:00:00') {
+                this.applyTimeout();
+            }
+        }, 80000);
 
-                                this.timeOut = setTimeout(() => {
-                                    if(this.state.time == "00:00:00"){
-                                        this.setState({ error: true });
-                                    }
-                                }, 60000);
+        this.setState({
+            client: new WebTorrent()
+        }, () => {
+            if (this.state.playMovie) {
+                this
+                    .state
+                    .client
+                    .add(movie.magnet, torrent => {
+                        console.log(`Attempting to stream "${movie.title}" from ${movie.magnet}.`);
+                        let videoFormats = ["avi", "mp4", "mkv", "wmv", "mov"];
+                        var fileIndex = torrent
+                            .files
+                            .findIndex(function (file) {
+                                let extension = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length);
+                                if (videoFormats.indexOf(extension) > -1 && file.length > 99999999) {
+                                    return file;
+                                }
+                            });
+                        if (fileIndex !== -1) {
+                            this.server = torrent.createServer();
+                            this
+                                .server
+                                .listen('8888');
 
-                                this.setState({
-                                    videoIndex: file
-                                }, () => {
-                                    this.setMovieTime(this.state.playMovie);
-                                });
-                            } else {
-                                this.setState({error: true});
-                            }
-                        });
-                } else {
-                    this.destroyClient();
-                }
-            });
+                            this.setState({
+                                videoIndex: fileIndex
+                            }, () => {
+                                this.setMovieTime(this.state.playMovie);
+                            });
+                        } else {
+                            this.applyTimeout();
+                        }
+                    });
+            } else {
+                this.destroyClient();
+            }
         });
     }
 
@@ -440,23 +462,83 @@ class App extends React.Component {
             .toLowerCase();
     }
 
+    checkMagnet = (movie) => {
+        return new Promise((resolve, reject) => {
+            let magnet = movie
+                .magnet
+                .toUpperCase();
+            if (magnet.match(/^(?!.*(FRENCH|ITALIAN|HDTS|HDTC|HD\.TS|HD\.TC|HD\-TS|HD\-TC|CAM))/g)) {
+                resolve(movie);
+            } else {
+                movie.magnet = false;
+                console.log('Previous magnet link was of low quality or different language.');
+                reject(movie);
+            }
+        });
+    }
+
+    promiseTimeout = (ms, promise) => {
+        let timeout = new Promise((resolve, reject) => {
+            let id = setTimeout(() => {
+                clearTimeout(id);
+                reject('Timed out in ' + ms + 'ms.')
+            }, ms)
+        }).catch(err => {
+            console.log(err);
+        });
+
+        return Promise.race([promise, timeout]);
+    }
+
     searchTorrent = (movie) => {
+        this.setState({videoIndex: false, playerLoading: true});
         if (movie.magnet) {
-            this.streamTorrent(this.torrentSearch, movie);
-        } else {
             this
-                .torrentSearch
-                .search(`${this.prepareMovieTitle(movie.title)} ${movie.release_date.substring(0, 4)}*`, (err, torrents) => {
-                    if (err == 2) {
-                        this.searchTorrent(movie);
-                    } else if (err == 1) {
-                        this.setState({error: true});
-                    } else {
-                        let torrent = this.getPreferredTorrent(torrents);
-                        this.currentMagnet = torrent.magnet;
-                        this.streamTorrent(this.torrentSearch, torrent);
-                    }
+                .checkMagnet(movie)
+                .then(cleanMovie => {
+                    this.streamTorrent(cleanMovie);
+                })
+                .catch(movie => {
+                    this.searchTorrent(movie);
                 });
+        } else {
+            this.fetchAttempts++;
+            console.log(`Try #${this.fetchAttempts}`);
+            let query = this.fetchAttempts > 3
+                ? `${this.prepareMovieTitle(movie.title)}`
+                : `${this.prepareMovieTitle(movie.title)} ${movie
+                    .release_date
+                    .substring(0, 4)}*`;
+            let getTorrents = this.promiseTimeout(8000, this.torrentSearch.search(query));
+
+            getTorrents.then(result => {
+                if (result.length) {
+                    this
+                        .getPreferredTorrent(result)
+                        .then(torrents => {
+                            let torrent = torrents[0];
+                            this.changeCurrentMagnet(torrent.magnet);
+                            this.fetchAttempts = 0;
+                            this.streamTorrent(torrent);
+                            this.setState({
+                                backupTorrents: torrents
+                            }, () => {
+                                this.state.playMovie.preferredTorrents = this.state.backupTorrents;
+                                this.updateMovieTimeArray(true);
+                            });
+                        });
+                } else {
+
+                    this.setState({error: true});
+                }
+            }).catch(err => {
+                if (this.fetchAttempts == 6) {
+                    this.fetchAttempts = 0;
+                    this.applyTimeout();
+                } else {
+                    this.searchTorrent(movie);
+                }
+            });
         }
     }
 
@@ -469,21 +551,22 @@ class App extends React.Component {
         });
     }
 
-    destroyClient = () => {
+    destroyClient = (backUp) => {
         clearTimeout(this.timeOut);
         if (this.state.client) {
             if (this.server) {
                 this
                     .server
                     .close();
+                this.server = false;
             }
 
             this
                 .state
                 .client
-                .destroy(() => {
-                    this.setState({client: false, videoIndex: false, paused: true});
-                });
+                .destroy();
+
+            this.setState({ client: false, videoIndex: false, paused: true, backupTorrents: backUp ? this.state.backupTorrents : false, time: backUp ? "00:00:00" : this.state.time });
         }
     }
 
@@ -495,8 +578,10 @@ class App extends React.Component {
     }
 
     setMovieTimeArray = () => {
-        this.setState({
-            movieTimeArray: this.state.movieTimeArray
+        this.setState((prevState) => {
+            if(prevState.movieTimeArray !== this.state.movieTimeArray){
+                return {movieTimeArray: this.state.movieTimeArray}
+            }
         }, () => {
             this.setStorage();
             this.updateBucket();
@@ -512,7 +597,11 @@ class App extends React.Component {
         this.setMovieTimeArray();
     }
 
-    updateMovieTimeArray = () => {
+    changeCurrentMagnet = (magnet) => {
+        this.currentMagnet = magnet;
+    }
+
+    updateMovieTimeArray = (alt) => {
         let matchingItem = this
             .state
             .movieTimeArray
@@ -521,8 +610,12 @@ class App extends React.Component {
             });
 
         if (matchingItem) {
-            matchingItem.currentTime = this.state.playMovie.currentTime;
             matchingItem.magnet = this.currentMagnet;
+            if (alt) {
+                matchingItem.preferredTorrents = this.state.playMovie.preferredTorrents;
+            } else {
+                matchingItem.currentTime = this.state.playMovie.currentTime;
+            }
             this.setMovieTimeArray();
         } else {
             this.addToMovieTimeArray({id: this.state.playMovie.id, currentTime: this.state.playMovie.currentTime, magnet: this.currentMagnet});
@@ -541,7 +634,10 @@ class App extends React.Component {
         if (time) {
             this.updateMovieTime(time);
         }
-        this.setState({playMovie: false, error: false}, () => {
+        this.setState({
+            playMovie: false,
+            error: false
+        }, () => {
             this.destroyClient();
         });
         this.setFullScreen(false);
@@ -557,7 +653,7 @@ class App extends React.Component {
 
         if (matchingItem) {
             movie.magnet = matchingItem.magnet;
-            this.currentMagnet = matchingItem.magnet;
+            this.changeCurrentMagnet(matchingItem.magnet);
             return movie;
         }
 
@@ -592,9 +688,9 @@ class App extends React.Component {
     }
 
     setResults = (results) => {
-        if(results){
+        if (results) {
             results = results.slice();
-            this.setState({ results });
+            this.setState({results});
         }
     }
 
@@ -607,7 +703,7 @@ class App extends React.Component {
             movie={movie}
             openBox={this.openBox}
             strip={this.strip}
-            key={this.getUnique(movie.title)}
+            key={uniqid()}
             featured={featured}/>));
 
         return items;
@@ -679,22 +775,26 @@ class App extends React.Component {
         return array;
     }
 
-    getMovies = (genre, genreID, resolve, reject) => {
+    getMovies = (genre, genreID) => {
         let url = `https://api.themoviedb.org/3/discover/movie?api_key=${
         this
             .state
             .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${Math
             .floor(Math.random() * this.state.genrePages) + 1}&primary_release_date.lte=${this.getURLDate(1)}&with_genres=${genreID}`;
 
-        this.fetchContent(url, (response) => {
-            let genreComplete = {
-                name: genre,
-                genreID: genreID,
-                movies: this.shuffleArray(response.results)
-            }
-            resolve(genreComplete);
-        }, (error) => {
-            reject(error);
+        return new Promise((resolve, reject) => {
+            this.fetchContent(url, (response) => {
+                let genreComplete = {
+                    name: genre,
+                    genreID: genreID,
+                    movies: this.shuffleArray(response.results)
+                }
+                resolve(genreComplete);
+            }, (error) => {
+                reject(error);
+            });
+        }).catch(err => {
+            console.log(err);
         });
     }
 
@@ -882,10 +982,9 @@ class App extends React.Component {
             scrollMovieGenre={this.scrollMovieGenre}
             openBox={this.openBox}
             strip={this.strip}
-            getUnique={this.getUnique}
             name={item.name}
             movies={item.movies}
-            key={this.getUnique(item.name)}/>));
+            key={uniqid()}/>));
 
         return movieGenres;
     }
@@ -958,7 +1057,14 @@ class App extends React.Component {
 
         for (let j = 0; j < genres.length; j++) {
             let promise = new Promise((resolve, reject) => {
-                this.getMovies(genres[j].name, genres[j].id, resolve, reject);
+                this
+                    .getMovies(genres[j].name, genres[j].id)
+                    .then(genreComplete => {
+                        resolve(genreComplete);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
             });
 
             promiseArray.push(promise);
@@ -1037,15 +1143,11 @@ class App extends React.Component {
     }
 
     requireTorrent = () => {
-        this.torrentSearch = new TorrentSearch();
+        this.torrentSearch = TorrentSearch;
     }
 
     startSimperium = () => {
-        if (this.state.user) {
-
-            let $ = require('jquery');
-
-            $('body').append('<script type="text/javascript" src="./libs/simperium.min.js"></script>');
+        if (!this.state.isGuest && this.state.user) {
 
             this.simperium = new Simperium(this.state.simperiumId, {token: this.state.user.token});
             this.bucket = this
@@ -1056,7 +1158,11 @@ class App extends React.Component {
                 .on('notify', (id, data) => {
                     if (data) {
                         if (data.content) {
-                            this.setState({[id]: data.content});
+                            this.setState(prevState => {
+                                if (prevState[id] !== data.content) {
+                                    return {[id]: data.content}
+                                }
+                            });
                         }
                     }
                 });
@@ -1068,9 +1174,10 @@ class App extends React.Component {
             this
                 .bucket
                 .start();
-        }else{
+        } else if (!this.state.isGuest && !this.state.user) {
             this.openAccount();
         }
+
     }
 
     handleAccount = (create, email, password) => {
@@ -1104,6 +1211,7 @@ class App extends React.Component {
                     this.closeAccount();
                     this.setState({
                         user: user,
+                        isGuest: false,
                         loginError: false
                     }, () => {
                         this.setUserCredentials();
@@ -1129,10 +1237,15 @@ class App extends React.Component {
         this.setState({
             account: false,
             create: false,
-            loginError: false
+            loginError: false,
+            isGuest: true
         }, () => {
             this.setUserCredentials();
         });
+    }
+
+    closeBackup = () => {
+        this.setState({backupIsOpen: false});
     }
 
     signOut = () => {
@@ -1143,10 +1256,6 @@ class App extends React.Component {
             user: false
         }, () => {
             this.setUserCredentials();
-
-            let $ = require('jquery');
-
-            $('script[src="./libs/simperium.min.js"]').remove();
         });
     }
 
@@ -1156,12 +1265,25 @@ class App extends React.Component {
         }
     }
 
+    handleConnectionChange = (e) => {
+        if (e.type == "offline") {
+            this.setOffline(true);
+        }
+        if (e.type == "online") {
+            this.setOffline();
+            this.updateMenu(false, this.state.active);
+            this.resetSearch();
+        }
+    }
+
     componentDidMount() {
         this.requireTorrent();
         this.loadLogo();
         this.getUserCredentials();
         this.getStorage();
         this.loadContent(this.state.active);
+        window.addEventListener('online', this.handleConnectionChange);
+        window.addEventListener('offline', this.handleConnectionChange);
     }
 
     render() {
@@ -1183,6 +1305,7 @@ class App extends React.Component {
         let movieModal = this.state.showBox
             ? (<MovieModal
                 movie={this.state.movieCurrent}
+                favorites={this.state.favorites}
                 playMovie={this.playMovie}
                 isFavorite={this.isFavorite}
                 addToFavorites={this.addToFavorites}
@@ -1191,6 +1314,16 @@ class App extends React.Component {
 
         let playerModal = this.state.playMovie
             ? (<Player
+                changeCurrentMagnet={this.changeCurrentMagnet}
+                updateMovieTimeArray={this.updateMovieTimeArray}
+                resetClient={this.destroyClient}
+                togglePause={this.togglePause}
+                showBackup={this.showBackup}
+                openBackup={this.state.backupIsOpen}
+                closeBackup={this.closeBackup}
+                backupTorrents={this.state.backupTorrents}
+                streamTorrent={this.streamTorrent}
+                searchTorrent={this.searchTorrent}
                 time={this.state.time}
                 index={this.state.videoIndex}
                 paused={this.state.paused}
@@ -1218,7 +1351,7 @@ class App extends React.Component {
 
         let loadingContainer = this.state.appLoading
             ? <div className="loading-container">
-                    <Fade when={this.state.logoIsLoaded} delay={100} distance="10%" bottom>
+                    <Fade when={this.state.logoIsLoaded} distance="10%" bottom>
                         <div className="logo"></div>
                     </Fade>
                 </div>
@@ -1340,7 +1473,8 @@ class App extends React.Component {
                     background={this.state.headerBg}
                     closeSearch={this.closeSearch}
                     searchContent={this.state.searchContent}
-                    searchMovies={this.searchMovies}/>
+                    searchMovies={this.searchMovies}
+                    user={this.state.user}/>
                 <ReactCSSTransitionGroup
                     transitionName="menu-anim"
                     transitionEnterTimeout={300}
@@ -1359,7 +1493,6 @@ class App extends React.Component {
                     scrollMovieGenre={this.scrollMovieGenre}
                     getHeader={this.getHeader}
                     setHeader={this.setHeader}
-                    getUnique={this.getUnique}
                     strip={this.strip}
                     openBox={this.openBox}
                     results={this.state.results}/>

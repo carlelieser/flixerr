@@ -15,6 +15,14 @@ class MovieModal extends React.Component {
         }
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        if(this.props.movie === nextProps.movie && this.props.favorites === nextProps.favorites){
+            return false;
+        } else{
+            return true;
+        }
+    }
+
     render() {
         return (
                 <div className="movie-modal">
@@ -23,7 +31,7 @@ class MovieModal extends React.Component {
                             className="movie-modal-poster"
                             style={{
                                 backgroundImage: `url(https://image.tmdb.org/t/p/w780${
-                                    this.props.movie.poster_path
+                                    this.props.movie.poster_path || this.props.movie.backdrop_path
                                 })`
                             }}
                         />

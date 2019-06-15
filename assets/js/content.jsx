@@ -1,4 +1,6 @@
 import Fade from "react-reveal/Fade";
+import uniqid from "uniqid";
+
 class Content extends React.Component {
     constructor(props) {
         super(props);
@@ -11,7 +13,7 @@ class Content extends React.Component {
     }
 
     shouldComponentUpdate(nextProps){
-        if(this.props.content === nextProps.content && this.props.searchContent === nextProps.searchContent && this.props.favorites === nextProps.favorites && this.props.recentlyPlayed === nextProps.recentlyPlayed && this.props.results === nextProps.results){
+        if(this.props.content == nextProps.content && this.props.searchContent == nextProps.searchContent && this.props.favorites == nextProps.favorites && this.props.recentlyPlayed == nextProps.recentlyPlayed && this.props.results == nextProps.results && this.props.isOffline == nextProps.isOffline){
             return false
         }else{
             return true
@@ -29,7 +31,7 @@ class Content extends React.Component {
 
     render() {
         this.genreCollection = this.state.collection.map((item) => (
-                <GenreContainer scrollMovieGenre={this.props.scrollMovieGenre} openBox={this.props.openBox} strip={this.props.strip} getUnique={this.props.getUnique} name={item} movies={item == 'Favorites' ? this.props.favorites : this.props.recentlyPlayed}/>
+                <GenreContainer key={uniqid()} scrollMovieGenre={this.props.scrollMovieGenre} openBox={this.props.openBox} strip={this.props.strip} name={item} movies={item == 'Favorites' ? this.props.favorites : this.props.recentlyPlayed}/>
             ));
 
         return (
@@ -43,13 +45,13 @@ class Content extends React.Component {
                 {(() => {
                     if(!this.props.isOffline){
                         if(this.props.search){
-                            return <Fade bottom><div className="search-title">Search Results</div></Fade>
+                            return <Fade distance="10%" bottom><div className="search-title">Search Results</div></Fade>
                         }
                     }
                 })()}
                 {(() => {
                     if(this.props.isOffline){
-                        return <Fade bottom>
+                        return <Fade distance="10%" bottom>
                             <div className="offline-container">
                                 <div className="offline-error"></div>
                                 <span>It looks like you're offline.</span>

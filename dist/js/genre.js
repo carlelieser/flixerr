@@ -37,20 +37,17 @@ var Genre = function (_React$Component) {
         };
 
         _this.loadPage = function (page) {
-            var url = 'https://api.themoviedb.org/3/discover/movie?api_key=' + _this.props.apiKey + '&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=' + _this.state.page + '&release_date.gte=' + (new Date().getFullYear() - 5) + '&release_date.lte=' + (new Date().getFullYear() - 1) + '&with_genres=' + _this.props.genreID;;
+            var url = 'https://api.themoviedb.org/3/discover/movie?api_key=' + _this.props.apiKey + '&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=' + _this.state.page + '&release_date.gte=' + (new Date().getFullYear() - 5) + '&release_date.lte=' + (new Date().getFullYear() - 1) + '&with_genres=' + _this.props.genreID;
 
             _this.props.fetchContent(url, function (response) {
                 _this.props.setOffline();
                 var movies = response.results;
-
-                setTimeout(function () {
-                    _this.setState({
-                        movies: _this.state.movies.concat(_this.props.visualizeResults(movies))
-                    }, function () {
-                        _this.changeContainerHeight();
-                        _this.processing = false;
-                    });
-                }, 400);
+                _this.setState({
+                    movies: _this.state.movies.concat(_this.props.visualizeResults(movies))
+                }, function () {
+                    _this.changeContainerHeight();
+                    _this.processing = false;
+                });
             }, function () {
                 return _this.props.setOffline(true);
             });
@@ -129,17 +126,21 @@ var Genre = function (_React$Component) {
             return React.createElement(
                 'div',
                 { className: 'paginated-genre-results', ref: this.setElementRef },
-                React.createElement('div', { className: 'genre-bar ' + (this.state.changeNav ? 'genre-bar-on' : '') }),
+                React.createElement('div', {
+                    className: 'genre-bar ' + (this.state.changeNav ? 'genre-bar-on' : '') }),
                 React.createElement(
                     'div',
-                    { className: 'close-genre ' + (this.state.changeNav ? 'close-genre-on' : ''), onClick: function onClick() {
+                    {
+                        className: 'close-genre ' + (this.state.changeNav ? 'close-genre-on' : ''),
+                        onClick: function onClick() {
                             return _this2.props.closeGenre();
                         } },
                     React.createElement('i', { className: 'mdi mdi-keyboard-backspace' })
                 ),
                 React.createElement(
                     'div',
-                    { className: 'genre-name ' + (this.state.changeNav ? 'genre-name-on' : '') },
+                    {
+                        className: 'genre-name ' + (this.state.changeNav ? 'genre-name-on' : '') },
                     this.props.genre
                 ),
                 React.createElement(

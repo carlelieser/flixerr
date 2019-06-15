@@ -34,6 +34,15 @@ var MovieModal = function (_React$Component) {
     }
 
     _createClass(MovieModal, [{
+        key: "shouldComponentUpdate",
+        value: function shouldComponentUpdate(nextProps, nextState) {
+            if (this.props.movie === nextProps.movie && this.props.favorites === nextProps.favorites) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }, {
         key: "render",
         value: function render() {
             var _this2 = this;
@@ -50,7 +59,7 @@ var MovieModal = function (_React$Component) {
                         React.createElement("div", {
                             className: "movie-modal-poster",
                             style: {
-                                backgroundImage: "url(https://image.tmdb.org/t/p/w780" + this.props.movie.poster_path + ")"
+                                backgroundImage: "url(https://image.tmdb.org/t/p/w780" + (this.props.movie.poster_path || this.props.movie.backdrop_path) + ")"
                             }
                         }),
                         React.createElement(

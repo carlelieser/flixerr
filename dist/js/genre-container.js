@@ -1,10 +1,14 @@
-'use strict';
+"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Fade = require('react-reveal/Fade');
+var _Fade = require("react-reveal/Fade");
 
 var _Fade2 = _interopRequireDefault(_Fade);
+
+var _uniqid = require("uniqid");
+
+var _uniqid2 = _interopRequireDefault(_uniqid);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -32,6 +36,10 @@ var GenreContainer = function (_React$Component) {
             }
         };
 
+        _this.handleOpenGenre = function () {
+            _this.props.toggleGenre(true, _this.props.name, _this.props.genreID);
+        };
+
         _this.state = {
             showArrows: false
         };
@@ -39,27 +47,27 @@ var GenreContainer = function (_React$Component) {
     }
 
     _createClass(GenreContainer, [{
-        key: 'shouldComponentUpdate',
+        key: "shouldComponentUpdate",
         value: function shouldComponentUpdate(nextProps, nextState) {
-            if (this.props.movies === nextProps.movies && this.state.showArrows === nextState.showArrows && this.props.name === nextProps.name) {
+            if (this.props.movies === nextProps.movies && this.state.showArrows === nextState.showArrows && this.props.name === nextProps.name && this.props.genreID === nextProps.genreID) {
                 return false;
             } else {
                 return true;
             }
         }
     }, {
-        key: 'componentDidMount',
+        key: "componentDidMount",
         value: function componentDidMount() {
             this.handleResize();
             window.addEventListener('resize', this.handleResize);
         }
     }, {
-        key: 'componentWillUnmount',
+        key: "componentWillUnmount",
         value: function componentWillUnmount() {
             window.removeEventListener('resize', this.handleResize);
         }
     }, {
-        key: 'render',
+        key: "render",
         value: function render() {
             var _this2 = this;
 
@@ -67,50 +75,48 @@ var GenreContainer = function (_React$Component) {
 
             return React.createElement(
                 _Fade2.default,
-                { delay: 100, fraction: 0.3, distance: '20%', bottom: true },
+                { delay: 100, fraction: 0.3, distance: "20%", bottom: true },
                 React.createElement(
-                    'div',
-                    { className: 'genre-container' },
+                    "div",
+                    { className: "genre-container" },
                     React.createElement(
-                        'div',
+                        "div",
                         {
                             className: "movie-genre " + (this.props.name == 'Recently Played' || this.props.name == 'Favorites' ? "movie-blocked" : ""),
-                            onClick: function onClick() {
-                                return _this2.props.toggleGenre(true, _this2.props.name, _this2.props.genreID);
-                            } },
+                            onClick: this.handleOpenGenre },
                         this.props.name
                     ),
                     this.state.showArrows ? React.createElement(
-                        'div',
-                        { className: 'movie-scroll-container', id: genreID },
+                        "div",
+                        { className: "movie-scroll-container", id: genreID },
                         React.createElement(
-                            'div',
+                            "div",
                             {
-                                className: 'movie-scroll-left',
+                                className: "movie-scroll-left",
                                 onClick: function onClick(e) {
                                     return _this2.props.scrollMovieGenre(true, e, genreID);
                                 } },
-                            React.createElement('i', { className: 'mdi mdi-light mdi-24px mdi-chevron-left' })
+                            React.createElement("i", { className: "mdi mdi-light mdi-24px mdi-chevron-left" })
                         ),
                         React.createElement(
-                            'div',
+                            "div",
                             {
-                                className: 'movie-scroll-right',
+                                className: "movie-scroll-right",
                                 onClick: function onClick(e) {
                                     return _this2.props.scrollMovieGenre(false, e, genreID);
                                 } },
-                            React.createElement('i', { className: 'mdi mdi-light mdi-24px mdi-chevron-right' })
+                            React.createElement("i", { className: "mdi mdi-light mdi-24px mdi-chevron-right" })
                         )
                     ) : "",
                     this.props.movies ? this.props.movies.length ? React.createElement(
-                        'div',
-                        { className: 'movie-list-paginated' },
+                        "div",
+                        { className: "movie-list-paginated" },
                         this.props.movies.map(function (movie, index) {
                             return React.createElement(MovieItem, {
                                 movie: movie,
                                 openBox: _this2.props.openBox,
                                 strip: _this2.props.strip,
-                                key: _this2.props.getUnique(movie.title) });
+                                key: (0, _uniqid2.default)() });
                         })
                     ) : "" : ""
                 )

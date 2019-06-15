@@ -1,10 +1,14 @@
-'use strict';
+"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Fade = require('react-reveal/Fade');
+var _Fade = require("react-reveal/Fade");
 
 var _Fade2 = _interopRequireDefault(_Fade);
+
+var _uniqid = require("uniqid");
+
+var _uniqid2 = _interopRequireDefault(_uniqid);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -31,16 +35,16 @@ var Content = function (_React$Component) {
     }
 
     _createClass(Content, [{
-        key: 'shouldComponentUpdate',
+        key: "shouldComponentUpdate",
         value: function shouldComponentUpdate(nextProps) {
-            if (this.props.content === nextProps.content && this.props.searchContent === nextProps.searchContent && this.props.favorites === nextProps.favorites && this.props.recentlyPlayed === nextProps.recentlyPlayed && this.props.results === nextProps.results) {
+            if (this.props.content == nextProps.content && this.props.searchContent == nextProps.searchContent && this.props.favorites == nextProps.favorites && this.props.recentlyPlayed == nextProps.recentlyPlayed && this.props.results == nextProps.results && this.props.isOffline == nextProps.isOffline) {
                 return false;
             } else {
                 return true;
             }
         }
     }, {
-        key: 'componentDidUpdate',
+        key: "componentDidUpdate",
         value: function componentDidUpdate(prevProps) {
             if (prevProps.results[0] && this.props.results[0]) {
                 if (prevProps.results[0].backdrop_path != this.props.results[0].backdrop_path || this.count === 0) {
@@ -50,16 +54,16 @@ var Content = function (_React$Component) {
             }
         }
     }, {
-        key: 'render',
+        key: "render",
         value: function render() {
             var _this2 = this;
 
             this.genreCollection = this.state.collection.map(function (item) {
-                return React.createElement(GenreContainer, { scrollMovieGenre: _this2.props.scrollMovieGenre, openBox: _this2.props.openBox, strip: _this2.props.strip, getUnique: _this2.props.getUnique, name: item, movies: item == 'Favorites' ? _this2.props.favorites : _this2.props.recentlyPlayed });
+                return React.createElement(GenreContainer, { key: (0, _uniqid2.default)(), scrollMovieGenre: _this2.props.scrollMovieGenre, openBox: _this2.props.openBox, strip: _this2.props.strip, name: item, movies: item == 'Favorites' ? _this2.props.favorites : _this2.props.recentlyPlayed });
             });
 
             return React.createElement(
-                'div',
+                "div",
                 {
                     className: "content-container" + (this.props.genre || this.props.isOffline ? " movie-content-container" : "") + (this.props.search ? " search-content" : "")
                 },
@@ -68,11 +72,11 @@ var Content = function (_React$Component) {
                         if (_this2.props.search) {
                             return React.createElement(
                                 _Fade2.default,
-                                { bottom: true },
+                                { distance: "10%", bottom: true },
                                 React.createElement(
-                                    'div',
-                                    { className: 'search-title' },
-                                    'Search Results'
+                                    "div",
+                                    { className: "search-title" },
+                                    "Search Results"
                                 )
                             );
                         }
@@ -82,20 +86,20 @@ var Content = function (_React$Component) {
                     if (_this2.props.isOffline) {
                         return React.createElement(
                             _Fade2.default,
-                            { bottom: true },
+                            { distance: "10%", bottom: true },
                             React.createElement(
-                                'div',
-                                { className: 'offline-container' },
-                                React.createElement('div', { className: 'offline-error' }),
+                                "div",
+                                { className: "offline-container" },
+                                React.createElement("div", { className: "offline-error" }),
                                 React.createElement(
-                                    'span',
+                                    "span",
                                     null,
-                                    'It looks like you\'re offline.'
+                                    "It looks like you're offline."
                                 ),
                                 React.createElement(
-                                    'span',
+                                    "span",
                                     null,
-                                    'Please check your internet connection and try again.'
+                                    "Please check your internet connection and try again."
                                 )
                             )
                         );
@@ -112,7 +116,7 @@ var Content = function (_React$Component) {
                                     return React.createElement(
                                         _Fade2.default,
                                         { bottom: true },
-                                        React.createElement('div', { className: 'content-loader' })
+                                        React.createElement("div", { className: "content-loader" })
                                     );
                                 }
                             }

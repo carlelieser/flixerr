@@ -1,11 +1,7 @@
 if (require('electron-squirrel-startup')) 
     return;
 
-const electron = require('electron')
-// Module to control application life.
-const app = electron.app
-// Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow
+const {app, shell, BrowserWindow, Menu} = require('electron');
 
 const windowStateKeeper = require('electron-window-state');
 
@@ -18,10 +14,7 @@ let mainWindow
 
 function createWindow() {
 
-    let mainWindowState = windowStateKeeper({
-        defaultWidth: 1165,
-        defaultHeight: 680
-    })
+    let mainWindowState = windowStateKeeper({defaultWidth: 1165, defaultHeight: 680})
 
     // Create the browser window.
     mainWindow = new BrowserWindow({
@@ -32,7 +25,7 @@ function createWindow() {
         minWidth: 1128,
         minHeight: 680,
         maximizable: false,
-        title: 'Flixer',
+        title: 'Flixerr',
         icon: __dirname + '/assets/imgs/icon.ico',
         backgroundColor: '#5d16fd',
         titleBarStyle: 'hiddenInset',
@@ -40,6 +33,84 @@ function createWindow() {
     });
 
     mainWindowState.manage(mainWindow);
+
+    var template = [
+        ...(process.platform === 'darwin'
+            ? [
+                {
+                    label: app.name,
+                    submenu: [
+                        {
+                            label: 'About Flixerr',
+                            role: 'about'
+                        }, {
+                            type: 'separator'
+                        }, {
+                            role: 'services'
+                        }, {
+                            type: 'separator'
+                        }, {
+                            label: 'Hide Flixerr',
+                            role: 'hide'
+                        }, {
+                            role: 'hideothers'
+                        }, {
+                            label: 'Unhide Flixerr',
+                            role: 'unhide'
+                        }, {
+                            type: 'separator'
+                        }, {
+                            label: 'Quit Flixerr',
+                            role: 'quit'
+                        }
+                    ]
+                }
+            ]
+            : []), {
+            label: "Edit",
+            submenu: [
+                {
+                    label: "Undo",
+                    accelerator: "CmdOrCtrl+Z",
+                    selector: "undo:"
+                }, {
+                    label: "Redo",
+                    accelerator: "Shift+CmdOrCtrl+Z",
+                    selector: "redo:"
+                }, {
+                    type: "separator"
+                }, {
+                    label: "Cut",
+                    accelerator: "CmdOrCtrl+X",
+                    selector: "cut:"
+                }, {
+                    label: "Copy",
+                    accelerator: "CmdOrCtrl+C",
+                    selector: "copy:"
+                }, {
+                    label: "Paste",
+                    accelerator: "CmdOrCtrl+V",
+                    selector: "paste:"
+                }, {
+                    label: "Select All",
+                    accelerator: "CmdOrCtrl+A",
+                    selector: "selectAll:"
+                }
+            ]
+        }, {
+            role: 'help',
+            submenu: [
+                {
+                    label: 'Learn More',
+                    click() {
+                        shell.openExternal('https://www.flixerr.co')
+                    }
+                }
+            ]
+        }
+    ];
+
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
     // and load the index.html of the app.
     mainWindow.loadURL(url.format({
