@@ -11,16 +11,16 @@ To install Flixerr, head into the build folder and download the package appropri
 ### Features
 Flixerr makes it easy to stream movies straight from your desktop. Just find the movie you want to watch, and click play.
 
-#### Blazing fast torrent streaming
+#### 🔥 Blazing fast torrent streaming
 Not only do we find the best quality torrent to stream, but we also use the best available torrent streaming client for Nodejs - WebTorrent. 
 
-#### Beautiful User Interface
+#### 👍🏼 Beautiful User Interface
 Flixerr boasts a clean, minimalistic design with smooth and consistent animations throughout.
 
-#### Cloud syncing using Google Firebase
+#### 🌩️ Cloud syncing using Google Firebase
 Flixerr persists your streaming data across multiple devices on the same account. This includes favorites, recently watched, streaming quality preference, and where you left off.
 
-#### No bullshit
+#### 💩 No bullshit
 We don't use ads or try to scam you. However, due to the legality of movie torrents, please use Flixerr at your own discretion.
 
 ### How it works
