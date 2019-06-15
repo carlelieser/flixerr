@@ -1,53 +1,27 @@
 <!DOCTYPE html>
 <html>
 
-    <head>
-        <meta charset="UTF-8">
-        <title>Flixerr</title>
-        <link
-            href="./libs/materialdesignicons/css/materialdesignicons.min.css"
-            media="all"
-            rel="stylesheet"
-            type="text/css"/>
-        <link type="text/css" rel="stylesheet" href="./assets/css/main.css"/>
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <title>Flixerr</title>
+    <link href="./libs/materialdesignicons/css/materialdesignicons.min.css" media="all" rel="stylesheet"
+        type="text/css" />
+    <link type="text/css" rel="stylesheet" href="./assets/css/main.css" />
+</head>
 
-    <body>
-        <div id="app"></div>
+<body>
+    <div id="app"></div>
 
-        <script>
-            process.env.NODE_ENV = 'production';
+    <script>
+        process.env.UV_THREADPOOL_SIZE = 128;
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+        process.env.NODE_ENV = 'production';
 
-            let React = require('react');
-            let ReactDOM = require('react-dom');
-        </script>
-        <!-- <script type="text/javascript" src="./libs/babel.min.js"></script>
-        <script type="text/babel" src="./assets/js/torrent.jsx"></script>
-        <script type="text/babel" src="./assets/js/backup-torrent-container.jsx"></script>
-        <script type="text/babel" src="./assets/js/player.jsx"></script>
-        <script type="text/babel" src="./assets/js/genre-container.jsx"></script>
-        <script type="text/babel" src="./assets/js/genre.jsx"></script>
-        <script type="text/babel" src="./assets/js/movie-item.jsx"></script>
-        <script type="text/babel" src="./assets/js/movie-modal.jsx"></script>
-        <script type="text/babel" src="./assets/js/content.jsx"></script>
-        <script type="text/babel" src="./assets/js/menu.jsx"></script>
-        <script type="text/babel" src="./assets/js/header.jsx"></script>
-        <script type="text/babel" src="./assets/js/proxy-list.js"></script>
-        <script type="text/babel" src="./assets/js/torrent-search.js"></script>
-        <script type="text/babel" src="./assets/js/app.jsx"></script> -->
-        <script src="./dist/js/torrent.js"></script>
-        <script src="./dist/js/backup-torrent-container.js"></script>
-        <script src="./dist/js/player.js"></script>
-        <script src="./dist/js/genre-container.js"></script>
-        <script src="./dist/js/genre.js"></script>
-        <script src="./dist/js/movie-item.js"></script>
-        <script src="./dist/js/movie-modal.js"></script>
-        <script src="./dist/js/content.js"></script>
-        <script src="./dist/js/menu.js"></script>
-        <script src="./dist/js/header.js"></script>
-        <script src="./dist/js/proxy-list.js"></script>
-        <script src="./dist/js/torrent-search.js"></script>
-        <script src="./dist/js/app.js"></script>
-    </body>
+        // require('babel-register');
+        // require('./assets/js/main');
+
+        require('./dist/js/main');
+    </script>
+</body>
 
 </html>

@@ -10,14 +10,6 @@ var _react = require("react");
 
 var _react2 = _interopRequireDefault(_react);
 
-var _uniqid = require("uniqid");
-
-var _uniqid2 = _interopRequireDefault(_uniqid);
-
-var _menuItem = require("./menu-item");
-
-var _menuItem2 = _interopRequireDefault(_menuItem);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -26,63 +18,46 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Menu = function (_Component) {
-	_inherits(Menu, _Component);
+var MenuItem = function (_Component) {
+	_inherits(MenuItem, _Component);
 
-	function Menu(props) {
-		_classCallCheck(this, Menu);
+	function MenuItem(props) {
+		_classCallCheck(this, MenuItem);
 
-		var _this = _possibleConstructorReturn(this, (Menu.__proto__ || Object.getPrototypeOf(Menu)).call(this, props));
+		var _this = _possibleConstructorReturn(this, (MenuItem.__proto__ || Object.getPrototypeOf(MenuItem)).call(this, props));
 
-		_this.toggleItem = function (item) {
-			_this.props.updateMenu(item);
-			_this.props.resetSearch();
+		_this.handleMenuClick = function () {
+			if (_this.props.item == "Sign Out") {
+				_this.props.signOut();
+			} else if (_this.props.item == "Sign In") {
+				_this.props.openAccount();
+			} else {
+				_this.props.toggleItem(_this.props.item);
+			}
 		};
 
-		_this.state = {
-			menu: ["Featured", "Movies", "Collection", _this.props.user ? "Sign Out" : "Sign In"],
-			icons: ["star", "filmstrip", "library", "account-circle"]
-		};
 		return _this;
 	}
 
-	_createClass(Menu, [{
-		key: "shouldComponentUpdate",
-		value: function shouldComponentUpdate(nextProps, nextState) {
-			if (nextProps.user !== this.props.user) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}, {
+	_createClass(MenuItem, [{
 		key: "render",
 		value: function render() {
-			var _this2 = this;
-
-			var menuItems = this.state.menu.map(function (item, index) {
-				var active = _this2.props.active == item ? true : false;
-
-				return _react2.default.createElement(_menuItem2.default, {
-					item: item,
-					active: active,
-					iconClass: "mdi mdi-" + _this2.state.icons[index],
-					signOut: _this2.props.signOut,
-					openAccount: _this2.props.openAccount,
-					toggleItem: _this2.toggleItem,
-					key: (0, _uniqid2.default)()
-				});
-			});
-
 			return _react2.default.createElement(
 				"div",
-				{ className: "app-menu" },
-				menuItems
+				{
+					className: "menu-item " + (this.props.active ? "menu-active" : ""),
+					onClick: this.handleMenuClick },
+				_react2.default.createElement("i", { className: this.props.iconClass }),
+				_react2.default.createElement(
+					"div",
+					null,
+					this.props.item
+				)
 			);
 		}
 	}]);
 
-	return Menu;
+	return MenuItem;
 }(_react.Component);
 
-exports.default = Menu;
+exports.default = MenuItem;

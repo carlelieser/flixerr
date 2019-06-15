@@ -1,18 +1,26 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var _react2 = _interopRequireDefault(_react);
 
 var _Fade = require("react-reveal/Fade");
 
 var _Fade2 = _interopRequireDefault(_Fade);
 
-var _reactLazyLoad = require("react-lazy-load");
-
-var _reactLazyLoad2 = _interopRequireDefault(_reactLazyLoad);
-
 var _fastAverageColor = require("fast-average-color");
 
 var _fastAverageColor2 = _interopRequireDefault(_fastAverageColor);
+
+var _uniqid = require("uniqid");
+
+var _uniqid2 = _interopRequireDefault(_uniqid);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -22,17 +30,21 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var MovieItem = function (_React$Component) {
-    _inherits(MovieItem, _React$Component);
+var MovieItem = function (_Component) {
+    _inherits(MovieItem, _Component);
 
     function MovieItem(props) {
         _classCallCheck(this, MovieItem);
 
         var _this = _possibleConstructorReturn(this, (MovieItem.__proto__ || Object.getPrototypeOf(MovieItem)).call(this, props));
 
+        _this.strip = function (string, chars) {
+            return string.substring(0, chars);
+        };
+
         _this.loadImage = function () {
             _this.setState({
-                backdrop: "url(" + (_this.props.featured ? _this.backdropImageURL : _this.imageURL) + ")"
+                backdrop: "" + (_this.props.fallback ? _this.backdropImageURL : _this.imageURL)
             });
         };
 
@@ -46,13 +58,15 @@ var MovieItem = function (_React$Component) {
 
             var fac = new _fastAverageColor2.default();
 
-            fac.getColorAsync(image, { algorithm: 'sqrt' }).then(function (color) {
-                _this.setState({ averageColor: color });
+            fac.getColorAsync(image, { algorithm: "sqrt" }).then(function (color) {
+                if (!_this.unMounting) {
+                    _this.setState({ averageColor: color });
+                }
             }).catch(function (err) {
                 return console.log(err);
             });
 
-            if (_this.props.featured) {
+            if (_this.props.fallback) {
                 _this.backdropImage = new Image();
                 _this.backdropImageURL = "https://image.tmdb.org/t/p/original" + _this.props.movie.backdrop_path;
                 _this.backdropImage.src = _this.backdropImageURL;
@@ -68,13 +82,44 @@ var MovieItem = function (_React$Component) {
             _this.props.openBox(movie);
         };
 
+        _this.getMovieRating = function (className) {
+            return _react2.default.createElement(
+                "div",
+                { key: (0, _uniqid2.default)(), className: "movie-item-star" },
+                _react2.default.createElement("i", { className: "mdi mdi-light " + className })
+            );
+        };
+
+        _this.loopStars = function (starArray, limit, className) {
+            for (var i = 0; i < limit; i++) {
+                starArray.push(_this.getMovieRating(className));
+            }
+        };
+
+        _this.getStars = function () {
+            var amountOfStars = _this.props.movie.vote_average / 10 * 5,
+                nearestHalf = Math.round(amountOfStars * 2) / 2,
+                floored = Math.floor(nearestHalf),
+                difference = Math.floor(5 - nearestHalf),
+                stars = [];
+
+            _this.loopStars(stars, floored, "mdi-star");
+            if (nearestHalf - floored !== 0) {
+                stars.push(_this.getMovieRating("mdi-star-half"));
+            }
+            _this.loopStars(stars, difference, "mdi-star-outline");
+
+            return stars;
+        };
+
         _this.state = {
             averageColor: {
-                hex: '#000',
+                hex: "#000",
                 value: [0, 0, 0]
             },
             backdrop: false,
-            fontSize: 1
+            fontSize: 1,
+            stars: 1
         };
         return _this;
     }
@@ -83,13 +128,15 @@ var MovieItem = function (_React$Component) {
         key: "componentDidMount",
         value: function componentDidMount() {
             this.setState({
-                fontSize: -0.0195 * this.props.movie.title.length + 1.6
+                fontSize: -0.0195 * this.props.movie.title.length + 1.6,
+                stars: this.getStars()
             });
         }
     }, {
         key: "componentWillUnmount",
         value: function componentWillUnmount() {
-            if (this.props.featured) {
+            this.unMounting = true;
+            if (this.props.fallback) {
                 if (this.backdropImage) {
                     this.backdropImage.onload = false;
                 }
@@ -102,16 +149,20 @@ var MovieItem = function (_React$Component) {
     }, {
         key: "render",
         value: function render() {
-            return React.createElement(
+            return _react2.default.createElement(
                 _Fade2.default,
-                { delay: 50, distance: "10%", bottom: true },
-                React.createElement(
+                { distance: "10%", bottom: true },
+                _react2.default.createElement(
                     "div",
                     { className: "movie-item", onClick: this.handleMovieClick },
-                    React.createElement(
+                    _react2.default.createElement(
                         "div",
-                        { className: "movie-item-desc" },
-                        React.createElement(
+                        {
+                            className: "movie-item-desc",
+                            style: {
+                                backgroundColor: this.state.averageColor ? "rgba(" + this.state.averageColor.value[0] + ", " + this.state.averageColor.value[1] + ", " + this.state.averageColor.value[2] + ", 0.4)" : 'rgba(0,0,0,0.1)'
+                            } },
+                        _react2.default.createElement(
                             "div",
                             {
                                 className: "movie-item-title",
@@ -120,31 +171,32 @@ var MovieItem = function (_React$Component) {
                                 } },
                             this.props.movie.title
                         ),
-                        React.createElement(
+                        _react2.default.createElement(
                             "div",
                             { className: "movie-item-summary" },
-                            this.props.strip(this.props.movie.overview, 80) + "..."
+                            this.strip(this.props.movie.overview, 80) + "..."
+                        ),
+                        _react2.default.createElement(
+                            "div",
+                            { className: "movie-item-stars" },
+                            this.state.stars
                         )
                     ),
-                    React.createElement("div", { className: "movie-item-bg" }),
-                    React.createElement("div", {
+                    _react2.default.createElement("div", { className: "movie-item-bg" }),
+                    _react2.default.createElement("img", {
                         className: "movie-item-blurred",
-                        style: {
-                            backgroundImage: "url(https://image.tmdb.org/t/p/" + (this.props.featured ? 'w300' : 'w92') + (this.props.featured ? this.props.movie.backdrop_path : this.props.movie.poster_path) + ")"
-                        } }),
-                    React.createElement(
-                        _reactLazyLoad2.default,
-                        { onContentVisible: this.handleImage },
-                        React.createElement("div", {
-                            className: "movie-backdrop" + (this.state.backdrop ? " movie-backdrop-show" : ""),
-                            style: {
-                                backgroundImage: this.state.backdrop
-                            } })
-                    )
+                        src: "https://image.tmdb.org/t/p/" + (this.props.fallback ? "w300" : "w92") + (this.props.fallback ? this.props.movie.backdrop_path : this.props.movie.poster_path),
+                        onLoad: this.handleImage }),
+                    " ",
+                    this.state.backdrop ? _react2.default.createElement("img", {
+                        className: "movie-backdrop" + (this.state.backdrop ? " movie-backdrop-show" : ""),
+                        src: this.state.backdrop }) : ""
                 )
             );
         }
     }]);
 
     return MovieItem;
-}(React.Component);
+}(_react.Component);
+
+exports.default = MovieItem;

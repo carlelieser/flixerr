@@ -1,10 +1,24 @@
-'use strict';
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _reactAddonsCssTransitionGroup = require('react-addons-css-transition-group');
+var _react = require("react");
 
-var _reactAddonsCssTransitionGroup2 = _interopRequireDefault(_reactAddonsCssTransitionGroup);
+var _react2 = _interopRequireDefault(_react);
+
+var _reactTransitionGroup = require("react-transition-group");
+
+var _Fade = require("react-reveal/Fade");
+
+var _Fade2 = _interopRequireDefault(_Fade);
+
+var _backupTorrentContainer = require("./backup-torrent-container");
+
+var _backupTorrentContainer2 = _interopRequireDefault(_backupTorrentContainer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -14,8 +28,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Player = function (_React$Component) {
-    _inherits(Player, _React$Component);
+var Player = function (_Component) {
+    _inherits(Player, _Component);
 
     function Player(props) {
         _classCallCheck(this, Player);
@@ -28,7 +42,7 @@ var Player = function (_React$Component) {
 
         _this.mouseStopped = function () {
             if (!_this.props.openBackup) {
-                _this.toggleOverlay(false);
+                _this.toggleOverlay();
             }
         };
 
@@ -121,13 +135,10 @@ var Player = function (_React$Component) {
         };
 
         _this.handleClose = function (e) {
-            _this.windowTimeout = setTimeout(function () {
-                window.removeEventListener('beforeunload', _this.handleClose);
-                window.close();
-            }, 600);
             e.preventDefault();
             _this.pauseVideo();
-            _this.props.handleVideoClose(_this.state.video);
+            _this.props.setWillClose(true);
+            _this.props.handleVideoClose(_this.videoElement.current);
             e.returnValue = false;
         };
 
@@ -177,7 +188,13 @@ var Player = function (_React$Component) {
             _this.pauseVideo();
         };
 
-        _this.videoElement = React.createRef();
+        _this.stopIntro = function () {
+            _this.props.toggleIntro();
+        };
+
+        _this.videoElement = _react2.default.createRef();
+
+        _this.changeTime.bind(_this);
 
         _this.state = {
             fullScreen: false,
@@ -190,45 +207,48 @@ var Player = function (_React$Component) {
     }
 
     _createClass(Player, [{
-        key: 'shouldComponentUpdate',
+        key: "shouldComponentUpdate",
         value: function shouldComponentUpdate(nextProps, nextState) {
-            if (nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.videoIndex === this.props.videoIndex && nextProps.time === this.props.time && nextProps.loading === this.props.loading && nextProps.playerStatus.status === this.props.playerStatus.status && nextProps.seekValue === this.props.seekValue && nextProps.currentTime === this.props.currentTime && nextState.videoBuffering === this.state.videoBuffering && nextProps.startTime === this.props.startTime) {
+            if (nextProps.readyToClose === this.props.readyToClose && nextProps.showIntro === this.props.showIntro && nextProps.downloadPercent === this.props.downloadPercent && nextProps.downloadSpeed === this.props.downloadSpeed && nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.videoIndex === this.props.videoIndex && nextProps.time === this.props.time && nextProps.loading === this.props.loading && nextProps.playerStatus.status === this.props.playerStatus.status && nextProps.seekValue === this.props.seekValue && nextProps.currentTime === this.props.currentTime && nextState.videoBuffering === this.state.videoBuffering && nextProps.startTime === this.props.startTime && nextProps.fileLoaded === this.props.fileLoaded) {
                 return false;
             } else {
                 return true;
             }
         }
     }, {
-        key: 'componentDidUpdate',
+        key: "componentDidUpdate",
         value: function componentDidUpdate(prevProps) {
-            if (prevProps.startTime != this.props.startTime) {
+            if (prevProps.startTime !== this.props.startTime) {
                 this.videoElement.current.currentTime = this.props.startTime;
+            }
+            if (this.props.readyToClose === true) {
+                window.removeEventListener("beforeunload", this.handleClose);
+                window.close();
             }
         }
     }, {
-        key: 'componentDidMount',
+        key: "componentDidMount",
         value: function componentDidMount() {
             this.props.setSeekValue(0);
             this.props.setColorStop(0);
+            this.props.setFileLoaded(0);
             this.props.setVideoElement(this.videoElement);
 
-            window.addEventListener('keydown', this.handleKeyPress);
-            window.addEventListener('beforeunload', this.handleClose);
+            window.addEventListener("keydown", this.handleKeyPress);
+            window.addEventListener("beforeunload", this.handleClose);
         }
     }, {
-        key: 'componentWillUnmount',
+        key: "componentWillUnmount",
         value: function componentWillUnmount() {
             clearTimeout(this.state.timer);
             clearTimeout(this.windowTimeout);
-            this.props.handleVideoClose(this.videoElement.current);
-            window.removeEventListener('keydown', this.handleKeyPress);
-            window.removeEventListener('beforeunload', this.handleClose);
+            window.removeEventListener("keydown", this.handleKeyPress);
+            window.removeEventListener("beforeunload", this.handleClose);
         }
     }, {
-        key: 'render',
+        key: "render",
         value: function render() {
-
-            var backupContainer = this.props.openBackup ? React.createElement(BackupTorrents, {
+            var backupContainer = this.props.openBackup ? _react2.default.createElement(_backupTorrentContainer2.default, {
                 movie: this.props.movie,
                 torrents: this.props.movie.preferredTorrents,
                 getCurrentMagnet: this.props.getCurrentMagnet,
@@ -237,119 +257,151 @@ var Player = function (_React$Component) {
                 streamTorrent: this.props.streamTorrent,
                 searchTorrent: this.props.searchTorrent,
                 closeBackup: this.props.closeBackup,
-                setPlayerLoading: this.props.setPlayerLoading }) : '';
-            var backupContainerBg = this.props.openBackup ? React.createElement('div', { className: 'backup-bg', onClick: this.handleBg }) : '';
+                setPlayerLoading: this.props.setPlayerLoading }) : "";
+            var backupContainerBg = this.props.openBackup ? _react2.default.createElement("div", { className: "backup-bg", onClick: this.handleBg }) : "";
 
-            var playerStatusContainer = this.props.playerStatus ? React.createElement(
-                'div',
-                {
-                    style: {
-                        marginBottom: this.state.showOverlay ? '130px' : '60px'
-                    }, className: 'player-status-container' },
-                React.createElement(
-                    'span',
+            var playerStatusContainer = this.props.playerStatus ? _react2.default.createElement(
+                "div",
+                { className: "player-status-container" },
+                _react2.default.createElement(
+                    "span",
                     null,
                     this.props.playerStatus.status
                 ),
-                this.props.playerStatus.loading ? React.createElement('span', { className: 'dots' }) : ''
-            ) : '';
+                this.props.playerStatus.loading ? _react2.default.createElement("span", { className: "dots" }) : "",
+                this.props.downloadPercent ? _react2.default.createElement(
+                    "div",
+                    { className: "download-info" },
+                    _react2.default.createElement(
+                        "span",
+                        { className: "download-percent" },
+                        this.props.downloadPercent,
+                        "%"
+                    ),
+                    _react2.default.createElement(
+                        "span",
+                        { className: "download-speed" },
+                        this.props.downloadSpeed + " Kb/s"
+                    )
+                ) : "",
+                this.props.downloadPercent ? _react2.default.createElement(
+                    _Fade2.default,
+                    { distance: "10%", bottom: true },
+                    _react2.default.createElement("div", {
+                        className: "progress-bar",
+                        style: {
+                            width: this.props.downloadPercent + "%"
+                        } }),
+                    _react2.default.createElement("div", { className: "progress-bar-shadow" })
+                ) : ""
+            ) : "";
 
-            return React.createElement(
-                'div',
+            return _react2.default.createElement(
+                "div",
                 {
-                    className: 'movie-player ' + (this.state.showOverlay ? '' : this.props.openBackup ? '' : 'movie-hide'),
+                    className: "movie-player " + (this.state.showOverlay ? "" : this.props.openBackup ? "" : this.props.playerStatus ? this.props.playerStatus.status ? "" : "movie-hide" : "movie-hide"),
                     style: {
-                        backgroundImage: '' + (this.props.loading ? this.props.error ? 'none' : 'url(assets/imgs/loading.apng)' : 'none')
+                        backgroundImage: "" + (this.props.loading ? this.props.error ? "none" : "url(assets/imgs/loading.apng)" : "none")
                     },
                     onMouseMove: this.mouseMove },
-                this.state.videoBuffering ? React.createElement('div', { className: 'video-buffer-container' }) : '',
-                React.createElement(
-                    _reactAddonsCssTransitionGroup2.default,
+                this.state.videoBuffering ? _react2.default.createElement("div", { className: "video-buffer-container" }) : "",
+                _react2.default.createElement(
+                    _reactTransitionGroup.CSSTransitionGroup,
                     {
-                        transitionName: 'movie-box-anim',
-                        transitionEnterTimeout: 300,
-                        transitionLeaveTimeout: 300 },
+                        transitionName: "movie-box-anim",
+                        transitionEnterTimeout: 250,
+                        transitionLeaveTimeout: 250 },
                     backupContainer
                 ),
-                React.createElement(
-                    _reactAddonsCssTransitionGroup2.default,
+                _react2.default.createElement(
+                    _reactTransitionGroup.CSSTransitionGroup,
                     {
-                        transitionName: 'box-anim',
-                        transitionEnterTimeout: 300,
-                        transitionLeaveTimeout: 300 },
+                        transitionName: "box-anim",
+                        transitionEnterTimeout: 250,
+                        transitionLeaveTimeout: 250 },
                     backupContainerBg
                 ),
-                React.createElement(
-                    _reactAddonsCssTransitionGroup2.default,
+                _react2.default.createElement(
+                    _reactTransitionGroup.CSSTransitionGroup,
                     {
-                        transitionName: 'player-status-anim',
-                        transitionEnterTimeout: 300,
-                        transitionLeaveTimeout: 300 },
+                        transitionName: "player-status-anim",
+                        transitionEnterTimeout: 250,
+                        transitionLeaveTimeout: 250 },
                     playerStatusContainer
                 ),
-                React.createElement(
-                    'div',
-                    {
-                        className: 'top-bar-container ' + (this.state.showOverlay ? '' : 'top-bar-hide') },
-                    React.createElement(
-                        'div',
-                        { className: 'top-bar' },
-                        React.createElement('i', {
-                            className: 'mdi mdi-light mdi-chevron-left mdi-36px',
+                _react2.default.createElement(
+                    "div",
+                    { className: "top-bar-container" },
+                    _react2.default.createElement(
+                        "div",
+                        { className: "top-bar" },
+                        _react2.default.createElement("i", {
+                            className: "mdi mdi-light mdi-chevron-left mdi-36px",
                             onClick: this.closeClient }),
-                        React.createElement(
-                            'div',
+                        _react2.default.createElement(
+                            "div",
                             null,
                             this.props.movie.title
                         ),
-                        React.createElement('i', {
-                            className: 'open-backup mdi mdi-light mdi-sort-variant',
+                        _react2.default.createElement("i", {
+                            className: "open-backup mdi mdi-light mdi-sort-variant",
                             onClick: this.handleOpenBackup })
                     )
                 ),
-                React.createElement(
-                    'div',
-                    {
-                        className: 'bottom-bar-container ' + (this.state.showOverlay ? '' : 'bottom-bar-hide') },
-                    React.createElement(
-                        'div',
-                        { className: 'bottom-bar' },
-                        React.createElement('i', {
-                            className: 'mdi mdi-light mdi-36px play-button ' + (this.props.paused ? 'mdi-play' : 'mdi-pause'),
+                _react2.default.createElement(
+                    "div",
+                    { className: "bottom-bar-container" },
+                    _react2.default.createElement(
+                        "div",
+                        { className: "bottom-bar" },
+                        _react2.default.createElement("i", {
+                            className: "mdi mdi-light mdi-36px play-button " + (this.props.paused ? "mdi-play" : "mdi-pause"),
                             onClick: this.toggleVideoPlayback }),
-                        React.createElement('input', {
-                            className: 'seek-bar',
-                            type: 'range',
-                            value: this.props.seekValue,
-                            onChange: this.changeTime.bind(this),
-                            onMouseDown: this.handleMouseDown,
-                            onMouseUp: this.playVideo,
-                            min: 0,
-                            max: this.state.videoElement ? this.state.videoElement.current.duration : 100,
-                            step: 0.1,
-                            style: {
-                                backgroundImage: '-webkit-gradient(linear, left top, right top, color-stop(' + this.props.colorStop + ', rgb(255, 0, 0)), color-stop(' + this.props.colorStop + ', rgba(255, 255, 255, 0.158)))'
-                            } }),
-                        React.createElement(
-                            'span',
+                        _react2.default.createElement(
+                            "div",
+                            { className: "video-data" },
+                            _react2.default.createElement("div", { className: "file-loaded", style: { width: this.props.fileLoaded + "%" } }),
+                            _react2.default.createElement("input", {
+                                className: "seek-bar",
+                                type: "range",
+                                value: this.props.seekValue,
+                                onChange: this.changeTime,
+                                onMouseDown: this.handleMouseDown,
+                                onMouseUp: this.playVideo,
+                                min: 0,
+                                max: this.state.videoElement ? this.state.videoElement.current.duration : 100,
+                                step: 0.1,
+                                style: {
+                                    backgroundImage: "-webkit-gradient(linear, left top, right top, color-stop(" + this.props.colorStop + ", rgb(255, 0, 0)), color-stop(" + this.props.colorStop + ", rgba(255, 255, 255, 0.158)))"
+                                } })
+                        ),
+                        _react2.default.createElement(
+                            "span",
                             null,
                             this.props.time
                         ),
-                        React.createElement('i', {
-                            className: 'mdi mdi-light mdi-fullscreen mdi-36px fullscreen-btn',
+                        _react2.default.createElement("i", {
+                            className: "mdi mdi-light mdi-fullscreen mdi-36px fullscreen-btn",
                             onClick: this.fullScreen })
                     )
                 ),
-                React.createElement('video', {
+                this.props.showIntro ? _react2.default.createElement("video", {
                     autoPlay: true,
-                    type: 'video/mp4',
+                    type: "video/mp4",
+                    src: "./assets/video/intro.mp4",
+                    onEnded: this.stopIntro }) : _react2.default.createElement("div", null),
+                _react2.default.createElement("video", {
+                    autoPlay: true,
+                    type: "video/mp4",
                     onTimeUpdate: this.handleUpdate.bind(this),
                     onWaiting: this.handleBuffer,
-                    src: Number.isInteger(this.props.videoIndex) ? 'http://localhost:8888/' + this.props.videoIndex : '',
+                    src: Number.isInteger(this.props.videoIndex) ? "http://localhost:8888/" + this.props.videoIndex : "",
                     ref: this.videoElement })
             );
         }
     }]);
 
     return Player;
-}(React.Component);
+}(_react.Component);
+
+exports.default = Player;

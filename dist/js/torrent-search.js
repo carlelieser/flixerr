@@ -1,89 +1,93 @@
-'use strict';
+"use strict";
 
-var TorrentSearch = function () {
-    process.env.UV_THREADPOOL_SIZE = 128;
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
-    var HttpsProxyAgent = require('https-proxy-agent');
+var _proxyList = require("./proxy-list");
 
-    var request = require('request'),
-        cheerio = require('cheerio'),
-        parseTorrent = require('parse-torrent'),
-        webtorrentHealth = require('webtorrent-health'),
-        timeout = 8000;
+var _proxyList2 = _interopRequireDefault(_proxyList);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var TorrentSearch = function TorrentSearch() {
+    var axios = require("axios"),
+        cheerio = require("cheerio"),
+        parseTorrent = require("parse-torrent"),
+        webtorrentHealth = require("webtorrent-health");
+
+    var request = axios.create({ timeout: 8000 });
 
     var providers = [{
-        name: 'The Pirate Bay',
-        url: 'https://thepiratebay3.org/index.php?video=on&category=0&page=0&orderby=99&q=',
+        name: "The Pirate Bay",
+        url: "https://thepiratebay3.org/index.php?video=on&category=0&page=0&orderby=99&q=",
         queryFunction: function queryFunction(query) {
             return encodeURI(query);
+        }
+    }, {
+        name: "YTS",
+        url: "https://yts.lt/movie/",
+        queryFunction: function queryFunction(query) {
+            return query.replace(/[^A-Za-z0-9]/g, '-');
         }
     }];
 
     var getProxy = function getProxy() {
+        var proxyList = new _proxyList2.default();
         return new Promise(function (resolve, reject) {
             proxyList.listProxies().then(function (proxies) {
-                var proxy = proxies[Math.floor(Math.random() * proxies.length)];
-                proxy = 'http://' + proxy.ip + ':' + proxy.port;
-                resolve(proxy);
-            }).catch(function (err) {
-                return reject;
+                if (proxies) {
+                    var proxy = proxies[Math.floor(Math.random() * proxies.length)];
+                    resolve(proxy);
+                } else {
+                    reject("Error: No proxies found.");
+                }
             });
-        }).catch(function (err) {
-            console.log(err);
         });
     };
 
-    var searchProvider = function searchProvider(uri) {
+    var searchProvider = function searchProvider(url) {
         return new Promise(function (resolve, reject) {
             getProxy().then(function (proxy) {
-                var agent = new HttpsProxyAgent(proxy);
-                var options = {
-                    uri: uri,
-                    agent: agent,
-                    timeout: timeout
-                };
-
-                request(options, function (err, response, body) {
-                    if (!err && response.statusCode == 200) {
-                        handleTorrents(body).then(function (torrents) {
-                            resolve(torrents);
-                        }).catch(function (err) {
-                            reject(err);
-                        });
-                    } else {
-                        reject(err);
-                    }
+                request.get(url, { proxy: proxy }).then(function (response) {
+                    var body = response.data;
+                    handleTorrents(body).then(function (torrents) {
+                        resolve(torrents);
+                    });
+                }).catch(function (err) {
+                    return resolve(err);
                 });
             }).catch(function (err) {
-                console.log(err);
+                return resolve(err);
             });
         }).catch(function (err) {
-            console.log(err);
+            return console.log(err);
         });
     };
 
     var getMagnetData = function getMagnetData(magnet) {
         return new Promise(function (resolve, reject) {
             webtorrentHealth(magnet).then(function (data) {
+                var parsed = parseTorrent(magnet);
                 var torrent = {
-                    title: parseTorrent(magnet).name,
+                    title: parsed.name,
                     magnet: magnet,
                     seeders: data.seeds,
                     leechers: data.peers
                 };
                 resolve(torrent);
+            }).catch(function (err) {
+                resolve(err);
             });
         });
     };
 
     var handleTorrents = function handleTorrents(html) {
         return new Promise(function (resolve, reject) {
-            var $ = cheerio.load(html);
             var magnetPromises = [];
 
-            var magnetLinks = $('a').filter(function (index, element) {
-                return $(element).attr('href').indexOf('magnet:?xt=urn:') > -1;
-            });
+            var magnetLinks = getMagnetLinks(html);
+
             if (magnetLinks.length) {
                 for (var i = 0; i < magnetLinks.length; i++) {
                     var magnet = magnetLinks[i].attribs.href;
@@ -92,21 +96,21 @@ var TorrentSearch = function () {
                 }
                 Promise.all(magnetPromises).then(function (torrents) {
                     resolve(torrents);
+                }).catch(function (err) {
+                    return resolve(err);
                 });
             } else {
-                reject('No torrents found.');
+                resolve("No torrents found.");
             }
-        }).catch(function (err) {
-            console.log(err);
         });
     };
 
-    var search = function search(query) {
+    var searchTorrents = function searchTorrents(query) {
         return new Promise(function (resolve, reject) {
             var searchPromises = [];
             for (var j = 0; j < providers.length; j++) {
                 var provider = providers[j];
-                var url = '' + provider.url + provider.queryFunction(query);
+                var url = "" + provider.url + provider.queryFunction(query);
                 var promise = searchProvider(url);
                 searchPromises.push(promise);
             }
@@ -114,38 +118,52 @@ var TorrentSearch = function () {
             Promise.all(searchPromises).then(function (results) {
                 results = [].concat.apply([], results);
                 resolve(results);
-            }).catch(function (err) {
-                return reject(err);
             });
         });
+    };
+
+    var getObjectClone = function getObjectClone(src) {
+        var target = {};
+        for (var prop in src) {
+            if (src.hasOwnProperty(prop)) {
+                target[prop] = src[prop];
+            }
+        }
+        return target;
+    };
+
+    var getMagnetLinks = function getMagnetLinks(html) {
+        var $ = cheerio.load(html);
+        var magnetLinks = $("a").filter(function (index, element) {
+            return $(element).attr("href").indexOf("magnet:?xt=urn:") > -1;
+        });
+
+        return magnetLinks;
     };
 
     var getMagnetFromLink = function getMagnetFromLink(torrent) {
-        var url = torrent.desc || torrent.url || torrent.uri;
+        var torrentCopy = getObjectClone(torrent);
+        var url = torrentCopy.desc || torrentCopy.url || torrentCopy.uri;
         return new Promise(function (resolve, reject) {
-            request(url, function (err, response, body) {
-                if (!err && response.statusCode == 200) {
-                    var $ = cheerio.load(body);
-                    var magnetLinks = $('a').filter(function (index, element) {
-                        return $(element).attr('href').indexOf('magnet:?xt=urn:') > -1;
-                    });
-                    if (magnetLinks.length) {
-                        torrent.magnet = magnetLinks[0].attribs.href;
+            request.get(url).then(function (response) {
+                var body = response.data;
+                var magnetLinks = getMagnetLinks(body);
+
+                if (magnetLinks.length) {
+                    var magnet = magnetLinks[0].attribs.href;
+                    getMagnetData(magnet).then(function (torrent) {
                         resolve(torrent);
-                    } else {
-                        reject('No magnet found.');
-                    }
+                    });
                 } else {
-                    reject(err);
+                    resolve("No magnet found.");
                 }
+            }).catch(function (err) {
+                return resolve(err);
             });
-        }).catch(function (err) {
-            return console.log(err);
         });
     };
 
-    return {
-        search: search,
-        getMagnetFromLink: getMagnetFromLink
-    };
-}();
+    return { searchTorrents: searchTorrents, getMagnetFromLink: getMagnetFromLink };
+};
+
+exports.default = TorrentSearch;

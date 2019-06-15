@@ -1,134 +1,119 @@
-import Fade from "react-reveal/Fade";
-import uniqid from "uniqid";
+import React, {Component} from "react";
 
-class Content extends React.Component {
+import Fade from "react-reveal/Fade";
+
+import MovieContainer from "./movie-container";
+import Collection from "./collection-container";
+import FeaturedContainer from "./featured-container";
+import SearchContainer from "./search-container";
+
+class Content extends Component {
     constructor(props) {
         super(props);
-
-        this.count = 0;
-
-        this.state = {
-            collection: [
-                {
-                    name: "Suggested for you",
-                    target: "suggested"
-                },
-                {
-                    name: "Recently Played",
-                    target: "recentlyPlayed"
-                },
-                {
-                    name: "Favorites",
-                    target: "favorites"
-                }
-            ]
-        };
     }
 
-    shouldComponentUpdate(nextProps) {
-        if (
-            this.props.content == nextProps.content &&
-            this.props.searchContent == nextProps.searchContent &&
-            this.props.favorites == nextProps.favorites &&
-            this.props.recentlyPlayed == nextProps.recentlyPlayed &&
-            this.props.suggested == nextProps.suggested &&
-            this.props.results == nextProps.results &&
-            this.props.isOffline == nextProps.isOffline
-        ) {
-            return false;
-        } else {
-            return true;
+    getActiveContainer = () => {
+        switch (this.props.active) {
+            case "Featured":
+                return (<FeaturedContainer
+                    offline={this.props.offline}
+                    featured={this.props.featured}
+                    loadFeatured={this.props.loadFeatured}
+                    openBox={this.props.openBox}
+                    setHeader={this.props.setHeaderBackground}/>);
+            case "Movies":
+                return (<MovieContainer
+                    offline={this.props.offline}
+                    movies={this.props.movies}
+                    toggleGenre={this.props.toggleGenre}
+                    openBox={this.props.openBox}
+                    loadMovieCategories={this.props.loadMovieCategories}
+                    setHeader={this.props.setHeaderBackground}/>);
+            case "Collection":
+                return (<Collection
+                    suggested={this.props.suggested}
+                    favorites={this.props.favorites}
+                    recentlyPlayed={this.props.recentlyPlayed}
+                    updateSuggested={this.props.updateSuggested}
+                    openBox={this.props.openBox}
+                    setHeader={this.props.setHeaderBackground}
+                    toggleGenre={this.props.toggleGenre}/>);
         }
-    }
+    };
 
-    componentDidUpdate(prevProps) {
-        if (prevProps.results[0] && this.props.results[0]) {
-            if (
-                prevProps.results[0].backdrop_path !=
-                this.props.results[0].backdrop_path ||
-                this.count === 0
-            ) {
-                this.props.setHeader(this.props.getHeader(this.props.results));
-                this.count++;
+    getOfflineContainer = () => {
+        return (
+            <Fade distance='10%' bottom>
+                <div className='offline-container'>
+                    <div className='offline-error'/>
+                    <span>It looks like you're offline.</span>
+                    <span>
+                        Please check your internet connection and try again.
+                    </span>
+                </div>
+            </Fade>
+        );
+    };
+
+    getSearchContainer = () => {
+        let search = (<SearchContainer
+            setHeader={this.props.setHeaderBackground}
+            searchContent={this.props.searchContent}
+            openBox={this.props.openBox}/>);
+        return search;
+    };
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.active === "Featured") {
+            if (nextProps.featured === this.props.featured && nextProps.active === this.props.active && nextProps.offline === this.props.offline && nextProps.searchContent === this.props.searchContent) {
+                return false;
+            } else {
+                return true;
+            }
+        } else if (nextProps.active === "Movies") {
+            if (nextProps.movies === this.props.movies && nextProps.active === this.props.active && nextProps.offline === this.props.offline && nextProps.searchContent === this.props.searchContent) {
+                return false;
+            } else {
+                return true;
+            }
+        } else if (nextProps.active === "Collection") {
+            if (nextProps.suggested === this.props.suggested && nextProps.favorites === this.props.favorites && nextProps.recentlyPlayed === this.props.recentlyPlayed && nextProps.active === this.props.active && nextProps.offline === this.props.offline && nextProps.searchContent === this.props.searchContent) {
+                return false;
+            } else {
+                return true;
             }
         }
     }
 
     render() {
-        let genreCollection = this.state.collection.map(item => {
-            let movies = this.props[item.target].map((movie, index) => (
-                <MovieItem
-                    movie={movie}
-                    openBox={this.props.openBox}
-                    strip={this.props.strip}
-                    key={uniqid()}
-                />
-            ));
-
-            return <GenreContainer key={uniqid()} name={item.name} movies={movies} />;
-        });
+        let activeContainer = this.getActiveContainer(),
+            offlineContainer = this.getOfflineContainer(),
+            searchContainer = this.getSearchContainer();
 
         return (
             <div
-                className={`content-container ${
-                    this.props.genre || this.props.isOffline
-                        ? "movie-content-container"
-                        : ""
-                    } ${this.props.search ? "search-content" : ""}
-                `}
-            >
-                {(() => {
-                    if (!this.props.isOffline) {
-                        if (this.props.search) {
-                            return (
-                                <Fade distance="10%" bottom>
-                                    <div className="search-title">
-                                        Search Results{" "}
-                                        {this.props.searchContent
-                                            ? this.props.searchContent.length
-                                                ? `(${this.props.searchContent.length})`
-                                                : ""
-                                            : ""}
-                                    </div>
-                                </Fade>
-                            );
-                        }
-                    }
-                })()}
-                {(() => {
-                    if (this.props.isOffline) {
-                        return (
-                            <Fade distance="10%" bottom>
-                                <div className="offline-container">
-                                    <div className="offline-error" />
-                                    <span>It looks like you're offline.</span>
-                                    <span>
-                                        Please check your internet connection and try again.
-                  </span>
-                                </div>
-                            </Fade>
-                        );
-                    } else {
-                        if (this.props.search) {
-                            return this.props.searchContent;
-                        } else {
-                            if (this.props.collectionContainer) {
-                                return genreCollection;
-                            } else {
-                                if (this.props.content) {
-                                    return this.props.content;
-                                } else {
-                                    return (
-                                        <Fade distance="10%" bottom>
-                                            <div className="content-loader" />
-                                        </Fade>
-                                    );
-                                }
-                            }
-                        }
-                    }
-                })()}
+                className='content-container'
+                style={{
+                display: this.props.active == "Featured"
+                    ? "flex"
+                    : "block",
+                padding: this.props.active === "Featured"
+                    ? "40px 40px"
+                    : "40px 60px",
+                backgroundImage: this.props.loadingContent
+                    ? "url(./assets/imgs/loading.apng)"
+                    : ""
+            }}>
+                {this.props.loadingContent
+                    ? ""
+                    : this.props.offline
+                        ? offlineContainer
+                        : this.props.searchContent
+                            ? searchContainer
+                            : activeContainer}
             </div>
         );
     }
 }
+
+export default Content;

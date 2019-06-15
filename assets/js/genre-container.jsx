@@ -1,178 +1,224 @@
-import Fade from "react-reveal/Fade"
+import React, { Component } from "react";
 
-class GenreContainer extends React.Component {
-    constructor(props) {
-        super(props);
+import Fade from "react-reveal/Fade";
+import LazyLoad from "react-lazy-load";
 
-        this.movieListRef = React.createRef();
+import MovieItem from "./movie-item";
 
-        this.state = {
-            permitted: [
-                'Suggested for you', 'Recently Played', 'Favorites'
-            ],
-            showArrows: false,
-            movieScrollLeft: false,
-            movieScrollRight: true
-        }
-    }
+class GenreContainer extends Component {
+	constructor(props) {
+		super(props);
 
-    easeInOutQuad = (t, b, c, d) => {
-        t /= d / 2;
-        if (t < 1) 
-            return c / 2 * t * t + b;
-        t--;
-        return -c / 2 * (t * (t - 2) - 1) + b;
-    }
+		this.movieListRef = React.createRef();
 
-    scrollTo = (to, duration) => {
-        return new Promise((resolve, reject) => {
-            let start = this.movieListRef.current.scrollLeft,
-                change = to - start,
-                currentTime = 0,
-                increment = 20;
+		this.state = {
+			showArrows: false,
+			movieScrollLeft: false,
+			movieScrollRight: true
+		};
+	}
 
-            let animateScroll = () => {
-                currentTime += increment;
-                let val = this.easeInOutQuad(currentTime, start, change, duration);
-                this.movieListRef.current.scrollLeft = val;
-                if (currentTime < duration) {
-                    setTimeout(animateScroll, increment);
-                } else if (currentTime == duration) {
-                    resolve();
-                }
-            }
+	easingFunction = (t, b, c, d) => {
+		t /= d / 2;
+		if (t < 1) return (c / 2) * t * t * t * t + b;
+		t--;
+		return (-c / 2) * (t * (t - 2) - 1) + b;
+	};
 
-            animateScroll();
-        });
-    }
+	scrollTo = (to, duration) => {
+		return new Promise((resolve, reject) => {
+			let start = this.movieListRef.current.scrollLeft,
+				change = to - start,
+				currentTime = 0,
+				increment = 20;
 
-    scrollMovieGenre = (left) => {
-        let n = this.props.movies.length;
+			let animateScroll = () => {
+				currentTime += increment;
+				let val = this.easingFunction(
+					currentTime,
+					start,
+					change,
+					duration
+				);
+				this.movieListRef.current.scrollLeft = val;
+				if (currentTime < duration) {
+					setTimeout(animateScroll, increment);
+				} else if (currentTime >= duration) {
+					resolve();
+				}
+			};
 
-        let container = this.movieListRef.current,
-            scrollVal = container.scrollLeft;
+			animateScroll();
+		});
+	};
 
-        let viewportW = container.offsetWidth - 50,
-            boxW = 230,
-            viewItems = Math.ceil(viewportW / boxW) - 1,
-            containerScrollWidth = (boxW * n) - viewportW - 30;
+	scrollMovieGenre = (left) => {
+		let n = this.props.genreInfo.movies.length;
 
-        if (left) {
-            scrollVal -= boxW * viewItems;
-            scrollVal += 15;
-        } else {
-            scrollVal += boxW * viewItems;
-            scrollVal -= 15;
-        }
+		let container = this.movieListRef.current,
+			scrollVal = container.scrollLeft;
 
-        if (scrollVal > (containerScrollWidth - 30) && scrollVal < containerScrollWidth) {
-            scrollVal = containerScrollWidth;
-        }
+		let viewportW = container.offsetWidth - 50,
+			boxW = 230,
+			viewItems = Math.ceil(viewportW / boxW) - 1,
+			containerScrollWidth = boxW * n - viewportW - 30;
 
-        this
-            .scrollTo(scrollVal, 200)
-            .then(() => {
-                if (container.scrollLeft + container.offsetWidth >= container.scrollWidth - 20) {
-                    this.setState({movieScrollRight: false});
-                    this.setState({movieScrollLeft: true});
-                } else if (container.scrollLeft === 0) {
-                    this.setState({movieScrollRight: true});
-                    this.setState({movieScrollLeft: false});
-                } else {
-                    this.setState({movieScrollRight: true});
-                    this.setState({movieScrollLeft: true});
-                }
-            });
-    }
+		if (left) {
+			scrollVal -= boxW * viewItems;
+			scrollVal += 15;
+		} else {
+			scrollVal += boxW * viewItems;
+			scrollVal -= 15;
+		}
 
-    scrollLeft = () => {
-        this.scrollMovieGenre(true);
-    }
+		if (
+			scrollVal > containerScrollWidth - 30 &&
+			scrollVal < containerScrollWidth
+		) {
+			scrollVal = containerScrollWidth;
+		}
 
-    scrollRight = () => {
-        this.scrollMovieGenre();
-    }
+		this.scrollTo(scrollVal, 450).then(() => {
+			if (
+				container.scrollLeft + container.offsetWidth >=
+				container.scrollWidth - 10
+			) {
+				this.setState({ movieScrollRight: false });
+				this.setState({ movieScrollLeft: true });
+			} else if (container.scrollLeft === 0) {
+				this.setState({ movieScrollRight: true });
+				this.setState({ movieScrollLeft: false });
+			} else {
+				this.setState({ movieScrollRight: true });
+				this.setState({ movieScrollLeft: true });
+			}
+		});
+	};
 
-    handleResize = () => {
-        if (this.movieListRef.current) {
-            if (this.props.movies) {
-                if (this.props.movies.length * 230 > this.movieListRef.current.offsetWidth) {
-                    this.setState({showArrows: true});
-                } else {
-                    this.setState({showArrows: false});
-                }
+	scrollLeft = () => {
+		this.scrollMovieGenre(true);
+	};
 
-            }
-        }
-    }
+	scrollRight = () => {
+		this.scrollMovieGenre();
+	};
 
-    handleOpenGenre = () => {
-        if (this.props.toggleGenre) {
-            this
-                .props
-                .toggleGenre(true, this.props.name, this.props.genreID);
-        }
-    }
+	handleResize = () => {
+		if (this.movieListRef.current) {
+			if (this.props.genreInfo.movies) {
+				if (
+					this.props.genreInfo.movies.length * 220 >
+					this.movieListRef.current.offsetWidth
+				) {
+					this.setState({ showArrows: true });
 
-    shouldComponentUpdate(nextProps, nextState) {
-        if (this.props.movies === nextProps.movies && this.state.showArrows === nextState.showArrows && this.props.name === nextProps.name && this.props.genreID === nextProps.genreID && this.state.movieScrollLeft === nextState.movieScrollLeft && this.state.movieScrollRight === nextState.movieScrollRight) {
-            return false
-        } else {
-            return true
-        }
-    }
+					if (
+						this.movieListRef.current.scrollLeft +
+							this.movieListRef.current.offsetWidth <
+						this.movieListRef.current.scrollWidth - 10
+					) {
+						this.setState({ movieScrollRight: true });
+					} else {
+						this.setState({ movieScrollRight: false });
+					}
+				} else {
+					this.setState({ showArrows: false });
+				}
+			}
+		}
+	};
 
-    componentDidMount() {
-        this.handleResize();
-        window.addEventListener('resize', this.handleResize);
-    }
+	handleOpenGenre = () => {
+		this.props.toggleGenre(true, this.props.genreInfo);
+	};
 
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.handleResize);
-    }
+	shouldComponentUpdate(nextProps, nextState) {
+		if (
+			this.state.showArrows === nextState.showArrows &&
+			this.props.genreInfo === this.props.genreInfo &&
+			this.state.movieScrollLeft === nextState.movieScrollLeft &&
+			this.state.movieScrollRight === nextState.movieScrollRight
+		) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 
-    render() {
+	componentDidMount() {
+		this.handleResize();
+		window.addEventListener("resize", this.handleResize);
+	}
 
-        return (
-            <Fade fraction={0.3} distance="20%" bottom>
-                <div className="genre-container">
-                    <div
-                        className={`movie-genre ${this
-                        .state
-                        .permitted
-                        .indexOf(this.props.name) > -1
-                        ? 'movie-blocked'
-                        : ''}`}
-                        onClick={this.handleOpenGenre}>
-                        <span>{this.props.name}</span>
-                    </div>
-                    {this.state.showArrows
-                        ? (
-                            <div className="movie-scroll-container">
-                                {this.state.movieScrollLeft
-                                    ? <div className="movie-scroll movie-scroll-left" onClick={this.scrollLeft}>
-                                            <i className="mdi mdi-light mdi-24px mdi-chevron-left"/>
-                                        </div>
-                                    : ''}
-                                {this.state.movieScrollRight
-                                    ? <div className="movie-scroll movie-scroll-right" onClick={this.scrollRight}>
-                                            <i className="mdi mdi-light mdi-24px mdi-chevron-right"/>
-                                        </div>
-                                    : ''}
-                            </div>
-                        )
-                        : ("")}
-                    {this.props.movies
-                        ? this.props.movies.length
-                            ? (
-                                <div className="movie-list-paginated" ref={this.movieListRef}>
-                                    {this.props.movies}
-                                </div>
-                            )
-                            : ("")
-                        : ("")}
-                </div>
-            </Fade>
-        )
-    }
+	componentWillUnmount() {
+		window.removeEventListener("resize", this.handleResize);
+	}
+
+	render() {
+		let movies = this.props.genreInfo.movies.map((movie, index) => (
+			<MovieItem
+				movie={movie}
+				openBox={this.props.openBox}
+				key={movie.title + index + 'genre'}
+			/>
+		));
+		let n = this.props.genreInfo.movies.length ? 470 : 100;
+
+		return (
+			<LazyLoad
+				height={n}
+				offsetVertical={n}
+				debounce={false}
+				onContentVisible={this.handleResize}>
+				<Fade distance='20%' bottom>
+					<div className='genre-container'>
+						<div
+							className="movie-genre"
+							onClick={this.handleOpenGenre}>
+							<span>{this.props.genreInfo.activeGenre}</span>
+						</div>
+						{this.state.showArrows ? (
+							<div className='movie-scroll-container'>
+								{this.state.movieScrollLeft ? (
+									<div
+										className='movie-scroll movie-scroll-left'
+										onClick={this.scrollLeft}>
+										<i className='mdi mdi-light mdi-24px mdi-chevron-left' />
+									</div>
+								) : (
+									""
+								)}
+								{this.state.movieScrollRight ? (
+									<div
+										className='movie-scroll movie-scroll-right'
+										onClick={this.scrollRight}>
+										<i className='mdi mdi-light mdi-24px mdi-chevron-right' />
+									</div>
+								) : (
+									""
+								)}
+							</div>
+						) : (
+							""
+						)}
+						{this.props.genreInfo.movies ? (
+							this.props.genreInfo.movies.length ? (
+								<div
+									className='movie-list-paginated'
+									ref={this.movieListRef}>
+									{movies}
+								</div>
+							) : (
+								""
+							)
+						) : (
+							""
+						)}
+					</div>
+				</Fade>
+			</LazyLoad>
+		);
+	}
 }
+
+export default GenreContainer;

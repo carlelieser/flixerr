@@ -1,10 +1,18 @@
-'use strict';
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Fade = require('react-reveal/Fade');
+var _react = require("react");
 
-var _Fade2 = _interopRequireDefault(_Fade);
+var _react2 = _interopRequireDefault(_react);
+
+var _movieItem = require("./movie-item");
+
+var _movieItem2 = _interopRequireDefault(_movieItem);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -14,60 +22,54 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Genre = function (_React$Component) {
-    _inherits(Genre, _React$Component);
+var Genre = function (_Component) {
+    _inherits(Genre, _Component);
 
     function Genre(props) {
         _classCallCheck(this, Genre);
 
         var _this = _possibleConstructorReturn(this, (Genre.__proto__ || Object.getPrototypeOf(Genre)).call(this, props));
 
-        _this.setListRef = function (e) {
-            _this.listElem = e;
-        };
+        _this.loadPage = function () {
+            if (!_this.props.genreInfo.showCollection) {
+                var url = "https://api.themoviedb.org/3/discover/movie?api_key=" + _this.props.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=" + _this.state.page + "&release_date.gte=" + (new Date().getFullYear() - 5) + "&release_date.lte=" + (new Date().getFullYear() - 1) + "&with_genres=" + _this.props.genreInfo.genreID;
 
-        _this.setElementRef = function (e) {
-            _this.genreElem = e;
-        };
-
-        _this.changeContainerHeight = function () {
-            _this.setState({
-                containerHeight: _this.listElem.offsetHeight + 40
-            });
-        };
-
-        _this.loadPage = function (page) {
-            var url = 'https://api.themoviedb.org/3/discover/movie?api_key=' + _this.props.apiKey + '&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=' + _this.state.page + '&release_date.gte=' + (new Date().getFullYear() - 5) + '&release_date.lte=' + (new Date().getFullYear() - 1) + '&with_genres=' + _this.props.genreID;
-
-            _this.props.fetchContent(url, function (response) {
-                _this.props.setOffline();
-                var movies = response.results;
-                _this.setState({
-                    movies: _this.state.movies.concat(_this.props.visualizeResults(movies))
-                }, function () {
-                    _this.changeContainerHeight();
-                    _this.processing = false;
+                _this.props.fetchContent(url).then(function (response) {
+                    _this.props.setOffline();
+                    var movies = response.results;
+                    _this.setState(function (prevState) {
+                        return {
+                            movies: prevState.movies.concat(movies),
+                            processing: false
+                        };
+                    });
+                }).catch(function (err) {
+                    return _this.props.setOffline(true);
                 });
-            }, function () {
-                return _this.props.setOffline(true);
-            });
+            } else {
+                _this.setCollection();
+            }
         };
 
         _this.handleScroll = function () {
-            var scrollTop = _this.genreElem.scrollTop,
-                scrollHeight = _this.genreElem.scrollHeight,
-                limit = 20;
+            var scrollTop = _this.genreElem.current.scrollTop,
+                scrollHeight = _this.genreElem.current.scrollHeight,
+                limit = 30;
 
-            if (scrollTop >= scrollHeight - 1200) {
-                if (_this.processing) {
-                    return false;
-                } else {
-                    _this.processing = true;
-                    _this.setState({
-                        page: _this.state.page + 1
-                    }, function () {
-                        _this.loadPage(_this.state.page);
-                    });
+            if (!_this.props.genreInfo.showCollection) {
+                if (scrollTop >= scrollHeight - 1200) {
+                    if (_this.state.processing) {
+                        return;
+                    } else {
+                        _this.setState(function (prevState) {
+                            return {
+                                processing: true,
+                                page: prevState.page + 1
+                            };
+                        }, function () {
+                            _this.loadPage(_this.state.page);
+                        });
+                    }
                 }
             }
 
@@ -80,24 +82,38 @@ var Genre = function (_React$Component) {
             }
         };
 
-        _this.handleResize = function () {
-            var windowWidth = window.innerWidth - 160;
-            var itemWidth = 210 + 40;
-            var numberItems = Math.floor(windowWidth / itemWidth);
-            var containerWidth = itemWidth * numberItems + 'px';
-
-            _this.setState({ containerWidth: containerWidth });
+        _this.getEmptyState = function () {
+            return _react2.default.createElement(
+                "div",
+                { className: "empty-state-container" },
+                _react2.default.createElement("div", { className: "empty-state-bg" }),
+                _react2.default.createElement(
+                    "div",
+                    { className: "empty-state-info" },
+                    _react2.default.createElement(
+                        "div",
+                        { className: "title" },
+                        "Look's like we're empty!"
+                    ),
+                    _react2.default.createElement(
+                        "div",
+                        { className: "desc" },
+                        "We couldn't find any movies in \"" + _this.props.genreInfo.activeGenre + "\". To watch a movie, click the play button in the movie dialog box."
+                    )
+                )
+            );
         };
 
-        _this.genreElem = false;
-        _this.listElem = false;
-        _this.processing = false;
-        _this.lastScroll = 0;
+        _this.setCollection = function () {
+            var collection = _this.props[_this.props.genreInfo.target];
+            _this.setState({ movies: collection ? collection : [], processing: false });
+        };
+
+        _this.genreElem = _react2.default.createRef();
 
         _this.state = {
             page: 1,
-            containerWidth: 'auto',
-            containerHeight: '100%',
+            processing: true,
             changeNav: false,
             movies: []
         };
@@ -105,63 +121,80 @@ var Genre = function (_React$Component) {
     }
 
     _createClass(Genre, [{
-        key: 'componentDidMount',
+        key: "shouldComponentUpdate",
+        value: function shouldComponentUpdate(nextProps, nextState) {
+            if (nextState.changeNav === this.state.changeNav && nextProps.genreInfo === this.props.genreInfo && nextState.page === this.state.page && nextState.processing === this.state.processing && nextState.movies === this.state.movies && nextProps.favorites === this.props.favorites && nextProps.recentlyPlayed === this.props.recentlyPlayed && nextProps.suggested === this.props.suggested) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }, {
+        key: "componentDidUpdate",
+        value: function componentDidUpdate(prevProps, prevState) {
+            if (this.props.genreInfo.showCollection) {
+                if (prevProps.favorites !== this.props.favorites || prevProps.recentlyPlayed !== this.props.recentlyPlayed || prevProps.suggested !== this.props.suggested) {
+                    this.setCollection();
+                }
+            }
+        }
+    }, {
+        key: "componentDidMount",
         value: function componentDidMount() {
-            this.loadPage(0);
-            this.handleResize();
-            window.addEventListener('resize', this.handleResize);
-            this.genreElem.addEventListener('scroll', this.handleScroll);
+            this.loadPage();
+            this.genreElem.current.addEventListener("scroll", this.handleScroll);
         }
     }, {
-        key: 'componentWillUnmount',
+        key: "componentWillUnmount",
         value: function componentWillUnmount() {
-            window.removeEventListener('resize', this.handleResize);
-            this.genreElem.removeEventListener('scroll', this.handleScroll);
+            this.genreElem.current.removeEventListener("scroll", this.handleScroll);
         }
     }, {
-        key: 'render',
+        key: "render",
         value: function render() {
             var _this2 = this;
 
-            return React.createElement(
-                'div',
-                { className: 'paginated-genre-results', ref: this.setElementRef },
-                React.createElement('div', {
-                    className: 'genre-bar ' + (this.state.changeNav ? 'genre-bar-on' : '') }),
-                React.createElement(
-                    'div',
+            var movies = this.state.movies.map(function (movie, index) {
+                return _react2.default.createElement(_movieItem2.default, {
+                    key: movie.title + index,
+                    movie: movie,
+                    openBox: _this2.props.openBox });
+            });
+
+            return _react2.default.createElement(
+                "div",
+                { className: "paginated-genre-results", ref: this.genreElem },
+                _react2.default.createElement("div", {
+                    className: "genre-bar " + (this.state.changeNav ? "genre-bar-on" : "") }),
+                _react2.default.createElement(
+                    "div",
                     {
-                        className: 'close-genre ' + (this.state.changeNav ? 'close-genre-on' : ''),
-                        onClick: function onClick() {
-                            return _this2.props.closeGenre();
-                        } },
-                    React.createElement('i', { className: 'mdi mdi-keyboard-backspace' })
+                        className: "close-genre " + (this.state.changeNav ? "close-genre-on" : ""),
+                        onClick: this.props.closeGenre },
+                    _react2.default.createElement("i", { className: "mdi mdi-keyboard-backspace" })
                 ),
-                React.createElement(
-                    'div',
+                _react2.default.createElement(
+                    "div",
                     {
-                        className: 'genre-name ' + (this.state.changeNav ? 'genre-name-on' : '') },
-                    this.props.genre
+                        className: "genre-name " + (this.state.changeNav ? "genre-name-on" : "") },
+                    this.props.genreInfo.activeGenre
                 ),
-                React.createElement(
-                    'div',
+                _react2.default.createElement(
+                    "div",
                     {
-                        className: 'genre-movie-list',
-                        ref: this.setListRef,
+                        className: "genre-movie-list",
                         style: {
-                            width: this.state.containerWidth,
-                            minHeight: 'calc(100% - 300px)',
-                            marginLeft: this.state.movies.length ? '-30px' : '',
-                            backgroundImage: this.state.movies.length ? '' : 'url(./assets/imgs/loading.apng)',
-                            backgroundRepeat: 'no-repeat',
-                            backgroundPosition: 'center',
-                            backgroundSize: '5%'
+                            marginLeft: this.state.movies.length ? "-20px" : "",
+                            backgroundSize: !this.state.processing && !this.state.movies.length ? "40%" : "5%",
+                            backgroundImage: this.state.processing && this.state.movies.length ? "" : this.state.processing && !this.state.movies.length ? "url(./assets/imgs/loading.apng)" : !this.state.processing && !this.state.movies.length ? "" : ""
                         } },
-                    this.state.movies
+                    !this.state.processing && !this.state.movies.length ? this.getEmptyState() : movies
                 )
             );
         }
     }]);
 
     return Genre;
-}(React.Component);
+}(_react.Component);
+
+exports.default = Genre;

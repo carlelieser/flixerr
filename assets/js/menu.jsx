@@ -1,55 +1,56 @@
+import React, { Component } from "react";
+
 import uniqid from "uniqid";
-class Menu extends React.Component {
-    constructor(props) {
-        super(props);
 
-        this.icons = ['star', 'filmstrip', 'library', 'account-circle'];
-    }
+import MenuItem from "./menu-item";
 
-    toggleItem = (e, item) => {
-        e.stopPropagation();
-        this
-            .props
-            .updateMenu(false, item);
-        this
-            .props
-            .resetSearch();
-    }
+class Menu extends Component {
+	constructor(props) {
+		super(props);
 
-    shouldComponentUpdate(nextProps, nextState){
-        if(nextProps.menu !== this.props.menu){
-            return true
-        } else{
-            return false;
-        }
-    }
+		this.state = {
+			menu: [
+				"Featured",
+				"Movies",
+				"Collection",
+				this.props.user ? "Sign Out" : "Sign In"
+			],
+			icons: ["star", "filmstrip", "library", "account-circle"]
+		};
+	}
 
-    render() {
-        let menuItems = this
-            .props
-            .menu
-            .map((item, index) => (
-                <div
-                    className={`menu-item ${this.props.active == item
-                    ? "menu-active"
-                    : ""}`}
-                    key={uniqid()}
-                    onClick={(e) => {
-                        if(index == this.props.menu.length - 1){
-                            if (this.props.user){
-                                this.props.signOut();
-                            } else{
-                                this.props.openAccount();
-                            }
-                        }else{
-                            this.toggleItem(e, item)
-                        }
-                    }}>
-                    <i className={`mdi mdi-${this.icons[index]}`}></i>
-                    <div>{this.props.user ? index == this.props.menu.length - 1 ? 'Sign Out' : item : index == this.props.menu.length ? 'Sign In' : item }</div>
-                </div>
-            ));
+	toggleItem = (item) => {
+		this.props.updateMenu(item);
+		this.props.resetSearch();
+	};
 
-        return <div className="app-menu">{menuItems}</div>;
-    }
+	shouldComponentUpdate(nextProps, nextState) {
+		if (nextProps.user !== this.props.user) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	render() {
+		let menuItems = this.state.menu.map((item, index) => {
+			let active = this.props.active == item ? true : false;
+
+			return (
+				<MenuItem
+					item={item}
+					active={active}
+					iconClass={`mdi mdi-${this.state.icons[index]}`}
+					signOut={this.props.signOut}
+					openAccount={this.props.openAccount}
+					toggleItem={this.toggleItem}
+					key={uniqid()}
+				/>
+			);
+		});
+
+		return <div className='app-menu'>{menuItems}</div>;
+	}
 }
+
+export default Menu;

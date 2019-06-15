@@ -14,9 +14,9 @@ var _uniqid = require("uniqid");
 
 var _uniqid2 = _interopRequireDefault(_uniqid);
 
-var _torrent = require("./torrent");
+var _movieItem = require("./movie-item");
 
-var _torrent2 = _interopRequireDefault(_torrent);
+var _movieItem2 = _interopRequireDefault(_movieItem);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26,88 +26,68 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BackupTorrents = function (_Component) {
-	_inherits(BackupTorrents, _Component);
+var SearchContainer = function (_Component) {
+	_inherits(SearchContainer, _Component);
 
-	function BackupTorrents(props) {
-		_classCallCheck(this, BackupTorrents);
+	function SearchContainer(props) {
+		_classCallCheck(this, SearchContainer);
 
-		var _this = _possibleConstructorReturn(this, (BackupTorrents.__proto__ || Object.getPrototypeOf(BackupTorrents)).call(this, props));
-
-		_this.handleReload = function () {
-			_this.props.setPlayerLoading(true);
-			_this.props.resetClient(true).then(function (result) {
-				var movie = _this.props.movie;
-				movie.magnet = false;
-				_this.props.searchTorrent(movie);
-			}).catch(function (err) {
-				return console.log(err);
-			});
-			_this.props.closeBackup();
-		};
-
-		return _this;
+		return _possibleConstructorReturn(this, (SearchContainer.__proto__ || Object.getPrototypeOf(SearchContainer)).call(this, props));
 	}
 
-	_createClass(BackupTorrents, [{
+	_createClass(SearchContainer, [{
 		key: "shouldComponentUpdate",
 		value: function shouldComponentUpdate(nextProps, nextState) {
-			if (nextProps.torrents !== this.props.torrents || nextProps.movie.magnet !== this.props.movie.magnet) {
+			if (nextProps.searchContent === this.props.searchContent) {
+				return false;
+			} else {
 				return true;
 			}
-
-			return false;
+		}
+	}, {
+		key: "componentDidUpdate",
+		value: function componentDidUpdate(prevProps, prevState) {
+			if (prevProps.searchContent !== this.props.searchContent) {
+				this.props.setHeader(this.props.searchContent);
+			}
+		}
+	}, {
+		key: "componentDidMount",
+		value: function componentDidMount() {
+			this.props.setHeader(this.props.searchContent);
 		}
 	}, {
 		key: "render",
 		value: function render() {
 			var _this2 = this;
 
-			var torrents = this.props.torrents ? this.props.torrents.map(function (torrent) {
-				var title = torrent.title;
-				var videoQuality = torrent.resolution || torrent.quality;
-
-				return _react2.default.createElement(_torrent2.default, {
+			var searchContent = this.props.searchContent.$$typeof ? this.props.searchContent : this.props.searchContent.map(function (movie) {
+				return _react2.default.createElement(_movieItem2.default, {
 					key: (0, _uniqid2.default)(),
-					torrent: torrent,
-					name: "torrent " + (_this2.props.getCurrentMagnet() == torrent.magnet ? "active" : ""),
-					videoQuality: videoQuality,
-					title: title,
-					handleTorrentClick: _this2.props.handleTorrentClick
+					movie: movie,
+					fallback: true,
+					openBox: _this2.props.openBox
 				});
-			}) : "";
+			});
+
 			return _react2.default.createElement(
 				"div",
-				{ className: "backup-container" },
-				_react2.default.createElement(
+				{ className: "search-container" },
+				this.props.searchContent.$$typeof ? "" : _react2.default.createElement(
 					"div",
-					{ className: "title" },
-					"Torrents"
+					{ className: "search-title" },
+					"Search Results (" + this.props.searchContent.length + ")"
 				),
 				_react2.default.createElement(
 					"div",
-					{ className: "subtitle" },
-					this.props.torrents ? "Select from one of the alternative torrents for \"" + this.props.movie.title + "\" below." : "We couldn't find any alternative torrents. Please wait or try again."
-				),
-				this.props.torrents ? _react2.default.createElement(
-					"div",
-					{ className: "torrent-container" },
-					torrents
-				) : false,
-				_react2.default.createElement(
-					"div",
-					{ className: "reload-btn", onClick: this.handleReload },
-					_react2.default.createElement(
-						"span",
-						null,
-						"Reload"
-					)
+					{ className: "search-results" },
+					searchContent
 				)
 			);
 		}
 	}]);
 
-	return BackupTorrents;
+	return SearchContainer;
 }(_react.Component);
 
-exports.default = BackupTorrents;
+exports.default = SearchContainer;
