@@ -3,6 +3,8 @@ class Header extends React.Component {
     constructor(props) {
         super(props);
 
+        this.searchRef = React.createRef();
+
         this.state = {
             timer: false
         }
@@ -24,7 +26,24 @@ class Header extends React.Component {
                 this
                     .props
                     .searchMovies();
-            }, 500)});
+            }, 400)});
+    }
+
+    handleInput = (e) => {
+        let value = e.currentTarget.value;
+        this
+            .props
+            .setInputValue(value);
+    }
+
+    handleSearchClose = () => {
+        this
+            .props
+            .closeSearch();
+        this
+            .searchRef
+            .current
+            .focus();
     }
 
     componentWillUnmount() {
@@ -62,11 +81,24 @@ class Header extends React.Component {
                         className={`app-menu-button mdi mdi-light mdi-${this.props.menuActive
                         ? "keyboard-backspace"
                         : "menu"}`}
-                        onClick={this.toggleMenu}/>
+                        onClick={this.toggleMenu}
+                        style={{
+                        transform: `rotate(${this.props.menuActive
+                            ? "0"
+                            : "360"}deg)`
+                    }}/>
                     <div className="search-bar-container">
                         <i className="mdi mdi-24px mdi-magnify"/>
-                        <input type="text" placeholder="Search Movies" onKeyUp={this.handleSearch}/>{" "} {this.props.searchContent
-                            ? (<i className="mdi mdi-24px mdi-close" onClick={this.props.closeSearch}/>)
+                        <input
+                            ref={this.searchRef}
+                            type="text"
+                            placeholder="Search Movies"
+                            value={this.props.inputValue}
+                            onChange={this
+                            .handleInput
+                            .bind(this)}
+                            onKeyUp={this.handleSearch}/>{" "} {this.props.searchContent
+                            ? (<i className="mdi mdi-24px mdi-close" onClick={this.handleSearchClose}/>)
                             : ("")}
                     </div>
                 </div>

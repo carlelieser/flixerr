@@ -1,5 +1,5 @@
-import uniqid from 'uniqid';
-import Fade from 'react-reveal/Fade';
+import uniqid from 'uniqid'
+import Fade from 'react-reveal/Fade'
 
 class BackupTorrents extends React.Component {
     constructor(props) {
@@ -10,17 +10,17 @@ class BackupTorrents extends React.Component {
         this
             .props
             .setPlayerLoading(true);
+        this
+            .props
+            .resetClient(true)
+            .then((result) => {
+                let movie = this.props.movie;
+                movie.magnet = false;
                 this
                     .props
-                    .resetClient(true)
-                    .then((result) => {
-                        let movie = this.props.movie;
-                        movie.magnet = false;
-                        this
-                            .props
-                            .searchTorrent(movie, true);
-                    })
-                    .catch(err => console.log(err));
+                    .searchTorrent(movie, true);
+            })
+            .catch(err => console.log(err));
         this
             .props
             .closeBackup();
@@ -40,37 +40,15 @@ class BackupTorrents extends React.Component {
                 .props
                 .torrents
                 .map((torrent) => {
-                    let videoQuality = torrent
-                        .title
-                        .match(/(\d*p)/g);
-                    let sorted = videoQuality
-                        ? videoQuality.filter((item) => {
-                            return item != 'p';
-                        })
-                        : [];
-                    videoQuality = sorted.length
-                        ? sorted[0]
-                        : false;
+                    let title = torrent.title;
+                    let videoQuality = torrent.resolution || torrent.quality;
+                    
                     return (
-                        <Fade key={uniqid()} distance="10%" bottom>
-                            <div
-                                className={`torrent ${this
-                                .props
-                                .getCurrentMagnet() == torrent.magnet
-                                ? 'active'
-                                : ''}`}
-                                onClick={this
-                                .props
-                                .handleTorrentClick
-                                .bind(this, torrent)}>{videoQuality
-                                    ? <span className="video-quality">{videoQuality}</span>
-                                    : ''}
-                                <span className="title">{torrent
-                                        .title
-                                        .replace(/[^a-zA-Z0-9\.\(\)\- ]/g, '')
-                                        .replace(/\./g, ' ')}</span>
-                            </div>
-                        </Fade>
+                        <Torrent key={uniqid()} torrent={torrent} name={`torrent ${this
+                            .props
+                            .getCurrentMagnet() == (torrent.magnet || torrent.download)
+                            ? 'active'
+                            : ''}`} videoQuality={videoQuality} title={title} handleTorrentClick={this.props.handleTorrentClick}/>
                     )
                 })
             : '';
@@ -78,13 +56,14 @@ class BackupTorrents extends React.Component {
             <div className="backup-container">
                 <div className="title">Torrents</div>
                 <div className="subtitle">{this.props.torrents
-                        ? `Here are some alternative torrents for ${this.props.movie.title}. Have fun :) `
+                        ? `Select from one of the alternative torrents for ${this.props.movie.title} below.`
                         : "We couldn't find any alternative torrents. Please wait or try again."}</div>
                 {this.props.torrents
                     ? <div className="torrent-container">{torrents}</div>
-                    : <div className="reload-btn" onClick={this.handleReload}>
-                        <span>Reload</span>
-                    </div>}
+                    : false}
+                <div className="reload-btn" onClick={this.handleReload}>
+                    <span>Reload</span>
+                </div>
             </div>
         );
     }

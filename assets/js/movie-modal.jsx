@@ -94,7 +94,7 @@ class MovieModal extends React.Component {
                     className="movie-gradient"
                     style={{
                     background: this.props.movie.averageColor
-                        ? `linear-gradient(180deg, rgba(${this.props.movie.averageColor.value[0]}, ${this.props.movie.averageColor.value[1]}, ${this.props.movie.averageColor.value[2]}, 0) 0%, rgba(${this.props.movie.averageColor.value[0]}, ${this.props.movie.averageColor.value[1]}, ${this.props.movie.averageColor.value[2]}, 0.60) 20%, rgba(${this.props.movie.averageColor.value[0]}, ${this.props.movie.averageColor.value[1]}, ${this.props.movie.averageColor.value[2]}, 0.80) 50%, ${this.props.movie.averageColor.hex} 100%)`
+                        ? `linear-gradient(180deg, rgba(${this.props.movie.averageColor.value[0]}, ${this.props.movie.averageColor.value[1]}, ${this.props.movie.averageColor.value[2]}, 0.40) 0%, rgba(${this.props.movie.averageColor.value[0]}, ${this.props.movie.averageColor.value[1]}, ${this.props.movie.averageColor.value[2]}, 0.60) 20%, rgba(${this.props.movie.averageColor.value[0]}, ${this.props.movie.averageColor.value[1]}, ${this.props.movie.averageColor.value[2]}, 0.80) 50%, ${this.props.movie.averageColor.hex} 100%)`
                         : ''
                 }}></div>
             </div>

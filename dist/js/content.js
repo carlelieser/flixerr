@@ -30,14 +30,14 @@ var Content = function (_React$Component) {
 
         _this.state = {
             collection: [{
-                name: 'Suggested for you',
-                target: 'suggested'
+                name: "Suggested for you",
+                target: "suggested"
             }, {
-                name: 'Recently Played',
-                target: 'recentlyPlayed'
+                name: "Recently Played",
+                target: "recentlyPlayed"
             }, {
-                name: 'Favorites',
-                target: 'favorites'
+                name: "Favorites",
+                target: "favorites"
             }]
         };
         return _this;
@@ -67,14 +67,23 @@ var Content = function (_React$Component) {
         value: function render() {
             var _this2 = this;
 
-            this.genreCollection = this.state.collection.map(function (item) {
-                return React.createElement(GenreContainer, { key: (0, _uniqid2.default)(), scrollMovieGenre: _this2.props.scrollMovieGenre, openBox: _this2.props.openBox, strip: _this2.props.strip, name: item.name, movies: _this2.props[item.target], setListWidth: _this2.props.setListWidth });
+            var genreCollection = this.state.collection.map(function (item) {
+                var movies = _this2.props[item.target].map(function (movie, index) {
+                    return React.createElement(MovieItem, {
+                        movie: movie,
+                        openBox: _this2.props.openBox,
+                        strip: _this2.props.strip,
+                        key: (0, _uniqid2.default)()
+                    });
+                });
+
+                return React.createElement(GenreContainer, { key: (0, _uniqid2.default)(), name: item.name, movies: movies });
             });
 
             return React.createElement(
                 "div",
                 {
-                    className: "content-container" + (this.props.genre || this.props.isOffline ? " movie-content-container" : "") + (this.props.search ? " search-content" : "")
+                    className: "content-container " + (this.props.genre || this.props.isOffline ? "movie-content-container" : "") + " " + (this.props.search ? "search-content" : "") + "\n                "
                 },
                 function () {
                     if (!_this2.props.isOffline) {
@@ -85,8 +94,9 @@ var Content = function (_React$Component) {
                                 React.createElement(
                                     "div",
                                     { className: "search-title" },
-                                    "Search Results ",
-                                    _this2.props.searchContent ? _this2.props.searchContent.length ? "(" + _this2.props.searchContent.length + ")" : '' : ''
+                                    "Search Results",
+                                    " ",
+                                    _this2.props.searchContent ? _this2.props.searchContent.length ? "(" + _this2.props.searchContent.length + ")" : "" : ""
                                 )
                             );
                         }
@@ -118,14 +128,14 @@ var Content = function (_React$Component) {
                             return _this2.props.searchContent;
                         } else {
                             if (_this2.props.collectionContainer) {
-                                return _this2.genreCollection;
+                                return genreCollection;
                             } else {
                                 if (_this2.props.content) {
                                     return _this2.props.content;
                                 } else {
                                     return React.createElement(
                                         _Fade2.default,
-                                        { bottom: true },
+                                        { distance: "10%", bottom: true },
                                         React.createElement("div", { className: "content-loader" })
                                     );
                                 }

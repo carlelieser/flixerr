@@ -32,8 +32,20 @@ var Header = function (_React$Component) {
             clearTimeout(_this.state.timer);
             _this.setState({ timer: setTimeout(function () {
                     _this.props.searchMovies();
-                }, 500) });
+                }, 400) });
         };
+
+        _this.handleInput = function (e) {
+            var value = e.currentTarget.value;
+            _this.props.setInputValue(value);
+        };
+
+        _this.handleSearchClose = function () {
+            _this.props.closeSearch();
+            _this.searchRef.current.focus();
+        };
+
+        _this.searchRef = React.createRef();
 
         _this.state = {
             timer: false
@@ -93,15 +105,24 @@ var Header = function (_React$Component) {
                     ),
                     React.createElement("i", {
                         className: "app-menu-button mdi mdi-light mdi-" + (this.props.menuActive ? "keyboard-backspace" : "menu"),
-                        onClick: this.toggleMenu }),
+                        onClick: this.toggleMenu,
+                        style: {
+                            transform: "rotate(" + (this.props.menuActive ? "0" : "360") + "deg)"
+                        } }),
                     React.createElement(
                         "div",
                         { className: "search-bar-container" },
                         React.createElement("i", { className: "mdi mdi-24px mdi-magnify" }),
-                        React.createElement("input", { type: "text", placeholder: "Search Movies", onKeyUp: this.handleSearch }),
+                        React.createElement("input", {
+                            ref: this.searchRef,
+                            type: "text",
+                            placeholder: "Search Movies",
+                            value: this.props.inputValue,
+                            onChange: this.handleInput.bind(this),
+                            onKeyUp: this.handleSearch }),
                         " ",
                         " ",
-                        this.props.searchContent ? React.createElement("i", { className: "mdi mdi-24px mdi-close", onClick: this.props.closeSearch }) : ""
+                        this.props.searchContent ? React.createElement("i", { className: "mdi mdi-24px mdi-close", onClick: this.handleSearchClose }) : ""
                     )
                 )
             );

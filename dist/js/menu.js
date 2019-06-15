@@ -25,7 +25,6 @@ var Menu = function (_React$Component) {
         _this.toggleItem = function (e, item) {
             e.stopPropagation();
             _this.props.updateMenu(false, item);
-            document.querySelector(".app-menu-button").style.transform = "rotate(0deg)";
             _this.props.resetSearch();
         };
 

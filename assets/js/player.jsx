@@ -1,14 +1,17 @@
-import ReactCSSTransitionGroup from "react-addons-css-transition-group";
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 
 class Player extends React.Component {
     constructor(props) {
         super(props);
 
+        this.videoElement = React.createRef();
+
         this.state = {
-            video: false,
             fullScreen: false,
             timer: false,
-            showOverlay: true
+            showOverlay: true,
+            showSubtitles: false,
+            videoBuffering: false
         }
     }
 
@@ -42,24 +45,43 @@ class Player extends React.Component {
         });
     }
 
-    playOrPause = () => {
-        if (this.state.video.paused == true) {
-            this
-                .state
-                .video
-                .play();
-        } else {
-            this
-                .state
-                .video
-                .pause();
+    handleVideoPlayback = (toggle, play) => {
+        if (this.videoElement.current) {
+            if (toggle) {
+                if (this.videoElement.current.paused == true) {
+                    this.videoElement.current.play();
+                } else {
+                    this.videoElement.current.pause();
+                }
+            } else if (play) {
+                this.videoElement.current.play();
+            } else {
+                this.videoElement.current.pause();
+            }
+
+            this.toggleOverlay(this.videoElement.current.paused);
         }
-        this.toggleOverlay(this.state.video.paused);
+    }
+
+    playVideo = () => {
+        this.handleVideoPlayback(false, true);
+    }
+
+    pauseVideo = () => {
+        this.handleVideoPlayback();
+    }
+
+    setVideoTime = (time) => {
+        this.videoElement.current.currentTime = time;
+    }
+
+    toggleVideoPlayback = () => {
+        this.handleVideoPlayback(true, false);
     }
 
     handleKeyPress = (e) => {
         if (e.keyCode == 32) {
-            this.playOrPause();
+            this.toggleVideoPlayback();
         } else if (e.keyCode == 27) {
             if (this.state.fullScreen) {
                 this.fullScreen();
@@ -69,51 +91,39 @@ class Player extends React.Component {
         }
 
         if (e.keyCode == 37) {
-            let time = document
-                .querySelector("video")
-                .currentTime;
-            document
-                .querySelector("video")
-                .currentTime = time - 10;
+            let time = this.props.currentTime - 10;
+            this.setVideoTime(time);
         }
 
         if (e.keyCode == 39) {
-            let time = document
-                .querySelector("video")
-                .currentTime;
-            document
-                .querySelector("video")
-                .currentTime = time + 30;
+            let time = this.props.currentTime + 30;
+            this.setVideoTime(time);
         }
     }
 
-    changeTime = () => {
-        let seekBar = document.querySelector(".seek-bar");
-        let time = document
-            .querySelector("video")
-            .duration * (this.props.getElementValue(seekBar) / 100);
-
-        this
-            .props
-            .setElementValue(document.querySelector("video"), "currentTime", time);
+    changeTime = (e) => {
+        let value = e.currentTarget.value;
+        let percent = value / 100;
+        let time = this.videoElement.current.duration * percent;
+        
+        this.setVideoTime(time);
+        this.props.setSeekValue(value);
+        this.props.setColorStop(percent);
     }
 
     closeClient = () => {
-        let currentTime = document
-            .querySelector("video")
-            .currentTime;
         this
             .props
-            .removeClient(currentTime);
+            .removeClient(this.props.currentTime);
     }
 
     handleClose = (e) => {
         this.windowTimeout = setTimeout(() => {
-            window.removeEventListener("beforeunload", this.handleClose);
+            window.removeEventListener('beforeunload', this.handleClose);
             window.close();
         }, 600);
         e.preventDefault();
-        this.playOrPause();
+        this.pauseVideo();
         this
             .props
             .handleVideoClose(this.state.video);
@@ -121,22 +131,18 @@ class Player extends React.Component {
     }
 
     handleTorrentClick = (torrent) => {
-        let currentTime = document
-            .querySelector("video")
-            .currentTime;
-
         this
             .props
             .setPlayerLoading(true);
-
+        
         this
             .props
-            .updateMovieTime(currentTime);
+            .updateMovieTime(this.videoElement.current.currentTime);
+
         this
             .props
             .resetClient(true)
             .then((result) => {
-                console.log(result);
                 this
                     .props
                     .streamTorrent(torrent);
@@ -147,57 +153,73 @@ class Player extends React.Component {
     }
 
     handleOpenBackup = () => {
-        if (this.props.index !== false) {
-            this
-                .state
-                .video
-                .pause();
+        if (this.props.videoIndex !== false) {
+            this.pauseVideo();
         }
         this
             .props
             .showBackup(true);
     }
 
+    handleSubtitles = () => {
+        this.setState((prevState) => {
+            return {
+                showSubtitles: !prevState.showSubtitles
+            }
+        });
+    }
+
     handleBg = () => {
-        if (this.props.index !== false) {
-            this
-                .state
-                .video
-                .play();
+        if (this.props.videoIndex !== false) {
+            this.playVideo();
         }
         this
             .props
             .closeBackup();
     }
 
+    handleBuffer = () => {
+        this.setState({videoBuffering: true});
+    }
+
+    handleUpdate = (e) => {
+        this.setState({videoBuffering: false});
+        this.props.handleVideo(e);
+    }
+
+    handleMouseDown = (e) => {
+        this.pauseVideo();
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextProps.backupTorrents === this.props.backupTorrents && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.index === this.props.index && nextProps.time === this.props.time && nextProps.loading === this.props.loading) {
+        if (nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.videoIndex === this.props.videoIndex && nextProps.time === this.props.time && nextProps.loading === this.props.loading && nextProps.playerStatus.status === this.props.playerStatus.status && nextProps.seekValue === this.props.seekValue && nextProps.currentTime === this.props.currentTime && nextState.videoBuffering === this.state.videoBuffering && nextProps.startTime === this.props.startTime) {
             return false;
         } else {
             return true;
         }
     }
 
-    componentDidMount() {
-        this
-            .props
-            .setElementValue(document.querySelector(".seek-bar"), "value", 0);
-        this.setState({
-            video: document.querySelector("video")
-        });
+    componentDidUpdate(prevProps){
+        if(prevProps.startTime != this.props.startTime){
+            this.videoElement.current.currentTime = this.props.startTime;
+        }
+    }
 
-        window.addEventListener("keydown", this.handleKeyPress);
-        window.addEventListener("beforeunload", this.handleClose);
+    componentDidMount() {
+        this.props.setSeekValue(0);
+        this.props.setColorStop(0);
+        this.props.setVideoElement(this.videoElement);
+
+        window.addEventListener('keydown', this.handleKeyPress);
+        window.addEventListener('beforeunload', this.handleClose);
     }
 
     componentWillUnmount() {
         clearTimeout(this.state.timer);
         clearTimeout(this.windowTimeout);
-        this
-            .props
-            .handleVideoClose(this.state.video);
-        window.removeEventListener("keydown", this.handleKeyPress);
-        window.removeEventListener("beforeunload", this.handleClose);
+        this.props.handleVideoClose(this.videoElement.current);
+        window.removeEventListener('keydown', this.handleKeyPress);
+        window.removeEventListener('beforeunload', this.handleClose);
     }
 
     render() {
@@ -205,7 +227,7 @@ class Player extends React.Component {
         let backupContainer = this.props.openBackup
             ? <BackupTorrents
                     movie={this.props.movie}
-                    torrents={this.props.backupTorrents || this.props.movie.preferredTorrents}
+                    torrents={this.props.movie.preferredTorrents}
                     getCurrentMagnet={this.props.getCurrentMagnet}
                     handleTorrentClick={this.handleTorrentClick}
                     resetClient={this.props.resetClient}
@@ -213,79 +235,112 @@ class Player extends React.Component {
                     searchTorrent={this.props.searchTorrent}
                     closeBackup={this.props.closeBackup}
                     setPlayerLoading={this.props.setPlayerLoading}/>
-            : "";
+            : '';
         let backupContainerBg = this.props.openBackup
-            ? <div className="backup-bg" onClick={this.handleBg}></div>
-            : "";
+            ? <div className='backup-bg' onClick={this.handleBg}></div>
+            : '';
+
+        let playerStatusContainer = this.props.playerStatus
+            ? <div
+                    style={{
+                    marginBottom: this.state.showOverlay
+                        ? '130px'
+                        : '60px'
+                }}className='player-status-container'>
+                    <span>{this.props.playerStatus.status}</span>
+                    {this.props.playerStatus.loading
+                        ? <span className='dots'></span>
+                        : ''}
+                </div>
+            : '';
+
         return (
             <div
-                className={"movie-player " + (this.state.showOverlay
-                ? ""
+                className={'movie-player ' + (this.state.showOverlay
+                ? ''
                 : this.props.openBackup
-                    ? ""
-                    : "movie-hide")}
+                    ? ''
+                    : 'movie-hide')}
                 style={{
                 backgroundImage: `${this.props.loading
                     ? this.props.error
-                        ? "none"
-                        : "url(assets/imgs/loading.apng)" : "none"}`
+                        ? 'none'
+                        : 'url(assets/imgs/loading.apng)' : 'none'}`
             }}
                 onMouseMove={this.mouseMove}>
+                {this.state.videoBuffering ? <div className="video-buffer-container"></div> : ''}
                 <ReactCSSTransitionGroup
-                    transitionName="movie-box-anim"
+                    transitionName='movie-box-anim'
                     transitionEnterTimeout={300}
                     transitionLeaveTimeout={300}>
                     {backupContainer}
                 </ReactCSSTransitionGroup>
                 <ReactCSSTransitionGroup
-                    transitionName="box-anim"
+                    transitionName='box-anim'
                     transitionEnterTimeout={300}
                     transitionLeaveTimeout={300}>
                     {backupContainerBg}
                 </ReactCSSTransitionGroup>
+                <ReactCSSTransitionGroup
+                    transitionName='player-status-anim'
+                    transitionEnterTimeout={300}
+                    transitionLeaveTimeout={300}>
+                    {playerStatusContainer}
+                </ReactCSSTransitionGroup>
                 <div
-                    className={"top-bar-container " + (this.state.showOverlay
-                    ? ""
-                    : "top-bar-hide")}>
-                    <div className="top-bar">
+                    className={'top-bar-container ' + (this.state.showOverlay
+                    ? ''
+                    : 'top-bar-hide')}>
+                    <div className='top-bar'>
                         <i
-                            className="mdi mdi-light mdi-chevron-left mdi-36px"
+                            className='mdi mdi-light mdi-chevron-left mdi-36px'
                             onClick={this.closeClient}/>
                         <div>{this.props.movie.title}</div>
                         <i
-                            className="open-backup mdi mdi-light mdi-sort-variant"
+                            className='open-backup mdi mdi-light mdi-sort-variant'
                             onClick={this.handleOpenBackup}/>
                     </div>
                 </div>
                 <div
-                    className={"bottom-bar-container " + (this.state.showOverlay
-                    ? ""
-                    : "bottom-bar-hide")}>
-                    <div className="bottom-bar">
+                    className={'bottom-bar-container ' + (this.state.showOverlay
+                    ? ''
+                    : 'bottom-bar-hide')}>
+                    <div className='bottom-bar'>
                         <i
-                            className={"mdi mdi-light mdi-36px play-button " + (this.props.paused
-                            ? "mdi-play"
-                            : "mdi-pause")}
-                            onClick={this.playOrPause}/>
+                            className={'mdi mdi-light mdi-36px play-button ' + (this.props.paused
+                            ? 'mdi-play'
+                            : 'mdi-pause')}
+                            onClick={this.toggleVideoPlayback}/>
                         <input
-                            className="seek-bar"
-                            type="range"
-                            onChange={() => this.changeTime()}
-                            onMouseDown={() => document.querySelector("video").pause()}
-                            onMouseUp={() => document.querySelector("video").play()}/>
+                            className='seek-bar'
+                            type='range'
+                            value={this.props.seekValue}
+                            onChange={this
+                            .changeTime
+                            .bind(this)}
+                            onMouseDown={this.handleMouseDown}
+                            onMouseUp={this.playVideo}
+                            min={0}
+                            max={this.state.videoElement ? this.state.videoElement.current.duration : 100}
+                            step={0.1}
+                            style={{
+                            backgroundImage: `-webkit-gradient(linear, left top, right top, color-stop(${this.props.colorStop}, rgb(255, 0, 0)), color-stop(${this.props.colorStop}, rgba(255, 255, 255, 0.158)))`
+                        }}/>
                         <span>{this.props.time}</span>
                         <i
-                            className="mdi mdi-light mdi-fullscreen mdi-36px fullscreen-button"
+                            className='mdi mdi-light mdi-fullscreen mdi-36px fullscreen-btn'
                             onClick={this.fullScreen}/>
                     </div>
                 </div>
                 <video
                     autoPlay
-                    onTimeUpdate={this.props.handleVideo}
-                    type="video/mp4"
-                    src={Number.isInteger(this.props.index)
-                    ? `http://localhost:8888/${this.props.index}`
-                    : ''}/>
+                    type='video/mp4'
+                    onTimeUpdate={this.handleUpdate.bind(this)}
+                    onWaiting={this.handleBuffer}
+                    src={Number.isInteger(this.props.videoIndex)
+                    ? `http://localhost:8888/${this.props.videoIndex}`
+                    : ''}
+                    ref={this.videoElement}/>
             </div>
         )
     }

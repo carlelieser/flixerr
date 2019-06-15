@@ -56,31 +56,10 @@ var BackupTorrents = function (_React$Component) {
             var _this2 = this;
 
             var torrents = this.props.torrents ? this.props.torrents.map(function (torrent) {
-                var videoQuality = torrent.title.match(/(\d*p)/g);
-                var sorted = videoQuality ? videoQuality.filter(function (item) {
-                    return item != 'p';
-                }) : [];
-                videoQuality = sorted.length ? sorted[0] : false;
-                return React.createElement(
-                    _Fade2.default,
-                    { key: (0, _uniqid2.default)(), distance: '10%', bottom: true },
-                    React.createElement(
-                        'div',
-                        {
-                            className: 'torrent ' + (_this2.props.getCurrentMagnet() == torrent.magnet ? 'active' : ''),
-                            onClick: _this2.props.handleTorrentClick.bind(_this2, torrent) },
-                        videoQuality ? React.createElement(
-                            'span',
-                            { className: 'video-quality' },
-                            videoQuality
-                        ) : '',
-                        React.createElement(
-                            'span',
-                            { className: 'title' },
-                            torrent.title.replace(/[^a-zA-Z0-9\.\(\)\- ]/g, '').replace(/\./g, ' ')
-                        )
-                    )
-                );
+                var title = torrent.title;
+                var videoQuality = torrent.resolution || torrent.quality;
+
+                return React.createElement(Torrent, { key: (0, _uniqid2.default)(), torrent: torrent, name: 'torrent ' + (_this2.props.getCurrentMagnet() == (torrent.magnet || torrent.download) ? 'active' : ''), videoQuality: videoQuality, title: title, handleTorrentClick: _this2.props.handleTorrentClick });
             }) : '';
             return React.createElement(
                 'div',
@@ -93,13 +72,14 @@ var BackupTorrents = function (_React$Component) {
                 React.createElement(
                     'div',
                     { className: 'subtitle' },
-                    this.props.torrents ? 'Here are some alternative torrents for ' + this.props.movie.title + '. Have fun :) ' : "We couldn't find any alternative torrents. Please wait or try again."
+                    this.props.torrents ? 'Select from one of the alternative torrents for ' + this.props.movie.title + ' below.' : "We couldn't find any alternative torrents. Please wait or try again."
                 ),
                 this.props.torrents ? React.createElement(
                     'div',
                     { className: 'torrent-container' },
                     torrents
-                ) : React.createElement(
+                ) : false,
+                React.createElement(
                     'div',
                     { className: 'reload-btn', onClick: this.handleReload },
                     React.createElement(

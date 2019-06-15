@@ -1,48 +1,50 @@
-"use strict";
+'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _reactAddonsCssTransitionGroup = require("react-addons-css-transition-group");
+var _reactAddonsCssTransitionGroup = require('react-addons-css-transition-group');
 
 var _reactAddonsCssTransitionGroup2 = _interopRequireDefault(_reactAddonsCssTransitionGroup);
 
-var _Fade = require("react-reveal/Fade");
+var _Fade = require('react-reveal/Fade');
 
 var _Fade2 = _interopRequireDefault(_Fade);
 
-var _getJson = require("get-json");
+var _getJson = require('get-json');
 
 var _getJson2 = _interopRequireDefault(_getJson);
 
-var _electronJsonStorage = require("electron-json-storage");
+var _electronJsonStorage = require('electron-json-storage');
 
 var _electronJsonStorage2 = _interopRequireDefault(_electronJsonStorage);
 
-var _uniqid = require("uniqid");
+var _uniqid = require('uniqid');
 
 var _uniqid2 = _interopRequireDefault(_uniqid);
 
-var _app = require("firebase/app");
+var _app = require('firebase/app');
 
-var firebase = _interopRequireWildcard(_app);
+var _app2 = _interopRequireDefault(_app);
 
-require("firebase/auth");
+require('firebase/auth');
 
-require("firebase/database");
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+require('firebase/database');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var parseTorrent = require('parse-torrent-name');
 
 var App = function (_React$Component) {
     _inherits(App, _React$Component);
@@ -52,8 +54,48 @@ var App = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
-        _this.setListWidth = function (listWidth) {
-            _this.setState({ listWidth: listWidth });
+        _this.setStartTime = function (startTime) {
+            _this.setState({ startTime: startTime });
+        };
+
+        _this.setVideoElement = function (videoElement) {
+            _this.setState({ videoElement: videoElement });
+        };
+
+        _this.setCurrentTime = function (currentTime) {
+            _this.setState({ currentTime: currentTime });
+        };
+
+        _this.setSeekValue = function (seekValue) {
+            _this.setState({ seekValue: seekValue });
+        };
+
+        _this.setColorStop = function (colorStop) {
+            _this.setState({ colorStop: colorStop });
+        };
+
+        _this.setInputValue = function (inputValue) {
+            _this.setState({ inputValue: inputValue });
+        };
+
+        _this.setStreaming = function (isStreaming) {
+            _this.setState({ isStreaming: isStreaming });
+        };
+
+        _this.setPlayerStatus = function (status, loading) {
+            return new Promise(function (resolve, reject) {
+                _this.setState({
+                    playerStatus: status ? {
+                        status: status,
+                        loading: loading
+                    } : false
+                }, function () {
+                    clearTimeout(_this.playerTimeout);
+                    _this.playerTimeout = setTimeout(function () {
+                        return resolve();
+                    }, 2500);
+                });
+            });
         };
 
         _this.toggleGenre = function (showGenre, activeGenre, genreID) {
@@ -78,15 +120,19 @@ var App = function (_React$Component) {
         };
 
         _this.getUserCredentials = function () {
-            _electronJsonStorage2.default.get("userCredentials", function (error, data) {
-                _this.setState({
-                    user: data.user ? data.user.uid ? data.user : false : false,
-                    create: data.create,
-                    account: data.account,
-                    isGuest: data.isGuest
-                }, function () {
-                    _this.startFireBase();
-                });
+            _electronJsonStorage2.default.get('userCredentials', function (error, data) {
+                if (error) {
+                    console.log('Not able to retrieve user credentials.');
+                } else {
+                    _this.setState({
+                        user: data.user ? data.user.uid ? data.user : false : false,
+                        create: data.create,
+                        account: data.account,
+                        isGuest: data.isGuest
+                    }, function () {
+                        _this.startFireBase();
+                    });
+                }
             });
         };
 
@@ -95,7 +141,7 @@ var App = function (_React$Component) {
                 var clean = array.slice();
                 for (var j = 0; j < array.length; j++) {
                     var object = array[j];
-                    if ((typeof object === "undefined" ? "undefined" : _typeof(object)) === 'object') {
+                    if ((typeof object === 'undefined' ? 'undefined' : _typeof(object)) === 'object') {
                         _this.removeEmpty(object);
                     }
                 }
@@ -114,8 +160,8 @@ var App = function (_React$Component) {
         };
 
         _this.createDataBase = function () {
-            var db = firebase.database();
-            _this.databaseRef = db.ref("users/" + _this.state.user.uid);
+            var db = _app2.default.database();
+            _this.databaseRef = db.ref('users/' + _this.state.user.uid);
         };
 
         _this.setBucket = function () {
@@ -186,25 +232,33 @@ var App = function (_React$Component) {
                 if (error) {
                     throw error;
                 }
-                if (firebase.auth().currentUser) {
+                if (_app2.default.auth().currentUser) {
                     _this.setBucket();
                 }
             });
         };
 
         _this.getStorage = function () {
-            _electronJsonStorage2.default.get("collection", function (error, data) {
-
-                _this.setState({
-                    favorites: data ? data.favorites ? data.favorites : [] : [],
-                    recentlyPlayed: data ? data.recentlyPlayed ? data.recentlyPlayed : [] : [],
-                    movieTimeArray: data ? data.movieTimeArray ? data.movieTimeArray : [] : [],
-                    suggested: data ? data.suggested ? data.suggested : [] : []
-                }, function (error) {
-                    setTimeout(function () {
-                        _this.setState({ appLoading: false });
-                    }, 2500);
+            return new Promise(function (resolve, reject) {
+                _electronJsonStorage2.default.get("collection", function (error, data) {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        _this.setState({
+                            favorites: data ? data.favorites ? data.favorites : [] : [],
+                            recentlyPlayed: data ? data.recentlyPlayed ? data.recentlyPlayed : [] : [],
+                            movieTimeArray: data ? data.movieTimeArray ? data.movieTimeArray : [] : [],
+                            suggested: data ? data.suggested ? data.suggested : [] : []
+                        }, function (error) {
+                            setTimeout(function () {
+                                _this.setState({ appLoading: false });
+                            }, 2500);
+                            resolve();
+                        });
+                    }
                 });
+            }).catch(function (err) {
+                return console.log(err);
             });
         };
 
@@ -215,28 +269,48 @@ var App = function (_React$Component) {
             var seconds = sec_num - hours * 3600 - minutes * 60;
 
             if (hours < 10) {
-                hours = "0" + hours;
+                hours = '0' + hours;
             }
             if (minutes < 10) {
-                minutes = "0" + minutes;
+                minutes = '0' + minutes;
             }
             if (seconds < 10) {
-                seconds = "0" + seconds;
+                seconds = '0' + seconds;
             }
-            return "" + (hours ? hours + ":" : "") + (minutes ? minutes + ":" : "") + seconds;
+            return '' + (hours ? hours + ":" : "") + (minutes ? minutes + ":" : "") + seconds;
         };
 
-        _this.getPreferredTorrent = function (torrents) {
+        _this.getPreferredTorrents = function (torrents) {
             return new Promise(function (resolve, reject) {
                 var preferredTorrents = torrents.filter(function (item, index) {
                     if (item) {
+                        var parsed = parseTorrent(item.title);
                         var title = item.title.toUpperCase();
-                        return title.match(/^(?=.*(1080|720|HD|YIFY))(?!.*(HDTS|HDTC|HD\.TS|HD\.TC|HD\-TS|HD\-TC|CAM))/g);
+
+                        if (item.download) {
+                            item.magnet = item.download;
+                            delete item.download;
+                        }
+
+                        if (item.hasOwnProperty('seeds') || item.hasOwnProperty('peers')) {
+                            item.seeders = item.seeds;
+                            item.leechers = item.peers;
+                            delete item.seeds;
+                            delete item.peers;
+                        }
+
+                        item.title = parsed.title + ' (' + parsed.year + ') ' + (parsed.group ? parsed.group.match(/^\[.*?\]$/g) ? '' + parsed.group : '(' + parsed.group + ')' : '');
+                        item.quality = parsed.quality;
+                        item.resolution = parsed.resolution;
+
+                        item.health = Math.round(item.leechers > 0 ? item.seeders / item.leechers : item.seeders);
+
+                        return title.match(/^(?=.*(1080|720|HD|YIFY))(?!.*(3D|HDTS|HDTC|HD\.TS|HD\.TC|HD\-TS|HD\-TC|CAM))/g);
                     }
                 });
 
                 preferredTorrents.sort(function (a, b) {
-                    return b.seeds - a.seeds;
+                    return b.health - a.health;
                 });
 
                 resolve(preferredTorrents);
@@ -251,24 +325,23 @@ var App = function (_React$Component) {
             _this.setState({ time: time });
         };
 
-        _this.handleVideo = function () {
-            var video = document.querySelector("video");
-            var seekBar = document.querySelector(".seek-bar");
+        _this.handleVideo = function (e) {
+            var video = e.currentTarget;
+            if (video.duration) {
+                var value = 100 / video.duration * video.currentTime;
+                var time = _this.formatTime(video.duration - video.currentTime);
+                var colorStop = _this.state.seekValue / 100;
+                _this.setColorStop(colorStop);
 
-            if (seekBar !== null) {
-                if (video.duration) {
-                    var value = 100 / video.duration * video.currentTime;
-                    var time = _this.formatTime(video.duration - video.currentTime);
-                    var colorStop = _this.getElementValue(seekBar) / 100;
-
-                    _this.setPlayerTime(time);
-                    _this.setElementValue(seekBar, "value", value);
-
-                    _this.setElementStyle(seekBar, "backgroundImage", "-webkit-gradient(linear, left top, right top, color-stop(" + colorStop + ", rgb(255, 0, 0)), color-stop(" + colorStop + ", rgba(255, 255, 255, 0.158)))");
-
-                    _this.togglePause(video.paused);
+                if (!_this.state.isStreaming) {
+                    _this.startStreaming();
                 }
+
+                _this.setPlayerTime(time);
+                _this.setCurrentTime(video.currentTime);
+                _this.setSeekValue(value);
             }
+            _this.togglePause(video.paused);
         };
 
         _this.handleVideoClose = function (video) {
@@ -278,17 +351,18 @@ var App = function (_React$Component) {
         };
 
         _this.setMovieTime = function (movie) {
-            var video = document.querySelector("video");
-            var movieMatch = _this.state.movieTimeArray.find(function (item) {
+            var clone = _this.getClone(_this.state.movieTimeArray);
+            var movieMatch = clone.find(function (item) {
                 return movie.id == item.id;
             });
 
             if (movieMatch) {
                 if (movieMatch.currentTime) {
-                    video.currentTime = movieMatch.currentTime;
+                    _this.setStartTime(movieMatch.currentTime);
                 }
 
-                _this.setState({ recentlyPlayed: _this.state.recentlyPlayed });
+                var recentlyPlayed = _this.getClone(_this.state.recentlyPlayed);
+                _this.setState({ recentlyPlayed: recentlyPlayed });
             }
         };
 
@@ -306,31 +380,53 @@ var App = function (_React$Component) {
             }
         };
 
-        _this.applyTimeout = function () {
-            if (_this.server) {
-                _this.server.close();
+        _this.applyTimeout = function (type) {
+            var message = void 0;
+
+            if (!type) {
+                message = 'Ooops. We dropped the ball';
+            } else if (type == 1) {
+                message = 'We can\'t find Kevin';
+            } else if (type == 2) {
+                message = 'Stop littering';
             }
+
+            _this.removeTorrents().then(function () {
+                _this.setVideoIndex();
+                _this.setPlayerLoading(false);
+            });
+
+            _this.closeServer();
+            _this.setPlayerStatus(message);
             _this.showBackup();
-            console.log('Streaming timed out.');
         };
 
         _this.startWebTorrent = function () {
             var WebTorrent = require('webtorrent');
             _this.setState({
-                client: new WebTorrent()
+                client: new WebTorrent({ maxConn: 150 })
             }, function () {
                 _this.state.client.on('error', function (err) {
-                    console.log(err);
+                    _this.applyTimeout();
                 });
             });
         };
 
-        _this.removeTorrent = function (magnet) {
+        _this.removeTorrents = function () {
             return new Promise(function (resolve, reject) {
-                _this.state.client.remove(magnet, function () {
-                    resolve('Torrent removed.');
-                }, function (err) {
-                    reject(err);
+                var promises = [];
+
+                for (var i = 0; i < _this.state.client.torrents.length; i++) {
+                    var torrent = _this.state.client.torrents[i];
+                    var promise = _this.state.client.remove(torrent);
+
+                    promises.push(promise);
+                }
+
+                Promise.all(promises).then(function () {
+                    return resolve('Torrents removed.');
+                }).catch(function (err) {
+                    return reject(err);
                 });
             }).catch(function (err) {
                 return console.log(err);
@@ -341,20 +437,48 @@ var App = function (_React$Component) {
             _this.setState({ error: error });
         };
 
+        _this.startStreaming = function () {
+            _this.setStreaming(true);
+            clearTimeout(_this.timeOut);
+            _this.setPlayerLoading(false);
+            _this.setPlayerStatus('We\'ve found a reason for your meaningless existence').then(function () {
+                _this.setPlayerStatus(false);
+            });
+        };
+
         _this.streamTorrent = function (movie) {
+            var magnet = movie.magnet;
+            _this.setStreaming();
+            _this.setPlayerStatus('Sending the lost boys to neverland', true);
             _this.resetVideo();
-            _this.changeCurrentMagnet(movie.magnet);
+            _this.changeCurrentMagnet(magnet);
+
+            clearTimeout(_this.timeOut);
 
             _this.timeOut = setTimeout(function () {
                 if (_this.state.time == '00:00:00') {
                     _this.applyTimeout();
                 }
-            }, 80000);
+            }, 50000);
 
             if (_this.state.playMovie) {
-                _this.state.client.add(movie.magnet, function (torrent) {
-                    console.log("Attempting to stream \"" + movie.title + "\" from " + movie.magnet + ".");
-                    var videoFormats = ["avi", "mp4", "mkv", "wmv", "mov"];
+                var torrent = _this.state.client.add(magnet);
+
+                torrent.on('metadata', function () {
+                    _this.setPlayerStatus('Configuring the DeLorean', true);
+                });
+
+                torrent.on('ready', function () {
+                    _this.setPlayerStatus('Retrieving from the owl postal service', true);
+                    torrent.deselect(0, torrent.pieces.length - 1, false);
+
+                    for (var i = 0; i < torrent.files.length; i++) {
+                        var fileToDeselect = torrent.files[i];
+                        fileToDeselect.deselect();
+                    }
+
+                    var videoFormats = ['avi', 'mp4', 'm4v', 'm4a', 'mkv', 'wmv', 'mov'];
+
                     var filtered = torrent.files.filter(function (file) {
                         var extension = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length);
 
@@ -369,45 +493,38 @@ var App = function (_React$Component) {
 
                     var file = filtered[0];
                     var fileIndex = torrent.files.findIndex(function (item) {
-                        return file.path == item.path;
+                        if (file) {
+                            return file.path == item.path;
+                        }
                     });
 
-                    if (file && _this.state.playMovie) {
+                    if (!file) {
+                        _this.applyTimeout(1);
+                    } else if (!_this.state.playMovie) {
+                        _this.removeTorrents();
+                    } else if (file && _this.state.playMovie) {
+                        file.select();
+
+                        _this.closeServer();
+
                         _this.server = torrent.createServer();
                         _this.server.listen('8888');
 
                         _this.setVideoIndex(fileIndex).then(function () {
+                            _this.setPlayerStatus('Logging into the OASIS', true);
                             _this.setMovieTime(_this.state.playMovie);
                         });
-                    } else if (!file) {
-                        _this.applyTimeout();
-                    } else if (!_this.state.playMovie) {
-                        _this.removeMagnet(movie.magnet);
                     }
                 });
+
+                // torrent.on('warning', (err) => {     console.log(err); });
             } else {
                 _this.destroyClient();
             }
         };
 
-        _this.getSearch = function () {
-            return document.querySelector(".search-bar-container input");
-        };
-
-        _this.setElementValue = function (elem, property, value) {
-            elem[property] = value;
-        };
-
-        _this.setElementStyle = function (elem, property, value) {
-            elem.style[property] = value;
-        };
-
-        _this.getElementValue = function (elem) {
-            return elem.value;
-        };
-
         _this.resetSearch = function () {
-            _this.setElementValue(_this.getSearch(), "value", "");
+            _this.setInputValue('');
             _this.toggleSearch();
         };
 
@@ -421,7 +538,6 @@ var App = function (_React$Component) {
 
         _this.closeSearch = function () {
             _this.resetSearch();
-            _this.getSearch().focus();
 
             if (_this.state.active != "Featured") {
                 _this.toggleContainerSettings(true, _this.state.collectionContainer);
@@ -455,11 +571,11 @@ var App = function (_React$Component) {
                     _Fade2.default,
                     { bottom: true },
                     React.createElement(
-                        "div",
-                        { className: "search-empty" },
-                        "No Results for \"",
+                        'div',
+                        { className: 'search-empty' },
+                        'No Results for "',
                         query.length > 20 ? query.substring(0, 20) + "..." : query,
-                        "\""
+                        '"'
                     )
                 ) });
         };
@@ -487,7 +603,7 @@ var App = function (_React$Component) {
             _this.toggleSearch(true, _this.state.searchContent);
             _this.toggleContainerSettings(false, _this.state.collectionContainer);
 
-            var query = _this.getElementValue(_this.getSearch());
+            var query = _this.state.inputValue;
 
             if (query === "") {
                 _this.closeSearch();
@@ -495,7 +611,7 @@ var App = function (_React$Component) {
                 var searchResults = [];
 
                 var _loop = function _loop(u) {
-                    var url = "https://api.themoviedb.org/3/search/movie?api_key=" + _this.state.apiKey + "&region=US&language=en-US&query=" + query + "&page=" + u + "&include_adult=false";
+                    var url = 'https://api.themoviedb.org/3/search/movie?api_key=' + _this.state.apiKey + '&region=US&language=en-US&query=' + query + '&page=' + u + '&include_adult=false';
 
                     var promise = new Promise(function (resolve, reject) {
                         _this.fetchContent(url, function (response) {
@@ -539,7 +655,7 @@ var App = function (_React$Component) {
         };
 
         _this.initMovie = function (movie) {
-            _this.setState({ playerLoading: true, playMovie: movie, time: "00:00:00" });
+            _this.setState({ playerLoading: true, playMovie: movie, time: "00:00:00", paused: true });
         };
 
         _this.prepareMovieTitle = function (title) {
@@ -553,7 +669,7 @@ var App = function (_React$Component) {
                     resolve(movie);
                 } else {
                     movie.magnet = false;
-                    console.log('Previous magnet link was of low quality or different language.');
+                    console.log('Previous magnet link was of low quality.');
                     reject(movie);
                 }
             });
@@ -592,23 +708,16 @@ var App = function (_React$Component) {
             _this.setVideoError();
         };
 
-        _this.searchTorrent = function (movie, reset) {
-            if (_this.currentMagnet) {
-                if (_this.state.client) {
-                    if (_this.state.client.get(_this.currentMagnet)) {
-                        _this.removeTorrent(_this.currentMagnet);
-                    }
-                }
-            }
-
+        _this.closeServer = function () {
             if (_this.server) {
                 _this.server.close();
             }
+        };
 
-            if (reset) {
-                _this.fetchAttempts = 0;
-            }
+        _this.searchTorrent = function (movie) {
             _this.resetVideo();
+            _this.removeTorrents();
+            _this.closeServer();
 
             if (movie.magnet) {
                 _this.checkMagnet(movie).then(function (cleanMovie) {
@@ -617,41 +726,56 @@ var App = function (_React$Component) {
                     return _this.searchTorrent(movie);
                 });
             } else {
-                _this.fetchAttempts++;
-                console.log("Try #" + _this.fetchAttempts);
-                var query = _this.fetchAttempts > 3 ? "" + _this.prepareMovieTitle(movie.title) : _this.prepareMovieTitle(movie.title) + " " + movie.release_date.substring(0, 4) + "*";
-                var getTorrents = _this.promiseTimeout(8000, _this.torrentSearch.search(query));
+                var query = _this.prepareMovieTitle(movie.title) + ' ' + movie.release_date.substring(0, 4);
 
-                getTorrents.then(function (result) {
-                    if (result.length) {
-                        _this.getPreferredTorrent(result).then(function (torrents) {
-                            var torrent = torrents[0];
-                            if (torrent) {
-                                _this.setState({
-                                    backupTorrents: torrents
-                                }, function () {
+                _this.setPlayerStatus('Searching the entire universe for "' + movie.title + '"', true);
+
+                var publicSearch = _this.publicSearch.search(['1337x', 'Rarbg'], query, 'Movies', 20);
+
+                var proprietarySearch = _this.torrentSearch.search(query);
+
+                publicSearch.then(function (data) {
+                    var magnetPromises = [];
+                    for (var n = 0; n < data.length; n++) {
+                        var magnetTorrent = data[n];
+                        if (!magnetTorrent.magnet) {
+                            var promise = _this.torrentSearch.getMagnetFromLink(magnetTorrent).catch(function (err) {
+                                return console.log(err);
+                            });
+                            magnetPromises.push(promise);
+                        }
+                    }
+
+                    Promise.all([proprietarySearch].concat(magnetPromises)).then(function (result) {
+                        result = [].concat.apply([], result);
+                        if (result.length) {
+                            _this.getPreferredTorrents(result).then(function (torrents) {
+                                var torrent = torrents[0];
+                                if (torrent) {
                                     if (_this.state.playMovie) {
-                                        _this.state.playMovie.preferredTorrents = _this.state.backupTorrents;
-                                        _this.changeCurrentMagnet(torrent.magnet);
-                                        _this.updateMovieTimeArray(true);
-                                        _this.fetchAttempts = 0;
-                                        _this.streamTorrent(torrent);
+                                        var _movie = Object.assign({}, _this.state.playMovie);
+                                        _movie.preferredTorrents = torrents;
+                                        var magnet = torrent.magnet;
+                                        _this.setState({
+                                            playMovie: _movie
+                                        }, function () {
+                                            _this.changeCurrentMagnet(magnet);
+                                            _this.updateMovieTimeArray(_this.getObjectClone(_this.state.playMovie), true);
+                                            _this.streamTorrent(torrent);
+                                        });
                                     }
-                                });
-                            } else {
-                                _this.applyTimeout();
-                            }
-                        });
-                    } else {
-                        _this.applyTimeout();
-                    }
+                                } else {
+                                    _this.applyTimeout();
+                                }
+                            });
+                        } else {
+                            _this.applyTimeout();
+                        }
+                    }).catch(function (err) {
+                        return console.log(err);
+                    });
                 }).catch(function (err) {
-                    if (_this.fetchAttempts == 6) {
-                        _this.fetchAttempts = 0;
-                        _this.applyTimeout();
-                    } else {
-                        _this.searchTorrent(movie);
-                    }
+                    return console.log(err);
                 });
             }
         };
@@ -669,28 +793,22 @@ var App = function (_React$Component) {
             return new Promise(function (resolve, reject) {
                 clearTimeout(_this.timeOut);
                 if (_this.state.client) {
+                    var playMovie = backUp ? _this.getObjectClone(_this.state.playMovie) : false;
                     _this.setState({
-                        playMovie: backUp ? _this.state.playMovie : false,
+                        playMovie: playMovie,
+                        startTime: backUp ? _this.state.startTime : false,
                         videoIndex: false,
+                        videoElement: false,
+                        isStreaming: false,
                         paused: true,
-                        backupTorrents: backUp ? _this.state.backupTorrents : false,
                         playerLoading: backUp ? true : false
                     }, function () {
-                        if (_this.server) {
-                            _this.server.close();
-                            _this.server = false;
-                        }
+                        _this.closeServer();
 
                         if (backUp) {
-                            if (_this.currentMagnet) {
-                                if (_this.state.client.get(_this.currentMagnet)) {
-                                    _this.removeTorrent(_this.currentMagnet).then(function (result) {
-                                        resolve(result);
-                                    });
-                                }
-                            } else {
-                                reject('No torrent.');
-                            }
+                            _this.removeTorrents().then(function () {
+                                resolve();
+                            });
                         } else {
                             resolve();
                         }
@@ -710,10 +828,12 @@ var App = function (_React$Component) {
             browserWindow.setFullScreen(full);
         };
 
-        _this.setMovieTimeArray = function () {
+        _this.setMovieTimeArray = function (newArray) {
             _this.setState(function (prevState) {
-                if (prevState.movieTimeArray !== _this.state.movieTimeArray) {
-                    return { movieTimeArray: _this.state.movieTimeArray };
+                if (prevState.movieTimeArray !== _this.state.movieTimeArray || newArray) {
+                    return {
+                        movieTimeArray: newArray ? newArray : _this.state.movieTimeArray
+                    };
                 }
             }, function () {
                 _this.setStorage();
@@ -721,9 +841,10 @@ var App = function (_React$Component) {
         };
 
         _this.addToMovieTimeArray = function (movie) {
-            _this.state.movieTimeArray.push(movie);
+            var clone = [].concat(_toConsumableArray(_this.state.movieTimeArray));
+            clone.push(movie);
 
-            _this.setMovieTimeArray();
+            _this.setMovieTimeArray(clone);
         };
 
         _this.changeCurrentMagnet = function (magnet) {
@@ -734,29 +855,49 @@ var App = function (_React$Component) {
             return _this.currentMagnet;
         };
 
-        _this.updateMovieTimeArray = function (alt) {
-            var matchingItem = _this.state.movieTimeArray.find(function (movie) {
-                return movie.id == _this.state.playMovie.id;
+        _this.updateMovieTimeArray = function (clone, alt) {
+            var movieTimeArray = [].concat(_toConsumableArray(_this.state.movieTimeArray));
+            var matchingItem = movieTimeArray.find(function (movie) {
+                return movie.id == clone.id;
             });
 
             if (matchingItem) {
                 matchingItem.magnet = _this.currentMagnet;
                 if (alt) {
-                    matchingItem.preferredTorrents = _this.state.playMovie.preferredTorrents;
+                    matchingItem.preferredTorrents = clone.preferredTorrents;
                 } else {
-                    matchingItem.currentTime = _this.state.playMovie.currentTime;
+                    matchingItem.currentTime = clone.currentTime;
                 }
-                _this.setMovieTimeArray();
+
+                _this.setMovieTimeArray(movieTimeArray);
             } else {
-                _this.addToMovieTimeArray({ id: _this.state.playMovie.id, currentTime: _this.state.playMovie.currentTime, magnet: _this.currentMagnet });
+                var movieData = {
+                    id: clone.id,
+                    currentTime: clone.currentTime,
+                    preferredTorrents: clone.preferredTorrents,
+                    magnet: _this.currentMagnet
+                };
+                _this.addToMovieTimeArray(movieData);
             }
+        };
+
+        _this.getObjectClone = function (src) {
+            var target = {};
+            for (var prop in src) {
+                if (src.hasOwnProperty(prop)) {
+                    target[prop] = src[prop];
+                }
+            }
+            return target;
         };
 
         _this.updateMovieTime = function (time) {
             if (_this.state.playMovie) {
-                if (time !== 0) {
-                    _this.state.playMovie.currentTime = time;
-                    _this.updateMovieTimeArray();
+                if (time || time !== 0) {
+                    var clone = _this.getObjectClone(_this.state.playMovie);
+                    clone.currentTime = time;
+                    _this.setState({ playMovie: clone });
+                    _this.updateMovieTimeArray(clone);
                 }
             }
         };
@@ -766,10 +907,11 @@ var App = function (_React$Component) {
                 _this.updateMovieTime(time);
             }
             _this.setState({
-                error: false
+                error: false,
+                playerStatus: false
             }, function () {
                 _this.destroyClient().then(function () {
-                    _this.removeTorrent(_this.currentMagnet).then(function (result) {
+                    _this.removeTorrents().then(function (result) {
                         console.log(result);
                     });
                 });
@@ -778,12 +920,13 @@ var App = function (_React$Component) {
         };
 
         _this.matchMovie = function (movie) {
-            var matchingItem = _this.state.movieTimeArray.find(function (item) {
+            var matchingItem = _this.getClone(_this.state.movieTimeArray).find(function (item) {
                 return item.id == movie.id;
             });
 
             if (matchingItem) {
                 movie.magnet = matchingItem.magnet;
+                movie.preferredTorrents = matchingItem.preferredTorrents;
                 _this.changeCurrentMagnet(matchingItem.magnet);
                 return movie;
             }
@@ -801,7 +944,7 @@ var App = function (_React$Component) {
                 _this.setState({
                     showBox: active
                 }, function () {
-                    resolve();
+                    setTimeout(resolve, 250);
                 });
             });
         };
@@ -856,11 +999,11 @@ var App = function (_React$Component) {
                 return year - n;
             }
 
-            return year - n + "-" + month + "-" + day;
+            return year - n + '-' + month + '-' + day;
         };
 
         _this.getFeatured = function (resolve, reject, page) {
-            var url = "https://api.themoviedb.org/3/discover/movie?api_key=" + _this.state.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&primary_release_date.gte=" + _this.getURLDate(5, true) + "&primary_release_date.lte=" + _this.getURLDate(1, true);
+            var url = 'https://api.themoviedb.org/3/discover/movie?api_key=' + _this.state.apiKey + '&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&primary_release_date.gte=' + _this.getURLDate(5, true) + '&primary_release_date.lte=' + _this.getURLDate(1, true);
             _this.fetchContent(url, function (response) {
                 resolve(response);
             }, function (error) {
@@ -898,7 +1041,7 @@ var App = function (_React$Component) {
         };
 
         _this.getMovies = function (genre, genreID) {
-            var url = "https://api.themoviedb.org/3/discover/movie?api_key=" + _this.state.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=" + (Math.floor(Math.random() * _this.state.genrePages) + 1) + "&primary_release_date.lte=" + _this.getURLDate(1) + "&with_genres=" + genreID;
+            var url = 'https://api.themoviedb.org/3/discover/movie?api_key=' + _this.state.apiKey + '&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=' + (Math.floor(Math.random() * _this.state.genrePages) + 1) + '&primary_release_date.lte=' + _this.getURLDate(1) + '&with_genres=' + genreID;
 
             return new Promise(function (resolve, reject) {
                 _this.fetchContent(url, function (response) {
@@ -940,7 +1083,7 @@ var App = function (_React$Component) {
                 limit = array.length;
             }
 
-            for (var i = 0; i <= limit; i++) {
+            for (var i = 0; i < limit; i++) {
                 var item = array[Math.floor(Math.random() * array.length)];
                 if (previousItem.title) {
                     while (previousItem.title == item.title) {
@@ -970,14 +1113,17 @@ var App = function (_React$Component) {
                 var pages = [1, 2, 3];
                 for (var j = 0; j < movies.length; j++) {
                     var movie = movies[j],
-                        page = _this.chooseRandom(pages, 1),
-                        _url = "https://api.themoviedb.org/3/movie/" + movie.id + "/recommendations?api_key=" + _this.state.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=" + page + "&primary_release_date.lte=" + _this.getURLDate(1);
-                    var promise = _this.getRecommended(_url);
-                    promises.push(promise);
+                        page = _this.chooseRandom(pages, 1);
+                    if (movie) {
+                        var _url = 'https://api.themoviedb.org/3/movie/' + movie.id + '/recommendations?api_key=' + _this.state.apiKey + '&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=' + page + '&primary_release_date.lte=' + _this.getURLDate(1);
+                        var promise = _this.getRecommended(_url);
+                        promises.push(promise);
+                    }
                 }
 
                 Promise.all(promises).then(function (suggested) {
-                    resolve([].concat.apply([], suggested));
+                    var finalSuggested = [].concat.apply([], suggested);
+                    resolve(finalSuggested);
                 }).catch(function (err) {
                     return reject(err);
                 });
@@ -1020,127 +1166,79 @@ var App = function (_React$Component) {
             });
         };
 
+        _this.getClone = function (array) {
+            return [].concat(_toConsumableArray(array));
+        };
+
         _this.addToFavorites = function (movie) {
-            _this.state.favorites.push(movie);
+            var clone = _this.getClone(_this.state.favorites);
+            clone.push(movie);
             _this.setState({
-                favorites: _this.state.favorites.slice()
+                favorites: clone
             }, function () {
                 _this.setStorage();
             });
         };
 
         _this.removeFromFavorites = function (movie) {
-            var index = _this.state.favorites.findIndex(function (item) {
+            var clone = _this.getClone(_this.state.favorites);
+            var index = clone.findIndex(function (item) {
                 return item.id == movie.id;
             });
-            _this.state.favorites.splice(index, 1);
+            clone.splice(index, 1);
             _this.setState({
-                favorites: _this.state.favorites.slice()
+                favorites: clone
             }, function () {
                 _this.setStorage();
             });
         };
 
         _this.addToRecentlyPlayed = function (movie) {
+            var clone = _this.getClone(_this.state.recentlyPlayed);
             if (!_this.isRecent(movie)) {
-                if (_this.state.recentlyPlayed.length > 9) {
-                    _this.state.recentlyPlayed.splice(-1, 1);
+                if (clone.length > 20) {
+                    clone.splice(-1, 1);
                 }
 
-                _this.state.recentlyPlayed.unshift(movie);
+                clone.unshift(movie);
                 _this.setState({
-                    recentlyPlayed: _this.state.recentlyPlayed.slice()
+                    recentlyPlayed: clone
                 }, function () {
                     _this.setStorage();
                 });
             } else {
-                var index = _this.state.recentlyPlayed.findIndex(function (item) {
+                var index = clone.findIndex(function (item) {
                     return item.id == movie.id;
                 });
 
-                _this.state.recentlyPlayed.splice(index, 1);
-                _this.state.recentlyPlayed.unshift(movie);
+                clone.splice(index, 1);
+                clone.unshift(movie);
                 _this.setState({
-                    recentlyPlayed: _this.state.recentlyPlayed.slice()
+                    recentlyPlayed: clone
                 }, function () {
                     _this.setStorage();
                 });
             }
-        };
-
-        _this.easeInOutQuad = function (t, b, c, d) {
-            t /= d / 2;
-            if (t < 1) return c / 2 * t * t + b;
-            t--;
-            return -c / 2 * (t * (t - 2) - 1) + b;
-        };
-
-        _this.scrollTo = function (id, element, to, duration, callback) {
-            var start = element.scrollLeft,
-                change = to - start,
-                currentTime = 0,
-                increment = 20;
-
-            var animateScroll = function animateScroll() {
-                currentTime += increment;
-                var val = _this.easeInOutQuad(currentTime, start, change, duration);
-                element.scrollLeft = val;
-                if (currentTime < duration) {
-                    setTimeout(animateScroll, increment);
-                } else if (currentTime == duration) {
-                    if (callback) {
-                        callback(id, element, to);
-                    }
-                }
-            };
-
-            animateScroll();
-        };
-
-        _this.scrollMovieGenre = function (left, e, id) {
-            var viewportW = _this.state.listWidth - 210;
-            var boxW = document.querySelector(".movie-item").offsetWidth + 10;
-            var viewItems = Math.ceil(viewportW / boxW);
-
-            var container = e.currentTarget.parentElement.parentElement.querySelector(".movie-list-paginated");
-
-            var scrollVal = container.scrollLeft;
-
-            if (left) {
-                scrollVal -= boxW * viewItems;
-            } else {
-                scrollVal += boxW * viewItems;
-            }
-
-            id = "#" + id;
-
-            _this.scrollTo(id, container, scrollVal, 200, function (id, container, scrollVal) {
-                if (container.scrollLeft + container.offsetWidth >= container.scrollWidth - 20) {
-                    _this.setElementStyle(document.querySelector(id).querySelector(".movie-scroll-right"), "display", "none");
-                    _this.setElementStyle(document.querySelector(id).querySelector(".movie-scroll-left"), "display", "flex");
-                } else if (container.scrollLeft === 0) {
-                    _this.setElementStyle(document.querySelector(id).querySelector(".movie-scroll-left"), "display", "none");
-                    _this.setElementStyle(document.querySelector(id).querySelector(".movie-scroll-right"), "display", "flex");
-                } else {
-                    _this.setElementStyle(document.querySelector(id).querySelector(".movie-scroll-left"), "display", "flex");
-                    _this.setElementStyle(document.querySelector(id).querySelector(".movie-scroll-right"), "display", "flex");
-                }
-            });
         };
 
         _this.visualizeMovieGenres = function (movieData) {
             _this.setResults([movieData[0].movies[0]]);
+
             var movieGenres = movieData.map(function (item, i) {
+                var movies = item.movies.map(function (movie, index) {
+                    return React.createElement(MovieItem, {
+                        movie: movie,
+                        openBox: _this.openBox,
+                        strip: _this.strip,
+                        key: (0, _uniqid2.default)() });
+                });
+
                 return React.createElement(GenreContainer, {
                     toggleGenre: _this.toggleGenre,
                     genreID: item.genreID,
-                    scrollMovieGenre: _this.scrollMovieGenre,
-                    openBox: _this.openBox,
-                    strip: _this.strip,
                     name: item.name,
-                    movies: item.movies,
-                    key: (0, _uniqid2.default)(),
-                    setListWidth: _this.setListWidth });
+                    movies: movies,
+                    key: (0, _uniqid2.default)() });
             });
 
             return movieGenres;
@@ -1260,7 +1358,6 @@ var App = function (_React$Component) {
 
         _this.handleMenu = function () {
             if (_this.state.menuActive) {
-                _this.setElementStyle(document.querySelector(".app-menu-button"), "transform", "rotate(" + (_this.state.menuActive ? "0" : "360") + "deg)");
                 _this.setState({ menuActive: false });
             }
         };
@@ -1290,6 +1387,9 @@ var App = function (_React$Component) {
         };
 
         _this.requireTorrent = function () {
+            _this.publicSearch = require('torrent-search-api');
+            _this.publicSearch.enablePublicProviders();
+
             _this.torrentSearch = TorrentSearch;
         };
 
@@ -1297,7 +1397,7 @@ var App = function (_React$Component) {
             var email = _this.state.inputEmail.length ? _this.state.inputEmail : _this.state.user.email,
                 password = _this.state.inputPass.length ? _this.state.inputPass : _this.state.user.password;
 
-            firebase.auth().signInWithEmailAndPassword(email, password).then(function () {
+            _app2.default.auth().signInWithEmailAndPassword(email, password).then(function () {
                 _this.closeAccount();
             }).catch(function (error) {
                 var errorCode = error.code;
@@ -1317,9 +1417,9 @@ var App = function (_React$Component) {
                 appId: "1:58493893285:web:b02990447eb9f16f"
             };
 
-            firebase.initializeApp(firebaseConfig);
+            _app2.default.initializeApp(firebaseConfig);
 
-            firebase.auth().onAuthStateChanged(function (user) {
+            _app2.default.auth().onAuthStateChanged(function (user) {
                 _this.setState({ user: user });
                 if (user) {
                     _this.createDataBase();
@@ -1347,7 +1447,7 @@ var App = function (_React$Component) {
             } else {
 
                 if (_this.state.create) {
-                    firebase.auth().createUserWithEmailAndPassword(email, password).then(function () {
+                    _app2.default.auth().createUserWithEmailAndPassword(email, password).then(function () {
                         _this.closeAccount();
                     }).catch(function (error) {
                         var errorCode = error.code;
@@ -1386,7 +1486,7 @@ var App = function (_React$Component) {
         };
 
         _this.signOut = function () {
-            firebase.auth().signOut().then(function () {
+            _app2.default.auth().signOut().then(function () {
                 _this.databaseRef = false;
                 _this.setStorage();
             }).catch(function (error) {
@@ -1428,7 +1528,7 @@ var App = function (_React$Component) {
             }
         };
 
-        _this.fetchAttempts = 0;
+        _this.handleInput.bind(_this);
 
         _this.state = {
             apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
@@ -1441,7 +1541,6 @@ var App = function (_React$Component) {
             isGuest: false,
             menu: ["Featured", "Movies", "Collection", "Sign In"],
             active: "Featured",
-            backupTorrents: false,
             suggested: [],
             recentlyPlayed: [],
             favorites: [],
@@ -1461,6 +1560,8 @@ var App = function (_React$Component) {
             movieCurrent: false,
             playMovie: false,
             playerLoading: true,
+            playerStatus: false,
+            isStreaming: false,
             paused: true,
             genreContainer: false,
             genrePages: 7,
@@ -1470,18 +1571,28 @@ var App = function (_React$Component) {
             logoIsLoaded: false,
             error: false,
             appLoading: true,
-            listWidth: false,
-            time: "00:00:00"
+            time: "00:00:00",
+            startTime: 0,
+            currentTime: 0,
+            videoElement: false,
+            inputValue: '',
+            seekValue: 0,
+            colorStop: 0
         };
         return _this;
     }
 
     _createClass(App, [{
-        key: "componentDidMount",
+        key: 'componentDidMount',
         value: function componentDidMount() {
+            var _this2 = this;
+
             this.loadLogo();
-            this.getStorage();
-            this.getUserCredentials();
+            this.getStorage().then(function () {
+                return _this2.getUserCredentials();
+            }).catch(function (err) {
+                return console.log(err);
+            });
             this.loadContent(this.state.active);
             this.startWebTorrent();
             this.requireTorrent();
@@ -1489,7 +1600,7 @@ var App = function (_React$Component) {
             window.addEventListener('offline', this.handleConnectionChange);
         }
     }, {
-        key: "render",
+        key: 'render',
         value: function render() {
             var menu = this.state.menuActive ? React.createElement(Menu, {
                 menu: this.state.menu,
@@ -1500,7 +1611,7 @@ var App = function (_React$Component) {
                 updateMenu: this.updateMenu,
                 resetSearch: this.resetSearch }) : null;
 
-            var movieBackDrop = this.state.showBox ? React.createElement("div", { className: "movie-container-bg", onClick: this.closeBackdrop }) : null;
+            var movieBackDrop = this.state.showBox ? React.createElement('div', { className: 'movie-container-bg', onClick: this.closeBackdrop }) : null;
 
             var movieModal = this.state.showBox ? React.createElement(MovieModal, {
                 movie: this.state.movieCurrent,
@@ -1511,6 +1622,8 @@ var App = function (_React$Component) {
                 removeFromFavorites: this.removeFromFavorites }) : null;
 
             var playerModal = this.state.playMovie ? React.createElement(Player, {
+                startTime: this.state.startTime,
+                isStreaming: this.state.isStreaming,
                 changeCurrentMagnet: this.changeCurrentMagnet,
                 updateMovieTime: this.updateMovieTime,
                 resetClient: this.destroyClient,
@@ -1518,23 +1631,29 @@ var App = function (_React$Component) {
                 showBackup: this.showBackup,
                 openBackup: this.state.backupIsOpen,
                 closeBackup: this.closeBackup,
-                backupTorrents: this.state.backupTorrents,
                 streamTorrent: this.streamTorrent,
                 searchTorrent: this.searchTorrent,
                 time: this.state.time,
-                index: this.state.videoIndex,
+                tempTime: this.state.tempTime,
+                currentTime: this.state.currentTime,
+                setCurrentTime: this.setCurrentTime,
+                colorStop: this.state.colorStop,
+                setColorStop: this.setColorStop,
+                videoIndex: this.state.videoIndex,
                 paused: this.state.paused,
                 removeClient: this.removeClient,
                 handleVideoClose: this.handleVideoClose,
                 setFullScreen: this.setFullScreen,
-                movie: this.state.movieCurrent,
+                movie: this.state.playMovie,
                 getCurrentMagnet: this.getCurrentMagnet,
                 loading: this.state.playerLoading,
                 setPlayerLoading: this.setPlayerLoading,
-                setElementValue: this.setElementValue,
-                getElementValue: this.getElementValue,
+                setVideoElement: this.setVideoElement,
+                playerStatus: this.state.playerStatus,
                 error: this.state.error,
-                handleVideo: this.handleVideo }) : null;
+                handleVideo: this.handleVideo,
+                setSeekValue: this.setSeekValue,
+                seekValue: this.state.seekValue }) : null;
 
             var fullGenreContainer = this.state.showGenre ? React.createElement(Genre, {
                 genre: this.state.activeGenre,
@@ -1546,146 +1665,146 @@ var App = function (_React$Component) {
                 closeGenre: this.closeGenre }) : null;
 
             var loadingContainer = this.state.appLoading ? React.createElement(
-                "div",
-                { className: "loading-container" },
+                'div',
+                { className: 'loading-container' },
                 React.createElement(
                     _Fade2.default,
-                    { when: this.state.logoIsLoaded, distance: "10%", bottom: true },
-                    React.createElement("div", { className: "logo" })
+                    { when: this.state.logoIsLoaded, distance: '10%', bottom: true },
+                    React.createElement('div', { className: 'logo' })
                 )
             ) : null;
 
             var accountContainer = this.state.account ? React.createElement(
-                "div",
-                { className: "account-container" },
+                'div',
+                { className: 'account-container' },
                 React.createElement(
                     _Fade2.default,
-                    { bottom: true, distance: "10%" },
+                    { bottom: true, distance: '10%' },
                     React.createElement(
-                        "div",
-                        { className: "account-form" },
+                        'div',
+                        { className: 'account-form' },
                         React.createElement(
-                            "div",
-                            { className: "account-close", onClick: this.closeAccount },
-                            React.createElement("i", { className: "mdi mdi-close" })
+                            'div',
+                            { className: 'account-close', onClick: this.closeAccount },
+                            React.createElement('i', { className: 'mdi mdi-close' })
                         ),
                         React.createElement(
-                            "div",
-                            { className: "account-title" },
-                            "Sign in"
+                            'div',
+                            { className: 'account-title' },
+                            'Sign in'
                         ),
                         React.createElement(
-                            "div",
-                            { className: "account-desc" },
-                            "Flixerr will use your account to synchronize data across all your devices."
+                            'div',
+                            { className: 'account-desc' },
+                            'Flixerr will use your account to synchronize data across all your devices.'
                         ),
-                        React.createElement("input", {
-                            type: "email",
-                            placeholder: "Email",
+                        React.createElement('input', {
+                            type: 'email',
+                            placeholder: 'Email',
                             autoFocus: true,
                             required: true,
-                            onKeyUp: this.handleInput.bind(this) }),
-                        React.createElement("span", null),
-                        React.createElement("input", {
-                            type: "password",
-                            placeholder: "Password",
+                            onKeyUp: this.handleInput }),
+                        React.createElement('span', null),
+                        React.createElement('input', {
+                            type: 'password',
+                            placeholder: 'Password',
                             required: true,
-                            onKeyUp: this.handleInput.bind(this) }),
-                        React.createElement("span", null),
+                            onKeyUp: this.handleInput }),
+                        React.createElement('span', null),
                         this.state.loginError ? React.createElement(
                             _Fade2.default,
-                            { bottom: true, distance: "10%" },
+                            { bottom: true, distance: '10%' },
                             React.createElement(
-                                "div",
-                                { className: "login-error" },
+                                'div',
+                                { className: 'login-error' },
                                 this.state.loginError
                             )
                         ) : '',
                         React.createElement(
-                            "div",
-                            { className: "account-submit", onClick: this.handleAccountSignin },
-                            "Sign In"
+                            'div',
+                            { className: 'account-submit', onClick: this.handleAccountSignin },
+                            'Sign In'
                         ),
-                        React.createElement("div", { className: "divider" }),
+                        React.createElement('div', { className: 'divider' }),
                         React.createElement(
-                            "div",
+                            'div',
                             {
-                                className: "account-submit account-secondary",
+                                className: 'account-submit account-secondary',
                                 onClick: this.openAccountCreation },
-                            "Sign Up"
+                            'Sign Up'
                         )
                     )
                 )
             ) : null;
 
             var createContainer = this.state.create ? React.createElement(
-                "div",
-                { className: "create-container account-container" },
+                'div',
+                { className: 'create-container account-container' },
                 React.createElement(
-                    "div",
-                    { className: "account-form" },
+                    'div',
+                    { className: 'account-form' },
                     React.createElement(
-                        "div",
-                        { className: "account-close", onClick: this.closeAccount },
-                        React.createElement("i", { className: "mdi mdi-close" })
+                        'div',
+                        { className: 'account-close', onClick: this.closeAccount },
+                        React.createElement('i', { className: 'mdi mdi-close' })
                     ),
                     React.createElement(
-                        "div",
-                        { className: "account-title" },
-                        "Create an account"
+                        'div',
+                        { className: 'account-title' },
+                        'Create an account'
                     ),
                     React.createElement(
-                        "div",
-                        { className: "account-desc" },
-                        "Register to easily synchronize data across multiple devices."
+                        'div',
+                        { className: 'account-desc' },
+                        'Register to easily synchronize data across multiple devices.'
                     ),
-                    React.createElement("input", {
-                        type: "email",
-                        placeholder: "Email",
+                    React.createElement('input', {
+                        type: 'email',
+                        placeholder: 'Email',
                         autoFocus: true,
                         required: true,
-                        onKeyUp: this.handleInput.bind(this) }),
-                    React.createElement("span", null),
-                    React.createElement("input", {
-                        type: "password",
-                        placeholder: "Password",
+                        onKeyUp: this.handleInput }),
+                    React.createElement('span', null),
+                    React.createElement('input', {
+                        type: 'password',
+                        placeholder: 'Password',
                         required: true,
-                        onKeyUp: this.handleInput.bind(this) }),
-                    React.createElement("span", null),
+                        onKeyUp: this.handleInput }),
+                    React.createElement('span', null),
                     this.state.loginError ? React.createElement(
                         _Fade2.default,
-                        { bottom: true, distance: "10%" },
+                        { bottom: true, distance: '10%' },
                         React.createElement(
-                            "div",
-                            { className: "login-error" },
+                            'div',
+                            { className: 'login-error' },
                             this.state.loginError
                         )
                     ) : '',
                     React.createElement(
-                        "div",
-                        { className: "account-submit", onClick: this.handleAccountCreation },
-                        "Create"
+                        'div',
+                        { className: 'account-submit', onClick: this.handleAccountCreation },
+                        'Create'
                     ),
-                    React.createElement("div", { className: "divider" }),
+                    React.createElement('div', { className: 'divider' }),
                     React.createElement(
-                        "div",
-                        { className: "account-submit account-secondary", onClick: this.openAccount },
-                        "Sign In"
+                        'div',
+                        { className: 'account-submit account-secondary', onClick: this.openAccount },
+                        'Sign In'
                     )
                 )
             ) : null;
 
             return React.createElement(
-                "div",
+                'div',
                 {
-                    className: "app-container " + (process.platform === "win32" ? "windows-compensate" : ''),
+                    className: 'app-container ' + (process.platform === "win32" ? "windows-compensate" : ''),
                     onClick: this.handleMenu },
-                process.platform === "darwin" ? React.createElement("div", {
+                process.platform === "darwin" ? React.createElement('div', {
                     className: 'draggable ' + (this.state.playMovie ? "invisible" : "") }) : '',
                 React.createElement(
                     _reactAddonsCssTransitionGroup2.default,
                     {
-                        transitionName: "player-anim",
+                        transitionName: 'player-anim',
                         transitionEnterTimeout: 300,
                         transitionLeaveTimeout: 300 },
                     createContainer
@@ -1693,7 +1812,7 @@ var App = function (_React$Component) {
                 React.createElement(
                     _reactAddonsCssTransitionGroup2.default,
                     {
-                        transitionName: "player-anim",
+                        transitionName: 'player-anim',
                         transitionEnterTimeout: 300,
                         transitionLeaveTimeout: 300 },
                     accountContainer
@@ -1701,7 +1820,7 @@ var App = function (_React$Component) {
                 React.createElement(
                     _reactAddonsCssTransitionGroup2.default,
                     {
-                        transitionName: "loading-anim",
+                        transitionName: 'loading-anim',
                         transitionEnterTimeout: 0,
                         transitionLeaveTimeout: 300 },
                     loadingContainer
@@ -1709,7 +1828,7 @@ var App = function (_React$Component) {
                 React.createElement(
                     _reactAddonsCssTransitionGroup2.default,
                     {
-                        transitionName: "genreContainer-anim",
+                        transitionName: 'genreContainer-anim',
                         transitionEnterTimeout: 300,
                         transitionLeaveTimeout: 300 },
                     fullGenreContainer
@@ -1717,7 +1836,7 @@ var App = function (_React$Component) {
                 React.createElement(
                     _reactAddonsCssTransitionGroup2.default,
                     {
-                        transitionName: "player-anim",
+                        transitionName: 'player-anim',
                         transitionEnterTimeout: 300,
                         transitionLeaveTimeout: 300 },
                     playerModal
@@ -1725,7 +1844,7 @@ var App = function (_React$Component) {
                 React.createElement(
                     _reactAddonsCssTransitionGroup2.default,
                     {
-                        transitionName: "movie-box-anim",
+                        transitionName: 'movie-box-anim',
                         transitionEnterTimeout: 300,
                         transitionLeaveTimeout: 300 },
                     movieModal
@@ -1733,7 +1852,7 @@ var App = function (_React$Component) {
                 React.createElement(
                     _reactAddonsCssTransitionGroup2.default,
                     {
-                        transitionName: "box-anim",
+                        transitionName: 'box-anim',
                         transitionEnterTimeout: 300,
                         transitionLeaveTimeout: 300 },
                     movieBackDrop
@@ -1746,11 +1865,13 @@ var App = function (_React$Component) {
                     closeSearch: this.closeSearch,
                     searchContent: this.state.searchContent,
                     searchMovies: this.searchMovies,
+                    inputValue: this.state.inputValue,
+                    setInputValue: this.setInputValue,
                     user: this.state.user }),
                 React.createElement(
                     _reactAddonsCssTransitionGroup2.default,
                     {
-                        transitionName: "menu-anim",
+                        transitionName: 'menu-anim',
                         transitionEnterTimeout: 300,
                         transitionLeaveTimeout: 300 },
                     menu
@@ -1765,13 +1886,11 @@ var App = function (_React$Component) {
                     favorites: this.state.favorites,
                     search: this.state.search,
                     searchContent: this.state.searchContent,
-                    scrollMovieGenre: this.scrollMovieGenre,
                     getHeader: this.getHeader,
                     setHeader: this.setHeader,
                     strip: this.strip,
                     openBox: this.openBox,
-                    results: this.state.results,
-                    setListWidth: this.setListWidth })
+                    results: this.state.results })
             );
         }
     }]);

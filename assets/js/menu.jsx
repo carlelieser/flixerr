@@ -11,10 +11,6 @@ class Menu extends React.Component {
         this
             .props
             .updateMenu(false, item);
-        document
-            .querySelector(".app-menu-button")
-            .style
-            .transform = "rotate(0deg)";
         this
             .props
             .resetSearch();

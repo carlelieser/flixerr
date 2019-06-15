@@ -2,16 +2,22 @@
 
 var TorrentSearch = function () {
     process.env.UV_THREADPOOL_SIZE = 128;
-    var request = require('request');
-    var cheerio = require('cheerio');
+
     var HttpsProxyAgent = require('https-proxy-agent');
 
-    var timeout = 8000;
+    var request = require('request'),
+        cheerio = require('cheerio'),
+        parseTorrent = require('parse-torrent'),
+        webtorrentHealth = require('webtorrent-health'),
+        timeout = 8000;
 
-    var provider = {
+    var providers = [{
         name: 'The Pirate Bay',
-        url: 'https://thepiratebay3.org/index.php?video=on&category=0&page=0&orderby=99&q='
-    };
+        url: 'https://thepiratebay3.org/index.php?video=on&category=0&page=0&orderby=99&q=',
+        queryFunction: function queryFunction(query) {
+            return encodeURI(query);
+        }
+    }];
 
     var getProxy = function getProxy() {
         return new Promise(function (resolve, reject) {
@@ -31,12 +37,14 @@ var TorrentSearch = function () {
         return new Promise(function (resolve, reject) {
             getProxy().then(function (proxy) {
                 var agent = new HttpsProxyAgent(proxy);
-                request({
+                var options = {
                     uri: uri,
                     agent: agent,
                     timeout: timeout
-                }, function (err, response, body) {
-                    if (!err) {
+                };
+
+                request(options, function (err, response, body) {
+                    if (!err && response.statusCode == 200) {
                         handleTorrents(body).then(function (torrents) {
                             resolve(torrents);
                         }).catch(function (err) {
@@ -46,36 +54,45 @@ var TorrentSearch = function () {
                         reject(err);
                     }
                 });
+            }).catch(function (err) {
+                console.log(err);
             });
         }).catch(function (err) {
             console.log(err);
         });
     };
 
+    var getMagnetData = function getMagnetData(magnet) {
+        return new Promise(function (resolve, reject) {
+            webtorrentHealth(magnet).then(function (data) {
+                var torrent = {
+                    title: parseTorrent(magnet).name,
+                    magnet: magnet,
+                    seeders: data.seeds,
+                    leechers: data.peers
+                };
+                resolve(torrent);
+            });
+        });
+    };
+
     var handleTorrents = function handleTorrents(html) {
         return new Promise(function (resolve, reject) {
             var $ = cheerio.load(html);
-            var torrents = [];
+            var magnetPromises = [];
 
-            $('#searchResult>tbody>tr').each(function () {
-                var title = $(this).children('td').eq(1).children('.detName').children('a').text(),
-                    seeds = Number($(this).children('td').last().prev().text()),
-                    leechers = Number($(this).children('td').last().text()),
-                    magnet = $(this).children('td').eq(1).children('a').attr('href');
-
-                var torrent = {
-                    title: title,
-                    seeds: seeds,
-                    leechers: leechers,
-                    magnet: magnet
-                };
-
-                if (magnet) {
-                    torrents.push(torrent);
-                }
+            var magnetLinks = $('a').filter(function (index, element) {
+                return $(element).attr('href').indexOf('magnet:?xt=urn:') > -1;
             });
-            if (torrents.length) {
-                resolve(torrents);
+            if (magnetLinks.length) {
+                for (var i = 0; i < magnetLinks.length; i++) {
+                    var magnet = magnetLinks[i].attribs.href;
+                    var promise = getMagnetData(magnet);
+                    magnetPromises.push(promise);
+                }
+                Promise.all(magnetPromises).then(function (torrents) {
+                    resolve(torrents);
+                });
             } else {
                 reject('No torrents found.');
             }
@@ -85,9 +102,50 @@ var TorrentSearch = function () {
     };
 
     var search = function search(query) {
-        var url = '' + provider.url + encodeURI(query);
-        return searchProvider(url);
+        return new Promise(function (resolve, reject) {
+            var searchPromises = [];
+            for (var j = 0; j < providers.length; j++) {
+                var provider = providers[j];
+                var url = '' + provider.url + provider.queryFunction(query);
+                var promise = searchProvider(url);
+                searchPromises.push(promise);
+            }
+
+            Promise.all(searchPromises).then(function (results) {
+                results = [].concat.apply([], results);
+                resolve(results);
+            }).catch(function (err) {
+                return reject(err);
+            });
+        });
     };
 
-    return { search: search };
+    var getMagnetFromLink = function getMagnetFromLink(torrent) {
+        var url = torrent.desc || torrent.url || torrent.uri;
+        return new Promise(function (resolve, reject) {
+            request(url, function (err, response, body) {
+                if (!err && response.statusCode == 200) {
+                    var $ = cheerio.load(body);
+                    var magnetLinks = $('a').filter(function (index, element) {
+                        return $(element).attr('href').indexOf('magnet:?xt=urn:') > -1;
+                    });
+                    if (magnetLinks.length) {
+                        torrent.magnet = magnetLinks[0].attribs.href;
+                        resolve(torrent);
+                    } else {
+                        reject('No magnet found.');
+                    }
+                } else {
+                    reject(err);
+                }
+            });
+        }).catch(function (err) {
+            return console.log(err);
+        });
+    };
+
+    return {
+        search: search,
+        getMagnetFromLink: getMagnetFromLink
+    };
 }();

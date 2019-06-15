@@ -26,7 +26,10 @@ function createWindow() {
         icon: __dirname + '/assets/imgs/icon.ico',
         backgroundColor: '#5d16fd',
         titleBarStyle: 'hiddenInset',
-        show: false
+        show: false,
+        webPreferences: {
+            nodeIntegration: true
+        }
     });
 
     mainWindowState.manage(mainWindow);
@@ -107,11 +110,7 @@ function createWindow() {
         Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     }
 
-    mainWindow.loadURL(url.format({
-        pathname: path.join(__dirname, 'index.html'),
-        protocol: 'file:',
-        slashes: true
-    }))
+    mainWindow.loadFile(path.join(__dirname, 'index.html'))
 
     // mainWindow.webContents.openDevTools();
 

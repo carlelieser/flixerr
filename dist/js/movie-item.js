@@ -23,124 +23,128 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var MovieItem = function (_React$Component) {
-	_inherits(MovieItem, _React$Component);
+    _inherits(MovieItem, _React$Component);
 
-	function MovieItem(props) {
-		_classCallCheck(this, MovieItem);
+    function MovieItem(props) {
+        _classCallCheck(this, MovieItem);
 
-		var _this = _possibleConstructorReturn(this, (MovieItem.__proto__ || Object.getPrototypeOf(MovieItem)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (MovieItem.__proto__ || Object.getPrototypeOf(MovieItem)).call(this, props));
 
-		_this.loadImage = function () {
-			_this.setState({ backdrop: "url(" + (_this.props.featured ? _this.backdropImageURL : _this.imageURL) + ")" });
-		};
+        _this.loadImage = function () {
+            _this.setState({
+                backdrop: "url(" + (_this.props.featured ? _this.backdropImageURL : _this.imageURL) + ")"
+            });
+        };
 
-		_this.handleImage = function () {
-			_this.image = new Image();
-			_this.imageURL = _this.props.movie.poster_path ? "https://image.tmdb.org/t/p/w780" + _this.props.movie.poster_path : "https://image.tmdb.org/t/p/w780" + _this.props.movie.backdrop_path;
-			_this.image.src = _this.imageURL;
+        _this.handleImage = function () {
+            _this.image = new Image();
+            _this.imageURL = _this.props.movie.poster_path ? "https://image.tmdb.org/t/p/w780" + _this.props.movie.poster_path : "https://image.tmdb.org/t/p/w780" + _this.props.movie.backdrop_path;
+            _this.image.src = _this.imageURL;
 
-			var image = new Image();
-			image.src = "https://image.tmdb.org/t/p/w300" + _this.props.movie.backdrop_path;
+            var image = new Image();
+            image.src = "https://image.tmdb.org/t/p/w300" + _this.props.movie.backdrop_path;
 
-			var fac = new _fastAverageColor2.default();
+            var fac = new _fastAverageColor2.default();
 
-			fac.getColorAsync(image, { algorithm: 'sqrt' }).then(function (color) {
-				_this.setState({ averageColor: color });
-			}).catch(function (err) {
-				return console.log(err);
-			});
+            fac.getColorAsync(image, { algorithm: 'sqrt' }).then(function (color) {
+                _this.setState({ averageColor: color });
+            }).catch(function (err) {
+                return console.log(err);
+            });
 
-			if (_this.props.featured) {
-				_this.backdropImage = new Image();
-				_this.backdropImageURL = "https://image.tmdb.org/t/p/original" + _this.props.movie.backdrop_path;
-				_this.backdropImage.src = _this.backdropImageURL;
-				_this.backdropImage.onload = _this.loadImage;
-			} else {
-				_this.image.onload = _this.loadImage;
-			}
-		};
+            if (_this.props.featured) {
+                _this.backdropImage = new Image();
+                _this.backdropImageURL = "https://image.tmdb.org/t/p/original" + _this.props.movie.backdrop_path;
+                _this.backdropImage.src = _this.backdropImageURL;
+                _this.backdropImage.onload = _this.loadImage;
+            } else {
+                _this.image.onload = _this.loadImage;
+            }
+        };
 
-		_this.handleMovieClick = function () {
-			var movie = _this.props.movie;
-			movie.averageColor = _this.state.averageColor;
-			_this.props.openBox(movie);
-		};
+        _this.handleMovieClick = function () {
+            var movie = _this.props.movie;
+            movie.averageColor = _this.state.averageColor;
+            _this.props.openBox(movie);
+        };
 
-		_this.state = {
-			averageColor: {
-				hex: '#000',
-				value: [0, 0, 0]
-			},
-			backdrop: false,
-			fontSize: 1
-		};
-		return _this;
-	}
+        _this.state = {
+            averageColor: {
+                hex: '#000',
+                value: [0, 0, 0]
+            },
+            backdrop: false,
+            fontSize: 1
+        };
+        return _this;
+    }
 
-	_createClass(MovieItem, [{
-		key: "componentDidMount",
-		value: function componentDidMount() {
-			this.setState({ fontSize: -0.0195 * this.props.movie.title.length + 1.6 });
-		}
-	}, {
-		key: "componentWillUnmount",
-		value: function componentWillUnmount() {
-			if (this.props.featured) {
-				if (this.backdropImage) {
-					this.backdropImage.onload = false;
-				}
-			} else {
-				if (this.image) {
-					this.image.onload = false;
-				}
-			}
-		}
-	}, {
-		key: "render",
-		value: function render() {
-			return React.createElement(
-				_Fade2.default,
-				{ delay: 50, distance: "10%", bottom: true },
-				React.createElement(
-					"div",
-					{
-						className: "movie-item",
-						onClick: this.handleMovieClick
-					},
-					React.createElement(
-						"div",
-						{ className: "movie-item-desc" },
-						React.createElement(
-							"div",
-							{
-								className: "movie-item-title",
-								style: {
-									fontSize: this.state.fontSize + "em"
-								}
-							},
-							this.props.movie.title
-						),
-						React.createElement(
-							"div",
-							{ className: "movie-item-summary" },
-							this.props.strip(this.props.movie.overview, 80) + "..."
-						)
-					),
-					React.createElement("div", { className: "movie-item-bg" }),
-					React.createElement("div", { className: "movie-item-blurred", style: {
-							backgroundImage: "url(https://image.tmdb.org/t/p/" + (this.props.featured ? 'w300' : 'w92') + (this.props.featured ? this.props.movie.backdrop_path : this.props.movie.poster_path) + ")"
-						} }),
-					React.createElement(
-						_reactLazyLoad2.default,
-						{ onContentVisible: this.handleImage },
-						React.createElement("div", { className: "movie-backdrop" + (this.state.backdrop ? " movie-backdrop-show" : ""), style: {
-								backgroundImage: this.state.backdrop
-							} })
-					)
-				)
-			);
-		}
-	}]);
+    _createClass(MovieItem, [{
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            this.setState({
+                fontSize: -0.0195 * this.props.movie.title.length + 1.6
+            });
+        }
+    }, {
+        key: "componentWillUnmount",
+        value: function componentWillUnmount() {
+            if (this.props.featured) {
+                if (this.backdropImage) {
+                    this.backdropImage.onload = false;
+                }
+            } else {
+                if (this.image) {
+                    this.image.onload = false;
+                }
+            }
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            return React.createElement(
+                _Fade2.default,
+                { delay: 50, distance: "10%", bottom: true },
+                React.createElement(
+                    "div",
+                    { className: "movie-item", onClick: this.handleMovieClick },
+                    React.createElement(
+                        "div",
+                        { className: "movie-item-desc" },
+                        React.createElement(
+                            "div",
+                            {
+                                className: "movie-item-title",
+                                style: {
+                                    fontSize: this.state.fontSize + "em"
+                                } },
+                            this.props.movie.title
+                        ),
+                        React.createElement(
+                            "div",
+                            { className: "movie-item-summary" },
+                            this.props.strip(this.props.movie.overview, 80) + "..."
+                        )
+                    ),
+                    React.createElement("div", { className: "movie-item-bg" }),
+                    React.createElement("div", {
+                        className: "movie-item-blurred",
+                        style: {
+                            backgroundImage: "url(https://image.tmdb.org/t/p/" + (this.props.featured ? 'w300' : 'w92') + (this.props.featured ? this.props.movie.backdrop_path : this.props.movie.poster_path) + ")"
+                        } }),
+                    React.createElement(
+                        _reactLazyLoad2.default,
+                        { onContentVisible: this.handleImage },
+                        React.createElement("div", {
+                            className: "movie-backdrop" + (this.state.backdrop ? " movie-backdrop-show" : ""),
+                            style: {
+                                backgroundImage: this.state.backdrop
+                            } })
+                    )
+                )
+            );
+        }
+    }]);
 
-	return MovieItem;
+    return MovieItem;
 }(React.Component);
