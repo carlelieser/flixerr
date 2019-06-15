@@ -1,4 +1,6 @@
-<img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/icon.png?raw=true=" width="128" height="128" style="text-align: center;"/>
+<p align="center">
+<img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/icon.png?raw=true=" width="128" height="128"/>
+</p>
 
 # Flixerr
 The best free movie torrent streaming app.
