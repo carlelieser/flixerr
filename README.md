@@ -1,4 +1,4 @@
-# Flixerr
+# ![Flixerr](https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/icon.png?raw=true) Flixerr
 The best free movie torrent streaming app.
 
 ### Installation
