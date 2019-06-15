@@ -28,7 +28,7 @@ Flixerr persists your streaming data across multiple devices on the same account
 We don't use ads or try to scam you. However, due to the legality of movie torrents, please use Flixerr at your own discretion.
 
 ### How it works
-First, Flixerr searches for torrents of that movie on multiple torrent sites. It then sorts through the results to find the best quality torrents and then plays one that matches your resolution preference and meets our specific threshold. 
+First, Flixerr searches for torrents of the movie you want to watch on multiple torrent sites. It then sorts through the results to find the best quality torrents and then plays one that matches your resolution preference and meets our specific threshold. 
 
 The process is as follows:
 1. Movie name is used to find torrents.
