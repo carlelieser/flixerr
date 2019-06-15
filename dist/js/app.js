@@ -366,10 +366,10 @@ var App = function (_Component) {
             }
         };
 
-        _this.setCloseReady = function () {
+        _this.setCloseReady = function (message, load) {
             if (_this.state.willClose) {
                 setTimeout(function () {
-                    _this.setPlayerStatus('Data saved succesfully!').then(function () {
+                    _this.setPlayerStatus(message ? message : 'Data saved succesfully!', load ? load : false).then(function () {
                         _this.setReady(true);
                     });
                 }, 600);
@@ -514,9 +514,11 @@ var App = function (_Component) {
         };
 
         _this.handleVideoClose = function (video) {
-            _this.setPlayerStatus('Saving data before closing', true);
             if (video.src) {
-                _this.updateMovieTime(video.currentTime);
+                _this.setPlayerStatus('Saving data before closing', true);
+                _this.updateMovieTime(video.currentTime, function () {
+                    _this.setCloseReady('Closing', true);
+                });
             }
         };
 
@@ -1162,13 +1164,17 @@ var App = function (_Component) {
             return target;
         };
 
-        _this.updateMovieTime = function (time) {
+        _this.updateMovieTime = function (time, fallback) {
             if (_this.state.playMovie) {
                 if (time) {
                     var clone = _this.getObjectClone(_this.state.playMovie);
                     clone.currentTime = time;
                     _this.setState({ playMovie: clone });
                     _this.updateMovieTimeArray(clone);
+                } else {
+                    if (fallback) {
+                        fallback();
+                    }
                 }
             }
         };
@@ -1760,6 +1766,9 @@ var App = function (_Component) {
                 _this.updateMenu(_this.state.active);
                 _this.resetSearch();
                 _this.loadNecessary();
+                if (_this.state.user && !_app2.default.auth().currentUser) {
+                    _this.signIn();
+                }
             }
         };
 

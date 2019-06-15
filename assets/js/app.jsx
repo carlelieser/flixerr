@@ -407,11 +407,11 @@ class App extends Component {
         }
     };
 
-    setCloseReady = () => {
+    setCloseReady = (message, load) => {
         if (this.state.willClose) {
             setTimeout(() => {
                 this
-                    .setPlayerStatus('Data saved succesfully!')
+                    .setPlayerStatus(message ? message : 'Data saved succesfully!', load ? load : false)
                     .then(() => {
                         this.setReady(true);
                     });
@@ -585,9 +585,11 @@ class App extends Component {
     };
 
     handleVideoClose = (video) => {
-        this.setPlayerStatus('Saving data before closing', true);
         if (video.src) {
-            this.updateMovieTime(video.currentTime);
+            this.setPlayerStatus('Saving data before closing', true);
+            this.updateMovieTime(video.currentTime, () => {
+                this.setCloseReady('Closing', true);
+            });
         }
     };
 
@@ -1315,13 +1317,17 @@ class App extends Component {
         return target;
     };
 
-    updateMovieTime = (time) => {
+    updateMovieTime = (time, fallback) => {
         if (this.state.playMovie) {
             if (time) {
                 let clone = this.getObjectClone(this.state.playMovie);
                 clone.currentTime = time;
                 this.setState({playMovie: clone});
                 this.updateMovieTimeArray(clone);
+            }else{
+                if(fallback){
+                    fallback();
+                }
             }
         }
     };
@@ -1988,6 +1994,9 @@ class App extends Component {
             this.updateMenu(this.state.active);
             this.resetSearch();
             this.loadNecessary();
+            if(this.state.user && !firebase.auth().currentUser){
+                this.signIn();
+            }
         }
     };
 
