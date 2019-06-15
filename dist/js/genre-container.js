@@ -27,13 +27,15 @@ var GenreContainer = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (GenreContainer.__proto__ || Object.getPrototypeOf(GenreContainer)).call(this, props));
 
         _this.handleResize = function () {
-            if (document.querySelector('.movie-list-paginated')) {
+            if (_this.movieListRef.current) {
                 if (_this.props.movies) {
-                    if (_this.props.movies.length * 230 > document.querySelector('.movie-list-paginated').offsetWidth) {
+                    if (_this.props.movies.length * 230 > _this.movieListRef.current.offsetWidth) {
                         _this.setState({ showArrows: true });
                     } else {
                         _this.setState({ showArrows: false });
                     }
+
+                    _this.props.setListWidth(_this.movieListRef.current.offsetWidth);
                 }
             }
         };
@@ -43,6 +45,8 @@ var GenreContainer = function (_React$Component) {
                 _this.props.toggleGenre(true, _this.props.name, _this.props.genreID);
             }
         };
+
+        _this.movieListRef = React.createRef();
 
         _this.state = {
             permitted: ['Suggested for you', 'Recently Played', 'Favorites'],
@@ -119,7 +123,7 @@ var GenreContainer = function (_React$Component) {
                     ) : "",
                     this.props.movies ? this.props.movies.length ? React.createElement(
                         "div",
-                        { className: "movie-list-paginated" },
+                        { className: "movie-list-paginated", ref: this.movieListRef },
                         this.props.movies.map(function (movie, index) {
                             return React.createElement(MovieItem, {
                                 movie: movie,

@@ -5,6 +5,8 @@ class GenreContainer extends React.Component {
     constructor(props) {
         super(props);
 
+        this.movieListRef = React.createRef();
+
         this.state = {
             permitted: ['Suggested for you', 'Recently Played', 'Favorites'],
             showArrows: false
@@ -12,13 +14,15 @@ class GenreContainer extends React.Component {
     }
 
     handleResize = () => {
-        if (document.querySelector('.movie-list-paginated')) {
+        if (this.movieListRef.current) {
             if(this.props.movies){
-                if (this.props.movies.length * 230 > document.querySelector('.movie-list-paginated').offsetWidth) {
+                if (this.props.movies.length * 230 > this.movieListRef.current.offsetWidth) {
                     this.setState({ showArrows: true });
                 } else {
                     this.setState({ showArrows: false });
                 }
+
+                this.props.setListWidth(this.movieListRef.current.offsetWidth);
             }
         }
     }
@@ -84,7 +88,7 @@ class GenreContainer extends React.Component {
                     {this.props.movies
                         ? this.props.movies.length
                             ? (
-                                <div className="movie-list-paginated">
+                                <div className="movie-list-paginated" ref={this.movieListRef}>
                                     {this
                                         .props
                                         .movies

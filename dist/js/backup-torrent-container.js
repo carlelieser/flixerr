@@ -63,11 +63,10 @@ var BackupTorrents = function (_React$Component) {
                 videoQuality = sorted.length ? sorted[0] : false;
                 return React.createElement(
                     _Fade2.default,
-                    { distance: '10%', bottom: true },
+                    { key: (0, _uniqid2.default)(), distance: '10%', bottom: true },
                     React.createElement(
                         'div',
                         {
-                            key: (0, _uniqid2.default)(),
                             className: 'torrent ' + (_this2.props.getCurrentMagnet() == torrent.magnet ? 'active' : ''),
                             onClick: _this2.props.handleTorrentClick.bind(_this2, torrent) },
                         videoQuality ? React.createElement(

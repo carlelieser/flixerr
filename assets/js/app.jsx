@@ -1,9 +1,11 @@
-import ReactCSSTransitionGroup from "react-addons-css-transition-group";
-import getJSON from "get-json";
-import Fade from "react-reveal/Fade";
-import storage from "electron-json-storage";
-import uniqid from "uniqid";
-import $ from 'jquery'
+import ReactCSSTransitionGroup from "react-addons-css-transition-group"
+import Fade from "react-reveal/Fade"
+import getJSON from "get-json"
+import storage from "electron-json-storage"
+import uniqid from "uniqid"
+import * as firebase from 'firebase/app'
+import "firebase/auth"
+import "firebase/database"
 
 class App extends React.Component {
     constructor(props) {
@@ -13,11 +15,11 @@ class App extends React.Component {
 
         this.state = {
             apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
-            simperiumId: "petition-locomotive-460",
-            simperiumKey: "d456aece029d44449569864ca68e0054",
             loginError: false,
             account: true,
             create: false,
+            inputEmail: '',
+            inputPass: '',
             user: false,
             isGuest: false,
             menu: [
@@ -53,8 +55,13 @@ class App extends React.Component {
             logoIsLoaded: false,
             error: false,
             appLoading: true,
+            listWidth: false,
             time: "00:00:00"
         }
+    }
+
+    setListWidth = (listWidth) => {
+        this.setState({listWidth});
     }
 
     toggleGenre = (showGenre, activeGenre, genreID) => {
@@ -81,27 +88,114 @@ class App extends React.Component {
     getUserCredentials = () => {
         storage.get("userCredentials", (error, data) => {
             this.setState({
-                user: data.user,
+                user: data.user
+                    ? data.user.uid
+                        ? data.user
+                        : false : false,
                 create: data.create,
                 account: data.account,
                 isGuest: data.isGuest
             }, () => {
-                this.startSimperium();
+                this.startFireBase();
             });
         });
     }
 
-    updateBucket = () => {
-        if (this.state.user) {
+    cleanMovieArrays = (array) => {
+        if (array) {
+            let clean = array.slice();
+            for (let j = 0; j < array.length; j++) {
+                let object = array[j];
+                if (typeof object === 'object') {
+                    this.removeEmpty(object);
+                }
+            }
+
+            return clean;
+        } else {
+            return [];
+        }
+    }
+
+    removeEmpty = (obj) => {
+        Object
+            .keys(obj)
+            .forEach(key => {
+                if (obj[key] && typeof obj[key] === 'object') 
+                    this.removeEmpty(obj[key]);
+                else if (obj[key] === undefined) 
+                    delete obj[key];
+                }
+            );
+        return obj;
+    }
+
+    createDataBase = () => {
+        let db = firebase.database();
+        this.databaseRef = db.ref(`users/${this.state.user.uid}`);
+    }
+
+    setBucket = () => {
+        if (this.state.user.email) {
+            let data = {
+                recentlyPlayed: this.cleanMovieArrays(this.state.recentlyPlayed),
+                movieTimeArray: this.cleanMovieArrays(this.state.movieTimeArray),
+                favorites: this.cleanMovieArrays(this.state.favorites),
+                suggested: this.cleanMovieArrays(this.state.suggested)
+            };
+
             this
-                .bucket
-                .update('favorites');
+                .databaseRef
+                .set(data, (err) => {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log('Data set!');
+                    }
+                });
+
+        }
+    }
+
+    setBucketData = (snapshot) => {
+        return new Promise((resolve, reject) => {
+            let data = snapshot.val();
+            if (data) {
+                if (data.favorites !== this.state.favorites && data.recentlyPlayed !== this.state.recentlyPlayed && data.movieTimeArray !== this.state.movieTimeArray && data.suggested !== this.state.suggested) {
+                    this.setState({
+                        favorites: data.favorites,
+                        recentlyPlayed: data.recentlyPlayed,
+                        movieTimeArray: data.movieTimeArray,
+                        suggested: data.suggested,
+                        results: this.state.active == 'Collection'
+                            ? [data.suggested[0]]
+                            : this.state.results
+                    }, () => resolve());
+                }
+            } else {
+                reject();
+            }
+        });
+    }
+
+    listenToBucket = () => {
+        if (this.databaseRef) {
             this
-                .bucket
-                .update('recentlyPlayed');
+                .databaseRef
+                .on('value', this.setBucketData);
+        }
+    }
+
+    getBucket = () => {
+        if (this.databaseRef) {
             this
-                .bucket
-                .update('movieTimeArray');
+                .databaseRef
+                .once('value', (snapshot) => {
+                    this
+                        .setBucketData(snapshot)
+                        .then(() => this.updateSuggested())
+                        .catch((err) => console.log(err));
+                });
         }
     }
 
@@ -109,13 +203,15 @@ class App extends React.Component {
         storage.set("collection", {
             favorites: this.state.favorites,
             recentlyPlayed: this.state.recentlyPlayed,
-            movieTimeArray: this.state.movieTimeArray
+            movieTimeArray: this.state.movieTimeArray,
+            suggested: this.state.suggested
         }, error => {
             if (error) {
                 throw error;
             }
-            this.updateSuggested();
-            this.updateBucket();
+            if (firebase.auth().currentUser) {
+                this.setBucket();
+            }
         });
     }
 
@@ -134,11 +230,15 @@ class App extends React.Component {
                 movieTimeArray: data
                     ? data.movieTimeArray
                         ? data.movieTimeArray
+                        : []: [],
+                suggested: data
+                    ? data.suggested
+                        ? data.suggested
                         : []: []
             }, (error) => {
                 setTimeout(() => {
                     this.setState({appLoading: false});
-                }, 5000);
+                }, 2500);
             });
         });
     }
@@ -558,12 +658,20 @@ class App extends React.Component {
     }
 
     searchTorrent = (movie, reset) => {
+        if (this.currentMagnet) {
+            if (this.state.client) {
+                if (this.state.client.get(this.currentMagnet)) {
+                    this.removeTorrent(this.currentMagnet);
+                }
+            }
+        }
+
         if (this.server) {
-            this.removeTorrent(this.currentMagnet);
             this
                 .server
                 .close();
         }
+
         if (reset) {
             this.fetchAttempts = 0;
         }
@@ -596,11 +704,13 @@ class App extends React.Component {
                                 this.setState({
                                     backupTorrents: torrents
                                 }, () => {
-                                    this.state.playMovie.preferredTorrents = this.state.backupTorrents;
-                                    this.changeCurrentMagnet(torrent.magnet);
-                                    this.updateMovieTimeArray(true);
-                                    this.fetchAttempts = 0;
-                                    this.streamTorrent(torrent);
+                                    if (this.state.playMovie) {
+                                        this.state.playMovie.preferredTorrents = this.state.backupTorrents;
+                                        this.changeCurrentMagnet(torrent.magnet);
+                                        this.updateMovieTimeArray(true);
+                                        this.fetchAttempts = 0;
+                                        this.streamTorrent(torrent);
+                                    }
                                 });
                             } else {
                                 this.applyTimeout();
@@ -979,7 +1089,7 @@ class App extends React.Component {
     getSuggested = (movies) => {
         return new Promise((resolve, reject) => {
             let promises = [];
-            let pages = [1, 2, 3, 4];
+            let pages = [1, 2, 3];
             for (let j = 0; j < movies.length; j++) {
                 let movie = movies[j],
                     page = this.chooseRandom(pages, 1),
@@ -1028,8 +1138,14 @@ class App extends React.Component {
                 if (clean.length > 20) {
                     clean = clean.slice(0, 20);
                 }
+
+                clean = this.shuffleArray(clean);
                 this.setState({
-                    suggested: this.shuffleArray(clean)
+                    suggested: clean
+                }, () => {
+                    if (this.databaseRef) {
+                        this.setBucket();
+                    }
                 });
             });
     }
@@ -1149,10 +1265,7 @@ class App extends React.Component {
     }
 
     scrollMovieGenre = (left, e, id) => {
-        let viewportW = document
-            .querySelector(".movie-list-paginated")
-            .parentElement
-            .offsetWidth - 210;
+        let viewportW = this.state.listWidth - 210;
         let boxW = document
             .querySelector(".movie-item")
             .offsetWidth + 10;
@@ -1189,7 +1302,7 @@ class App extends React.Component {
     }
 
     visualizeMovieGenres = (movieData) => {
-        this.setResults(movieData[0].movies);
+        this.setResults([movieData[0].movies[0]]);
         let movieGenres = movieData.map((item, i) => (<GenreContainer
             toggleGenre={this.toggleGenre}
             genreID={item.genreID}
@@ -1198,7 +1311,8 @@ class App extends React.Component {
             strip={this.strip}
             name={item.name}
             movies={item.movies}
-            key={uniqid()}/>));
+            key={uniqid()}
+            setListWidth={this.setListWidth}/>));
 
         return movieGenres;
     }
@@ -1285,23 +1399,21 @@ class App extends React.Component {
         Promise
             .all(promiseArray)
             .then(data => {
-                setTimeout(() => {
-                    this.setContent(this.visualizeMovieGenres(data));
-                }, 400);
+                this.setContent(this.visualizeMovieGenres(data));
             })
             .catch(() => this.setOffline(true))
     }
 
     loadCollection = () => {
         this.toggleContainerSettings(true, true);
-        if (this.state.recentlyPlayed && this.state.favorites) {
-            let headerSource = this.state.recentlyPlayed.length
+        let headerSource = this.state.suggested
+            ? this.state.suggested
+            : this.state.recentlyPlayed
                 ? this.state.recentlyPlayed
-                : false || this.state.favorites.length
+                : this.state.favorites
                     ? this.state.favorites
                     : false;
-            this.setResults(headerSource);
-        }
+        this.setResults(headerSource);
     }
 
     setContent = (content) => {
@@ -1360,107 +1472,100 @@ class App extends React.Component {
         this.torrentSearch = TorrentSearch;
     }
 
-    startSimperium = () => {
+    signIn = () => {
+        let email = this.state.inputEmail.length
+                ? this.state.inputEmail
+                : this.state.user.email,
+            password = this.state.inputPass.length
+                ? this.state.inputPass
+                : this.state.user.password;
+
+        firebase
+            .auth()
+            .signInWithEmailAndPassword(email, password)
+            .then(() => {
+                this.closeAccount();
+            })
+            .catch((error) => {
+                var errorCode = error.code;
+                var errorMessage = error.message;
+                this.setState({loginError: errorMessage});
+            });
+    }
+
+    startFireBase = () => {
+        let firebaseConfig = {
+            apiKey: "AIzaSyAOWT7w9hA8qsLY-KP7F14Qfv9vLjw3YJM",
+            authDomain: "flixerr-5aeb8.firebaseapp.com",
+            databaseURL: "https://flixerr-5aeb8.firebaseio.com",
+            projectId: "flixerr-5aeb8",
+            storageBucket: "flixerr-5aeb8.appspot.com",
+            messagingSenderId: "58493893285",
+            appId: "1:58493893285:web:b02990447eb9f16f"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        firebase
+            .auth()
+            .onAuthStateChanged((user) => {
+                this.setState({user});
+                if (user) {
+                    this.createDataBase();
+                    this.getBucket();
+                    this.listenToBucket();
+                }
+                this.setUserCredentials();
+            });
+
         if (!this.state.isGuest && this.state.user) {
-            this.simperiumScript = document.createElement('script');
-            this
-                .simperiumScript
-                .setAttribute('type', 'text/javascript');
-            this
-                .simperiumScript
-                .setAttribute('src', './libs/simperium.min.js');
-            $('body').append(this.simperiumScript);
-
-            this.simperium = new Simperium(this.state.simperiumId, {token: this.state.user.token});
-
-            this.bucket = this
-                .simperium
-                .bucket('collection');
-            this
-                .bucket
-                .on('notify', (id, data) => {
-                    if (data) {
-                        if (data.content) {
-                            this.setState(prevState => {
-                                if (prevState[id] !== data.content) {
-                                    if (id !== 'movieTimeArray') {
-                                        this.updateSuggested();
-                                    }
-                                    return {[id]: data.content}
-                                }
-                            });
-                        }
-                    }
-                });
-            this
-                .bucket
-                .on('local', (id) => {
-                    return {content: this.state[id]}
-                });
-            this
-                .bucket
-                .start();
+            this.signIn();
         } else if (!this.state.isGuest && !this.state.user) {
             this.openAccount();
+        } else if(!this.state.user){
+            this.updateSuggested();
         }
 
     }
 
-    handleAccount = (create, email, password) => {
-        if (!email && !password) {
+    handleAccount = () => {
+        let email = this.state.inputEmail,
+            password = this.state.inputPass;
+
+        if (!email.length && !password.length) {
             this.setState({loginError: true});
         } else {
-            let id = this.state.simperiumId;
-            let key = this.state.simperiumKey;
-            let url = `https://auth.simperium.com/1/${id}/${create
-                ? 'create'
-                : 'authorize'}/`;
 
-            let $ = require('jquery');
-
-            $.ajax({
-                url: url,
-                type: "POST",
-                contentType: "application/json",
-                dataType: "json",
-                data: JSON.stringify({"username": email, "password": password}),
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("X-Simperium-API-Key", key);
-                },
-                success: (data) => {
-                    let user = {
-                        email: email,
-                        password: password,
-                        token: data.access_token
-                    }
-
-                    this.closeAccount();
-                    this.setState({
-                        user: user,
-                        isGuest: false,
-                        loginError: false
-                    }, () => {
-                        this.setUserCredentials();
-                        this.startSimperium();
+            if (this.state.create) {
+                firebase
+                    .auth()
+                    .createUserWithEmailAndPassword(email, password)
+                    .then(() => {
+                        this.closeAccount();
+                    })
+                    .catch((error) => {
+                        var errorCode = error.code;
+                        var errorMessage = error.message;
+                        this.setState({loginError: errorMessage});
                     });
-                },
-                error: (error) => {
-                    this.setState({loginError: error.responseText});
-                }
-            });
+            } else {
+                this.signIn();
+            }
         }
     }
 
     openAccount = () => {
-        this.setState({account: true});
+        this.setState({create: false, loginError: false, account: true});
     }
 
     openAccountCreation = () => {
-        this.setState({create: true, loginError: false});
+        this.setState({create: true, loginError: false, account: false});
     }
 
     closeAccount = () => {
         this.setState({
+            inputEmail: '',
+            inputPass: '',
             account: false,
             create: false,
             loginError: false,
@@ -1475,25 +1580,43 @@ class App extends React.Component {
     }
 
     signOut = () => {
-        this.simperium = false;
-        this.bucket = false;
-
-        this.setState({
-            user: false
-        }, () => {
-            this.setUserCredentials();
-
-            this
-                .simperiumScript
-                .parentNode
-                .removeChild(this.simperiumScript);
-        });
+        firebase
+            .auth()
+            .signOut()
+            .then(() => {
+                this.databaseRef = false;
+                this.setStorage();
+            })
+            .catch((error) => {
+                console.log(error);
+            });
     }
 
     handleInput = (e) => {
-        if (e.keyCode == 13) {
-            this.handleAccount(false, document.querySelector('input[type="email"]').value, document.querySelector('input[type="password"]').value)
-        }
+        let value = e.target.value;
+        let isEmail = value.match(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/g);
+
+        this.setState({
+            [isEmail
+                    ? 'inputEmail'
+                    : 'inputPass']: value
+        });
+    }
+
+    handleAccountSignin = () => {
+        this.setState({
+            create: false
+        }, () => {
+            this.handleAccount();
+        });
+    }
+
+    handleAccountCreation = () => {
+        this.setState({
+            create: true
+        }, () => {
+            this.handleAccount();
+        });
     }
 
     handleConnectionChange = (e) => {
@@ -1509,8 +1632,8 @@ class App extends React.Component {
 
     componentDidMount() {
         this.loadLogo();
-        this.getUserCredentials();
         this.getStorage();
+        this.getUserCredentials();
         this.loadContent(this.state.active);
         this.startWebTorrent();
         this.requireTorrent();
@@ -1598,24 +1721,36 @@ class App extends React.Component {
                             <div className="account-close" onClick={this.closeAccount}>
                                 <i className="mdi mdi-close"></i>
                             </div>
-                            <div className="account-register">Don't have an account?
-                                <span onClick={this.openAccountCreation}>Register here.</span>
-                            </div>
                             <div className="account-title">Sign in</div>
                             <div className="account-desc">Flixerr will use your account to synchronize data across all your devices.</div>
-                            <input type="email" placeholder="Email" required/>
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                autoFocus={true}
+                                required
+                                onKeyUp={this
+                                .handleInput
+                                .bind(this)}/>
+                            <span></span>
+
                             <input
                                 type="password"
                                 placeholder="Password"
                                 required
-                                onKeyUp={this.handleInput}/> {this.state.loginError
+                                onKeyUp={this
+                                .handleInput
+                                .bind(this)}/>
+                            <span></span>
+                            {this.state.loginError
                                 ? <Fade bottom distance="10%">
                                         <div className="login-error">{this.state.loginError}</div>
                                     </Fade>
                                 : ''}
+                            <div className="account-submit" onClick={this.handleAccountSignin}>Sign In</div>
+                            <div className="divider"></div>
                             <div
-                                className="account-submit"
-                                onClick={() => this.handleAccount(false, document.querySelector('input[type="email"]').value, document.querySelector('input[type="password"]').value)}>Sign In</div>
+                                className="account-submit account-secondary"
+                                onClick={this.openAccountCreation}>Sign Up</div>
                         </div>
                     </Fade>
                 </div>
@@ -1629,19 +1764,31 @@ class App extends React.Component {
                         </div>
                         <div className="account-title">Create an account</div>
                         <div className="account-desc">Register to easily synchronize data across multiple devices.</div>
-                        <input type="email" placeholder="Email" required/>
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            autoFocus={true}
+                            required
+                            onKeyUp={this
+                            .handleInput
+                            .bind(this)}/>
+                        <span></span>
                         <input
                             type="password"
                             placeholder="Password"
                             required
-                            onKeyUp={this.handleInput}/> {this.state.loginError
+                            onKeyUp={this
+                            .handleInput
+                            .bind(this)}/>
+                        <span></span>
+                        {this.state.loginError
                             ? <Fade bottom distance="10%">
                                     <div className="login-error">{this.state.loginError}</div>
                                 </Fade>
                             : ''}
-                        <div
-                            className="account-submit"
-                            onClick={() => this.handleAccount(true, document.querySelector('.create-container').querySelector('input[type="email"]').value, document.querySelector('.create-container').querySelector('input[type="password"]').value)}>Create</div>
+                        <div className="account-submit" onClick={this.handleAccountCreation}>Create</div>
+                        <div className="divider"></div>
+                        <div className="account-submit account-secondary" onClick={this.openAccount}>Sign In</div>
                     </div>
                 </div>
             : null;
@@ -1730,7 +1877,8 @@ class App extends React.Component {
                     setHeader={this.setHeader}
                     strip={this.strip}
                     openBox={this.openBox}
-                    results={this.state.results}/>
+                    results={this.state.results}
+                    setListWidth={this.setListWidth}/>
             </div>
         )
     }

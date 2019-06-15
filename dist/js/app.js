@@ -1,18 +1,20 @@
 "use strict";
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _reactAddonsCssTransitionGroup = require("react-addons-css-transition-group");
 
 var _reactAddonsCssTransitionGroup2 = _interopRequireDefault(_reactAddonsCssTransitionGroup);
 
-var _getJson = require("get-json");
-
-var _getJson2 = _interopRequireDefault(_getJson);
-
 var _Fade = require("react-reveal/Fade");
 
 var _Fade2 = _interopRequireDefault(_Fade);
+
+var _getJson = require("get-json");
+
+var _getJson2 = _interopRequireDefault(_getJson);
 
 var _electronJsonStorage = require("electron-json-storage");
 
@@ -22,9 +24,15 @@ var _uniqid = require("uniqid");
 
 var _uniqid2 = _interopRequireDefault(_uniqid);
 
-var _jquery = require("jquery");
+var _app = require("firebase/app");
 
-var _jquery2 = _interopRequireDefault(_jquery);
+var firebase = _interopRequireWildcard(_app);
+
+require("firebase/auth");
+
+require("firebase/database");
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -43,6 +51,10 @@ var App = function (_React$Component) {
         _classCallCheck(this, App);
 
         var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
+
+        _this.setListWidth = function (listWidth) {
+            _this.setState({ listWidth: listWidth });
+        };
 
         _this.toggleGenre = function (showGenre, activeGenre, genreID) {
             _this.setState({ showGenre: showGenre, activeGenre: activeGenre, genreID: genreID });
@@ -68,21 +80,99 @@ var App = function (_React$Component) {
         _this.getUserCredentials = function () {
             _electronJsonStorage2.default.get("userCredentials", function (error, data) {
                 _this.setState({
-                    user: data.user,
+                    user: data.user ? data.user.uid ? data.user : false : false,
                     create: data.create,
                     account: data.account,
                     isGuest: data.isGuest
                 }, function () {
-                    _this.startSimperium();
+                    _this.startFireBase();
                 });
             });
         };
 
-        _this.updateBucket = function () {
-            if (_this.state.user) {
-                _this.bucket.update('favorites');
-                _this.bucket.update('recentlyPlayed');
-                _this.bucket.update('movieTimeArray');
+        _this.cleanMovieArrays = function (array) {
+            if (array) {
+                var clean = array.slice();
+                for (var j = 0; j < array.length; j++) {
+                    var object = array[j];
+                    if ((typeof object === "undefined" ? "undefined" : _typeof(object)) === 'object') {
+                        _this.removeEmpty(object);
+                    }
+                }
+
+                return clean;
+            } else {
+                return [];
+            }
+        };
+
+        _this.removeEmpty = function (obj) {
+            Object.keys(obj).forEach(function (key) {
+                if (obj[key] && _typeof(obj[key]) === 'object') _this.removeEmpty(obj[key]);else if (obj[key] === undefined) delete obj[key];
+            });
+            return obj;
+        };
+
+        _this.createDataBase = function () {
+            var db = firebase.database();
+            _this.databaseRef = db.ref("users/" + _this.state.user.uid);
+        };
+
+        _this.setBucket = function () {
+            if (_this.state.user.email) {
+                var data = {
+                    recentlyPlayed: _this.cleanMovieArrays(_this.state.recentlyPlayed),
+                    movieTimeArray: _this.cleanMovieArrays(_this.state.movieTimeArray),
+                    favorites: _this.cleanMovieArrays(_this.state.favorites),
+                    suggested: _this.cleanMovieArrays(_this.state.suggested)
+                };
+
+                _this.databaseRef.set(data, function (err) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log('Data set!');
+                    }
+                });
+            }
+        };
+
+        _this.setBucketData = function (snapshot) {
+            return new Promise(function (resolve, reject) {
+                var data = snapshot.val();
+                if (data) {
+                    if (data.favorites !== _this.state.favorites && data.recentlyPlayed !== _this.state.recentlyPlayed && data.movieTimeArray !== _this.state.movieTimeArray && data.suggested !== _this.state.suggested) {
+                        _this.setState({
+                            favorites: data.favorites,
+                            recentlyPlayed: data.recentlyPlayed,
+                            movieTimeArray: data.movieTimeArray,
+                            suggested: data.suggested,
+                            results: _this.state.active == 'Collection' ? [data.suggested[0]] : _this.state.results
+                        }, function () {
+                            return resolve();
+                        });
+                    }
+                } else {
+                    reject();
+                }
+            });
+        };
+
+        _this.listenToBucket = function () {
+            if (_this.databaseRef) {
+                _this.databaseRef.on('value', _this.setBucketData);
+            }
+        };
+
+        _this.getBucket = function () {
+            if (_this.databaseRef) {
+                _this.databaseRef.once('value', function (snapshot) {
+                    _this.setBucketData(snapshot).then(function () {
+                        return _this.updateSuggested();
+                    }).catch(function (err) {
+                        return console.log(err);
+                    });
+                });
             }
         };
 
@@ -90,13 +180,15 @@ var App = function (_React$Component) {
             _electronJsonStorage2.default.set("collection", {
                 favorites: _this.state.favorites,
                 recentlyPlayed: _this.state.recentlyPlayed,
-                movieTimeArray: _this.state.movieTimeArray
+                movieTimeArray: _this.state.movieTimeArray,
+                suggested: _this.state.suggested
             }, function (error) {
                 if (error) {
                     throw error;
                 }
-                _this.updateSuggested();
-                _this.updateBucket();
+                if (firebase.auth().currentUser) {
+                    _this.setBucket();
+                }
             });
         };
 
@@ -106,11 +198,12 @@ var App = function (_React$Component) {
                 _this.setState({
                     favorites: data ? data.favorites ? data.favorites : [] : [],
                     recentlyPlayed: data ? data.recentlyPlayed ? data.recentlyPlayed : [] : [],
-                    movieTimeArray: data ? data.movieTimeArray ? data.movieTimeArray : [] : []
+                    movieTimeArray: data ? data.movieTimeArray ? data.movieTimeArray : [] : [],
+                    suggested: data ? data.suggested ? data.suggested : [] : []
                 }, function (error) {
                     setTimeout(function () {
                         _this.setState({ appLoading: false });
-                    }, 5000);
+                    }, 2500);
                 });
             });
         };
@@ -500,10 +593,18 @@ var App = function (_React$Component) {
         };
 
         _this.searchTorrent = function (movie, reset) {
+            if (_this.currentMagnet) {
+                if (_this.state.client) {
+                    if (_this.state.client.get(_this.currentMagnet)) {
+                        _this.removeTorrent(_this.currentMagnet);
+                    }
+                }
+            }
+
             if (_this.server) {
-                _this.removeTorrent(_this.currentMagnet);
                 _this.server.close();
             }
+
             if (reset) {
                 _this.fetchAttempts = 0;
             }
@@ -529,11 +630,13 @@ var App = function (_React$Component) {
                                 _this.setState({
                                     backupTorrents: torrents
                                 }, function () {
-                                    _this.state.playMovie.preferredTorrents = _this.state.backupTorrents;
-                                    _this.changeCurrentMagnet(torrent.magnet);
-                                    _this.updateMovieTimeArray(true);
-                                    _this.fetchAttempts = 0;
-                                    _this.streamTorrent(torrent);
+                                    if (_this.state.playMovie) {
+                                        _this.state.playMovie.preferredTorrents = _this.state.backupTorrents;
+                                        _this.changeCurrentMagnet(torrent.magnet);
+                                        _this.updateMovieTimeArray(true);
+                                        _this.fetchAttempts = 0;
+                                        _this.streamTorrent(torrent);
+                                    }
                                 });
                             } else {
                                 _this.applyTimeout();
@@ -864,7 +967,7 @@ var App = function (_React$Component) {
         _this.getSuggested = function (movies) {
             return new Promise(function (resolve, reject) {
                 var promises = [];
-                var pages = [1, 2, 3, 4];
+                var pages = [1, 2, 3];
                 for (var j = 0; j < movies.length; j++) {
                     var movie = movies[j],
                         page = _this.chooseRandom(pages, 1),
@@ -905,8 +1008,14 @@ var App = function (_React$Component) {
                 if (clean.length > 20) {
                     clean = clean.slice(0, 20);
                 }
+
+                clean = _this.shuffleArray(clean);
                 _this.setState({
-                    suggested: _this.shuffleArray(clean)
+                    suggested: clean
+                }, function () {
+                    if (_this.databaseRef) {
+                        _this.setBucket();
+                    }
                 });
             });
         };
@@ -989,7 +1098,7 @@ var App = function (_React$Component) {
         };
 
         _this.scrollMovieGenre = function (left, e, id) {
-            var viewportW = document.querySelector(".movie-list-paginated").parentElement.offsetWidth - 210;
+            var viewportW = _this.state.listWidth - 210;
             var boxW = document.querySelector(".movie-item").offsetWidth + 10;
             var viewItems = Math.ceil(viewportW / boxW);
 
@@ -1020,7 +1129,7 @@ var App = function (_React$Component) {
         };
 
         _this.visualizeMovieGenres = function (movieData) {
-            _this.setResults(movieData[0].movies);
+            _this.setResults([movieData[0].movies[0]]);
             var movieGenres = movieData.map(function (item, i) {
                 return React.createElement(GenreContainer, {
                     toggleGenre: _this.toggleGenre,
@@ -1030,7 +1139,8 @@ var App = function (_React$Component) {
                     strip: _this.strip,
                     name: item.name,
                     movies: item.movies,
-                    key: (0, _uniqid2.default)() });
+                    key: (0, _uniqid2.default)(),
+                    setListWidth: _this.setListWidth });
             });
 
             return movieGenres;
@@ -1117,9 +1227,7 @@ var App = function (_React$Component) {
             }
 
             Promise.all(promiseArray).then(function (data) {
-                setTimeout(function () {
-                    _this.setContent(_this.visualizeMovieGenres(data));
-                }, 400);
+                _this.setContent(_this.visualizeMovieGenres(data));
             }).catch(function () {
                 return _this.setOffline(true);
             });
@@ -1127,10 +1235,8 @@ var App = function (_React$Component) {
 
         _this.loadCollection = function () {
             _this.toggleContainerSettings(true, true);
-            if (_this.state.recentlyPlayed && _this.state.favorites) {
-                var headerSource = _this.state.recentlyPlayed.length ? _this.state.recentlyPlayed : false || _this.state.favorites.length ? _this.state.favorites : false;
-                _this.setResults(headerSource);
-            }
+            var headerSource = _this.state.suggested ? _this.state.suggested : _this.state.recentlyPlayed ? _this.state.recentlyPlayed : _this.state.favorites ? _this.state.favorites : false;
+            _this.setResults(headerSource);
         };
 
         _this.setContent = function (content) {
@@ -1187,92 +1293,85 @@ var App = function (_React$Component) {
             _this.torrentSearch = TorrentSearch;
         };
 
-        _this.startSimperium = function () {
+        _this.signIn = function () {
+            var email = _this.state.inputEmail.length ? _this.state.inputEmail : _this.state.user.email,
+                password = _this.state.inputPass.length ? _this.state.inputPass : _this.state.user.password;
+
+            firebase.auth().signInWithEmailAndPassword(email, password).then(function () {
+                _this.closeAccount();
+            }).catch(function (error) {
+                var errorCode = error.code;
+                var errorMessage = error.message;
+                _this.setState({ loginError: errorMessage });
+            });
+        };
+
+        _this.startFireBase = function () {
+            var firebaseConfig = {
+                apiKey: "AIzaSyAOWT7w9hA8qsLY-KP7F14Qfv9vLjw3YJM",
+                authDomain: "flixerr-5aeb8.firebaseapp.com",
+                databaseURL: "https://flixerr-5aeb8.firebaseio.com",
+                projectId: "flixerr-5aeb8",
+                storageBucket: "flixerr-5aeb8.appspot.com",
+                messagingSenderId: "58493893285",
+                appId: "1:58493893285:web:b02990447eb9f16f"
+            };
+
+            firebase.initializeApp(firebaseConfig);
+
+            firebase.auth().onAuthStateChanged(function (user) {
+                _this.setState({ user: user });
+                if (user) {
+                    _this.createDataBase();
+                    _this.getBucket();
+                    _this.listenToBucket();
+                }
+                _this.setUserCredentials();
+            });
+
             if (!_this.state.isGuest && _this.state.user) {
-                _this.simperiumScript = document.createElement('script');
-                _this.simperiumScript.setAttribute('type', 'text/javascript');
-                _this.simperiumScript.setAttribute('src', './libs/simperium.min.js');
-                (0, _jquery2.default)('body').append(_this.simperiumScript);
-
-                _this.simperium = new Simperium(_this.state.simperiumId, { token: _this.state.user.token });
-
-                _this.bucket = _this.simperium.bucket('collection');
-                _this.bucket.on('notify', function (id, data) {
-                    if (data) {
-                        if (data.content) {
-                            _this.setState(function (prevState) {
-                                if (prevState[id] !== data.content) {
-                                    if (id !== 'movieTimeArray') {
-                                        _this.updateSuggested();
-                                    }
-                                    return _defineProperty({}, id, data.content);
-                                }
-                            });
-                        }
-                    }
-                });
-                _this.bucket.on('local', function (id) {
-                    return { content: _this.state[id] };
-                });
-                _this.bucket.start();
+                _this.signIn();
             } else if (!_this.state.isGuest && !_this.state.user) {
                 _this.openAccount();
+            } else if (!_this.state.user) {
+                _this.updateSuggested();
             }
         };
 
-        _this.handleAccount = function (create, email, password) {
-            if (!email && !password) {
+        _this.handleAccount = function () {
+            var email = _this.state.inputEmail,
+                password = _this.state.inputPass;
+
+            if (!email.length && !password.length) {
                 _this.setState({ loginError: true });
             } else {
-                var id = _this.state.simperiumId;
-                var key = _this.state.simperiumKey;
-                var _url2 = "https://auth.simperium.com/1/" + id + "/" + (create ? 'create' : 'authorize') + "/";
 
-                var _$ = require('jquery');
-
-                _$.ajax({
-                    url: _url2,
-                    type: "POST",
-                    contentType: "application/json",
-                    dataType: "json",
-                    data: JSON.stringify({ "username": email, "password": password }),
-                    beforeSend: function beforeSend(xhr) {
-                        xhr.setRequestHeader("X-Simperium-API-Key", key);
-                    },
-                    success: function success(data) {
-                        var user = {
-                            email: email,
-                            password: password,
-                            token: data.access_token
-                        };
-
+                if (_this.state.create) {
+                    firebase.auth().createUserWithEmailAndPassword(email, password).then(function () {
                         _this.closeAccount();
-                        _this.setState({
-                            user: user,
-                            isGuest: false,
-                            loginError: false
-                        }, function () {
-                            _this.setUserCredentials();
-                            _this.startSimperium();
-                        });
-                    },
-                    error: function error(_error) {
-                        _this.setState({ loginError: _error.responseText });
-                    }
-                });
+                    }).catch(function (error) {
+                        var errorCode = error.code;
+                        var errorMessage = error.message;
+                        _this.setState({ loginError: errorMessage });
+                    });
+                } else {
+                    _this.signIn();
+                }
             }
         };
 
         _this.openAccount = function () {
-            _this.setState({ account: true });
+            _this.setState({ create: false, loginError: false, account: true });
         };
 
         _this.openAccountCreation = function () {
-            _this.setState({ create: true, loginError: false });
+            _this.setState({ create: true, loginError: false, account: false });
         };
 
         _this.closeAccount = function () {
             _this.setState({
+                inputEmail: '',
+                inputPass: '',
                 account: false,
                 create: false,
                 loginError: false,
@@ -1287,22 +1386,35 @@ var App = function (_React$Component) {
         };
 
         _this.signOut = function () {
-            _this.simperium = false;
-            _this.bucket = false;
-
-            _this.setState({
-                user: false
-            }, function () {
-                _this.setUserCredentials();
-
-                _this.simperiumScript.parentNode.removeChild(_this.simperiumScript);
+            firebase.auth().signOut().then(function () {
+                _this.databaseRef = false;
+                _this.setStorage();
+            }).catch(function (error) {
+                console.log(error);
             });
         };
 
         _this.handleInput = function (e) {
-            if (e.keyCode == 13) {
-                _this.handleAccount(false, document.querySelector('input[type="email"]').value, document.querySelector('input[type="password"]').value);
-            }
+            var value = e.target.value;
+            var isEmail = value.match(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/g);
+
+            _this.setState(_defineProperty({}, isEmail ? 'inputEmail' : 'inputPass', value));
+        };
+
+        _this.handleAccountSignin = function () {
+            _this.setState({
+                create: false
+            }, function () {
+                _this.handleAccount();
+            });
+        };
+
+        _this.handleAccountCreation = function () {
+            _this.setState({
+                create: true
+            }, function () {
+                _this.handleAccount();
+            });
         };
 
         _this.handleConnectionChange = function (e) {
@@ -1320,11 +1432,11 @@ var App = function (_React$Component) {
 
         _this.state = {
             apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
-            simperiumId: "petition-locomotive-460",
-            simperiumKey: "d456aece029d44449569864ca68e0054",
             loginError: false,
             account: true,
             create: false,
+            inputEmail: '',
+            inputPass: '',
             user: false,
             isGuest: false,
             menu: ["Featured", "Movies", "Collection", "Sign In"],
@@ -1358,6 +1470,7 @@ var App = function (_React$Component) {
             logoIsLoaded: false,
             error: false,
             appLoading: true,
+            listWidth: false,
             time: "00:00:00"
         };
         return _this;
@@ -1367,8 +1480,8 @@ var App = function (_React$Component) {
         key: "componentDidMount",
         value: function componentDidMount() {
             this.loadLogo();
-            this.getUserCredentials();
             this.getStorage();
+            this.getUserCredentials();
             this.loadContent(this.state.active);
             this.startWebTorrent();
             this.requireTorrent();
@@ -1378,8 +1491,6 @@ var App = function (_React$Component) {
     }, {
         key: "render",
         value: function render() {
-            var _this2 = this;
-
             var menu = this.state.menuActive ? React.createElement(Menu, {
                 menu: this.state.menu,
                 user: this.state.user,
@@ -1460,16 +1571,6 @@ var App = function (_React$Component) {
                         ),
                         React.createElement(
                             "div",
-                            { className: "account-register" },
-                            "Don't have an account?",
-                            React.createElement(
-                                "span",
-                                { onClick: this.openAccountCreation },
-                                "Register here."
-                            )
-                        ),
-                        React.createElement(
-                            "div",
                             { className: "account-title" },
                             "Sign in"
                         ),
@@ -1478,13 +1579,19 @@ var App = function (_React$Component) {
                             { className: "account-desc" },
                             "Flixerr will use your account to synchronize data across all your devices."
                         ),
-                        React.createElement("input", { type: "email", placeholder: "Email", required: true }),
+                        React.createElement("input", {
+                            type: "email",
+                            placeholder: "Email",
+                            autoFocus: true,
+                            required: true,
+                            onKeyUp: this.handleInput.bind(this) }),
+                        React.createElement("span", null),
                         React.createElement("input", {
                             type: "password",
                             placeholder: "Password",
                             required: true,
-                            onKeyUp: this.handleInput }),
-                        " ",
+                            onKeyUp: this.handleInput.bind(this) }),
+                        React.createElement("span", null),
                         this.state.loginError ? React.createElement(
                             _Fade2.default,
                             { bottom: true, distance: "10%" },
@@ -1496,12 +1603,16 @@ var App = function (_React$Component) {
                         ) : '',
                         React.createElement(
                             "div",
-                            {
-                                className: "account-submit",
-                                onClick: function onClick() {
-                                    return _this2.handleAccount(false, document.querySelector('input[type="email"]').value, document.querySelector('input[type="password"]').value);
-                                } },
+                            { className: "account-submit", onClick: this.handleAccountSignin },
                             "Sign In"
+                        ),
+                        React.createElement("div", { className: "divider" }),
+                        React.createElement(
+                            "div",
+                            {
+                                className: "account-submit account-secondary",
+                                onClick: this.openAccountCreation },
+                            "Sign Up"
                         )
                     )
                 )
@@ -1528,13 +1639,19 @@ var App = function (_React$Component) {
                         { className: "account-desc" },
                         "Register to easily synchronize data across multiple devices."
                     ),
-                    React.createElement("input", { type: "email", placeholder: "Email", required: true }),
+                    React.createElement("input", {
+                        type: "email",
+                        placeholder: "Email",
+                        autoFocus: true,
+                        required: true,
+                        onKeyUp: this.handleInput.bind(this) }),
+                    React.createElement("span", null),
                     React.createElement("input", {
                         type: "password",
                         placeholder: "Password",
                         required: true,
-                        onKeyUp: this.handleInput }),
-                    " ",
+                        onKeyUp: this.handleInput.bind(this) }),
+                    React.createElement("span", null),
                     this.state.loginError ? React.createElement(
                         _Fade2.default,
                         { bottom: true, distance: "10%" },
@@ -1546,12 +1663,14 @@ var App = function (_React$Component) {
                     ) : '',
                     React.createElement(
                         "div",
-                        {
-                            className: "account-submit",
-                            onClick: function onClick() {
-                                return _this2.handleAccount(true, document.querySelector('.create-container').querySelector('input[type="email"]').value, document.querySelector('.create-container').querySelector('input[type="password"]').value);
-                            } },
+                        { className: "account-submit", onClick: this.handleAccountCreation },
                         "Create"
+                    ),
+                    React.createElement("div", { className: "divider" }),
+                    React.createElement(
+                        "div",
+                        { className: "account-submit account-secondary", onClick: this.openAccount },
+                        "Sign In"
                     )
                 )
             ) : null;
@@ -1651,7 +1770,8 @@ var App = function (_React$Component) {
                     setHeader: this.setHeader,
                     strip: this.strip,
                     openBox: this.openBox,
-                    results: this.state.results })
+                    results: this.state.results,
+                    setListWidth: this.setListWidth })
             );
         }
     }]);

@@ -40,7 +40,7 @@ class Content extends React.Component {
 
     render() {
         this.genreCollection = this.state.collection.map((item) => (
-                <GenreContainer key={uniqid()} scrollMovieGenre={this.props.scrollMovieGenre} openBox={this.props.openBox} strip={this.props.strip} name={item.name} movies={this.props[item.target]}/>
+                <GenreContainer key={uniqid()} scrollMovieGenre={this.props.scrollMovieGenre} openBox={this.props.openBox} strip={this.props.strip} name={item.name} movies={this.props[item.target]} setListWidth={this.props.setListWidth}/>
             ));
 
         return (

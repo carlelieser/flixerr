@@ -52,9 +52,8 @@ class BackupTorrents extends React.Component {
                         ? sorted[0]
                         : false;
                     return (
-                        <Fade distance="10%" bottom>
+                        <Fade key={uniqid()} distance="10%" bottom>
                             <div
-                                key={uniqid()}
                                 className={`torrent ${this
                                 .props
                                 .getCurrentMagnet() == torrent.magnet

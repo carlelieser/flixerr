@@ -68,7 +68,7 @@ var Content = function (_React$Component) {
             var _this2 = this;
 
             this.genreCollection = this.state.collection.map(function (item) {
-                return React.createElement(GenreContainer, { key: (0, _uniqid2.default)(), scrollMovieGenre: _this2.props.scrollMovieGenre, openBox: _this2.props.openBox, strip: _this2.props.strip, name: item.name, movies: _this2.props[item.target] });
+                return React.createElement(GenreContainer, { key: (0, _uniqid2.default)(), scrollMovieGenre: _this2.props.scrollMovieGenre, openBox: _this2.props.openBox, strip: _this2.props.strip, name: item.name, movies: _this2.props[item.target], setListWidth: _this2.props.setListWidth });
             });
 
             return React.createElement(
