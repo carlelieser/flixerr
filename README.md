@@ -6,7 +6,7 @@
 The best free movie torrent streaming app.
 
 <p align="center">
-<img src="https://previews.dropbox.com/p/thumb/AAdwKckUJKH-d7LCi4ddYViqeej3VcWQ2qQqp4WK4zDKcwri2IUgmb0y3p6nBREd8oVsnUG2dJocVUy9Bhid8xgCjMzqW9MZ4hgJb85tcZVWtJ6RGdT5NTl1y79dH1fDoCTYDawXQ86ol5L2YxFHMQ-pdIvS9k13Ba4IA8fDJ64CY0-sibqdMGu0fU49_xkS9WoV0gnlDU-W_in8DsoGxDX2l7rxZmBXsJe3b_aS5YDIQz36LVT0zE3v8RQDSphHi4RNsnmTM7RO_OvJUPEDThgqcPj_njHC855XEVfXFjmY4kbjMJKEzvmKUgpXiLwwRI9W7jUB8omJODpT1_oDEXsq/p.png?fv_content=true&size_mode=5">
+<img src="https://www.dropbox.com/s/t2q9lvxvj5dsinw/Screen%20Shot%202019-06-15%20at%205.16.43%20PM.png?dl=0">
 </p>
 
 ### Installation
