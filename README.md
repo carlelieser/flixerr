@@ -1,4 +1,6 @@
-# <img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/icon.png?raw=true=" width="85" height="85"/> Flixerr
+<img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/icon.png?raw=true=" width="85" height="85"/>
+
+# Flixerr
 The best free movie torrent streaming app.
 
 ### Installation
