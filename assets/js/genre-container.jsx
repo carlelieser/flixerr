@@ -6,24 +6,29 @@ class GenreContainer extends React.Component {
         super(props);
 
         this.state = {
+            permitted: ['Suggested for you', 'Recently Played', 'Favorites'],
             showArrows: false
         }
     }
 
     handleResize = () => {
         if (document.querySelector('.movie-list-paginated')) {
-            if (this.props.movies.length * 230 > document.querySelector('.movie-list-paginated').offsetWidth) {
-                this.setState({showArrows: true});
-            } else {
-                this.setState({showArrows: false});
+            if(this.props.movies){
+                if (this.props.movies.length * 230 > document.querySelector('.movie-list-paginated').offsetWidth) {
+                    this.setState({ showArrows: true });
+                } else {
+                    this.setState({ showArrows: false });
+                }
             }
         }
     }
 
     handleOpenGenre = () => {
-        this
-            .props
-            .toggleGenre(true, this.props.name, this.props.genreID);
+        if(this.props.toggleGenre){
+            this
+                .props
+                .toggleGenre(true, this.props.name, this.props.genreID);
+        }
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -44,19 +49,17 @@ class GenreContainer extends React.Component {
     }
 
     render() {
-        let genreID = 'movie-' + this
+        let genreID = `movie-${this
             .props
             .name
             .toLowerCase()
-            .replace(/ /g, '-');
+            .replace(/ /g, '-')}`;
 
         return (
             <Fade delay={100} fraction={0.3} distance="20%" bottom>
                 <div className="genre-container">
                     <div
-                        className={"movie-genre " + (this.props.name == 'Recently Played' || this.props.name == 'Favorites'
-                        ? "movie-blocked"
-                        : "")}
+                        className={`movie-genre ${this.state.permitted.indexOf(this.props.name) > -1 ? 'movie-blocked': ''}`}
                         onClick={this.handleOpenGenre}><span>{this.props.name}</span></div>
                     {this.state.showArrows
                         ? (

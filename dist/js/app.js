@@ -95,7 +95,7 @@ var App = function (_React$Component) {
                 if (error) {
                     throw error;
                 }
-
+                _this.updateSuggested();
                 _this.updateBucket();
             });
         };
@@ -499,7 +499,14 @@ var App = function (_React$Component) {
             _this.setVideoError();
         };
 
-        _this.searchTorrent = function (movie) {
+        _this.searchTorrent = function (movie, reset) {
+            if (_this.server) {
+                _this.removeTorrent(_this.currentMagnet);
+                _this.server.close();
+            }
+            if (reset) {
+                _this.fetchAttempts = 0;
+            }
             _this.resetVideo();
 
             if (movie.magnet) {
@@ -822,6 +829,88 @@ var App = function (_React$Component) {
             }
         };
 
+        _this.chooseRandom = function (array, limit) {
+            var results = [],
+                previousItem = {};
+
+            if (array.length < limit) {
+                limit = array.length;
+            }
+
+            for (var i = 0; i <= limit; i++) {
+                var item = array[Math.floor(Math.random() * array.length)];
+                if (previousItem.title) {
+                    while (previousItem.title == item.title) {
+                        item = array[Math.floor(Math.random() * array.length)];
+                    }
+                }
+                previousItem = item;
+                results.push(item);
+            }
+
+            return results;
+        };
+
+        _this.getRecommended = function (url) {
+            return new Promise(function (resolve, reject) {
+                _this.fetchContent(url, function (response) {
+                    resolve(response.results.slice(0, 5));
+                }, function (error) {
+                    reject(error);
+                });
+            });
+        };
+
+        _this.getSuggested = function (movies) {
+            return new Promise(function (resolve, reject) {
+                var promises = [];
+                var pages = [1, 2, 3, 4];
+                for (var j = 0; j < movies.length; j++) {
+                    var movie = movies[j],
+                        page = _this.chooseRandom(pages, 1),
+                        _url = "https://api.themoviedb.org/3/movie/" + movie.id + "/recommendations?api_key=" + _this.state.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=" + page + "&primary_release_date.lte=" + _this.getURLDate(1);
+                    var promise = _this.getRecommended(_url);
+                    promises.push(promise);
+                }
+
+                Promise.all(promises).then(function (suggested) {
+                    resolve([].concat.apply([], suggested));
+                }).catch(function (err) {
+                    return reject(err);
+                });
+            });
+        };
+
+        _this.stripDuplicateMovies = function (array) {
+            var unique = [],
+                uniqueMovies = [];
+            for (var k = 0; k < array.length; k++) {
+                var movie = array[k];
+                if (unique.indexOf(movie.id) === -1) {
+                    unique.push(movie.id);
+                    uniqueMovies.push(movie);
+                }
+            }
+
+            return uniqueMovies;
+        };
+
+        _this.updateSuggested = function () {
+            var favorites = _this.chooseRandom(_this.state.favorites, 5),
+                recents = _this.chooseRandom(_this.state.recentlyPlayed, 5),
+                collection = favorites.concat(recents);
+
+            _this.getSuggested(collection).then(function (suggested) {
+                var clean = _this.stripDuplicateMovies(suggested);
+                if (clean.length > 20) {
+                    clean = clean.slice(0, 20);
+                }
+                _this.setState({
+                    suggested: _this.shuffleArray(clean)
+                });
+            });
+        };
+
         _this.addToFavorites = function (movie) {
             _this.state.favorites.push(movie);
             _this.setState({
@@ -1028,7 +1117,9 @@ var App = function (_React$Component) {
             }
 
             Promise.all(promiseArray).then(function (data) {
-                _this.setContent(_this.visualizeMovieGenres(data));
+                setTimeout(function () {
+                    _this.setContent(_this.visualizeMovieGenres(data));
+                }, 400);
             }).catch(function () {
                 return _this.setOffline(true);
             });
@@ -1111,6 +1202,9 @@ var App = function (_React$Component) {
                         if (data.content) {
                             _this.setState(function (prevState) {
                                 if (prevState[id] !== data.content) {
+                                    if (id !== 'movieTimeArray') {
+                                        _this.updateSuggested();
+                                    }
                                     return _defineProperty({}, id, data.content);
                                 }
                             });
@@ -1132,12 +1226,12 @@ var App = function (_React$Component) {
             } else {
                 var id = _this.state.simperiumId;
                 var key = _this.state.simperiumKey;
-                var _url = "https://auth.simperium.com/1/" + id + "/" + (create ? 'create' : 'authorize') + "/";
+                var _url2 = "https://auth.simperium.com/1/" + id + "/" + (create ? 'create' : 'authorize') + "/";
 
                 var _$ = require('jquery');
 
                 _$.ajax({
-                    url: _url,
+                    url: _url2,
                     type: "POST",
                     contentType: "application/json",
                     dataType: "json",
@@ -1236,6 +1330,7 @@ var App = function (_React$Component) {
             menu: ["Featured", "Movies", "Collection", "Sign In"],
             active: "Featured",
             backupTorrents: false,
+            suggested: [],
             recentlyPlayed: [],
             favorites: [],
             movieTimeArray: [],
@@ -1546,6 +1641,7 @@ var App = function (_React$Component) {
                     content: this.state.content,
                     genre: this.state.genreContainer,
                     collectionContainer: this.state.collectionContainer,
+                    suggested: this.state.suggested,
                     recentlyPlayed: this.state.recentlyPlayed,
                     favorites: this.state.favorites,
                     search: this.state.search,

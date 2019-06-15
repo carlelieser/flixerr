@@ -7,17 +7,20 @@ class BackupTorrents extends React.Component {
     }
 
     handleReload = () => {
-        this.props.setPlayerLoading(true);
         this
             .props
-            .resetClient(true).then((result) => {
-                console.log(result);
-                let movie = this.props.movie;
-                movie.magnet = false;
+            .setPlayerLoading(true);
                 this
                     .props
-                    .searchTorrent(movie);
-            }).catch(err => console.log(err));
+                    .resetClient(true)
+                    .then((result) => {
+                        let movie = this.props.movie;
+                        movie.magnet = false;
+                        this
+                            .props
+                            .searchTorrent(movie, true);
+                    })
+                    .catch(err => console.log(err));
         this
             .props
             .closeBackup();

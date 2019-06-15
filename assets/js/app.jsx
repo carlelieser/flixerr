@@ -25,6 +25,7 @@ class App extends React.Component {
             ],
             active: "Featured",
             backupTorrents: false,
+            suggested: [],
             recentlyPlayed: [],
             favorites: [],
             movieTimeArray: [],
@@ -113,7 +114,7 @@ class App extends React.Component {
             if (error) {
                 throw error;
             }
-
+            this.updateSuggested();
             this.updateBucket();
         });
     }
@@ -556,7 +557,16 @@ class App extends React.Component {
         this.setVideoError();
     }
 
-    searchTorrent = (movie) => {
+    searchTorrent = (movie, reset) => {
+        if (this.server) {
+            this.removeTorrent(this.currentMagnet);
+            this
+                .server
+                .close();
+        }
+        if (reset) {
+            this.fetchAttempts = 0;
+        }
         this.resetVideo();
 
         if (movie.magnet) {
@@ -934,6 +944,96 @@ class App extends React.Component {
         }
     }
 
+    chooseRandom = (array, limit) => {
+        let results = [],
+            previousItem = {};
+
+        if (array.length < limit) {
+            limit = array.length;
+        }
+
+        for (let i = 0; i <= limit; i++) {
+            let item = array[Math.floor(Math.random() * array.length)];
+            if (previousItem.title) {
+                while (previousItem.title == item.title) {
+                    item = array[Math.floor(Math.random() * array.length)];
+                }
+            }
+            previousItem = item;
+            results.push(item);
+        }
+
+        return results;
+    }
+
+    getRecommended = (url) => {
+        return new Promise((resolve, reject) => {
+            this.fetchContent(url, (response) => {
+                resolve(response.results.slice(0, 5));
+            }, (error) => {
+                reject(error);
+            });
+        });
+    }
+
+    getSuggested = (movies) => {
+        return new Promise((resolve, reject) => {
+            let promises = [];
+            let pages = [1, 2, 3, 4];
+            for (let j = 0; j < movies.length; j++) {
+                let movie = movies[j],
+                    page = this.chooseRandom(pages, 1),
+                    url = `https://api.themoviedb.org/3/movie/${movie.id}/recommendations?api_key=${
+                this
+                    .state
+                    .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&primary_release_date.lte=${this
+                    .getURLDate(1)}`;
+                let promise = this.getRecommended(url);
+                promises.push(promise);
+            }
+
+            Promise
+                .all(promises)
+                .then((suggested) => {
+                    resolve([].concat.apply([], suggested));
+                })
+                .catch((err) => reject(err));
+
+        });
+    }
+
+    stripDuplicateMovies = (array) => {
+        let unique = [],
+            uniqueMovies = [];
+        for (let k = 0; k < array.length; k++) {
+            let movie = array[k];
+            if (unique.indexOf(movie.id) === -1) {
+                unique.push(movie.id);
+                uniqueMovies.push(movie);
+            }
+        }
+
+        return uniqueMovies;
+    }
+
+    updateSuggested = () => {
+        let favorites = this.chooseRandom(this.state.favorites, 5),
+            recents = this.chooseRandom(this.state.recentlyPlayed, 5),
+            collection = favorites.concat(recents);
+
+        this
+            .getSuggested(collection)
+            .then((suggested) => {
+                let clean = this.stripDuplicateMovies(suggested);
+                if (clean.length > 20) {
+                    clean = clean.slice(0, 20);
+                }
+                this.setState({
+                    suggested: this.shuffleArray(clean)
+                });
+            });
+    }
+
     addToFavorites = (movie) => {
         this
             .state
@@ -1185,7 +1285,9 @@ class App extends React.Component {
         Promise
             .all(promiseArray)
             .then(data => {
-                this.setContent(this.visualizeMovieGenres(data));
+                setTimeout(() => {
+                    this.setContent(this.visualizeMovieGenres(data));
+                }, 400);
             })
             .catch(() => this.setOffline(true))
     }
@@ -1281,6 +1383,9 @@ class App extends React.Component {
                         if (data.content) {
                             this.setState(prevState => {
                                 if (prevState[id] !== data.content) {
+                                    if (id !== 'movieTimeArray') {
+                                        this.updateSuggested();
+                                    }
                                     return {[id]: data.content}
                                 }
                             });
@@ -1615,6 +1720,7 @@ class App extends React.Component {
                     content={this.state.content}
                     genre={this.state.genreContainer}
                     collectionContainer={this.state.collectionContainer}
+                    suggested={this.state.suggested}
                     recentlyPlayed={this.state.recentlyPlayed}
                     favorites={this.state.favorites}
                     search={this.state.search}

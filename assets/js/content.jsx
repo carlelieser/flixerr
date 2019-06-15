@@ -8,12 +8,21 @@ class Content extends React.Component {
         this.count = 0;
 
         this.state = {
-            collection : ['Recently Played', 'Favorites']
+            collection : [{
+                name: 'Suggested for you',
+                target: 'suggested'
+            },{
+                name: 'Recently Played',
+                target: 'recentlyPlayed'
+            }, {
+                name: 'Favorites',
+                target: 'favorites'
+            }]
         }
     }
 
     shouldComponentUpdate(nextProps){
-        if(this.props.content == nextProps.content && this.props.searchContent == nextProps.searchContent && this.props.favorites == nextProps.favorites && this.props.recentlyPlayed == nextProps.recentlyPlayed && this.props.results == nextProps.results && this.props.isOffline == nextProps.isOffline){
+        if(this.props.content == nextProps.content && this.props.searchContent == nextProps.searchContent && this.props.favorites == nextProps.favorites && this.props.recentlyPlayed == nextProps.recentlyPlayed && this.props.suggested == nextProps.suggested && this.props.results == nextProps.results && this.props.isOffline == nextProps.isOffline){
             return false
         }else{
             return true
@@ -31,7 +40,7 @@ class Content extends React.Component {
 
     render() {
         this.genreCollection = this.state.collection.map((item) => (
-                <GenreContainer key={uniqid()} scrollMovieGenre={this.props.scrollMovieGenre} openBox={this.props.openBox} strip={this.props.strip} name={item} movies={item == 'Favorites' ? this.props.favorites : this.props.recentlyPlayed}/>
+                <GenreContainer key={uniqid()} scrollMovieGenre={this.props.scrollMovieGenre} openBox={this.props.openBox} strip={this.props.strip} name={item.name} movies={this.props[item.target]}/>
             ));
 
         return (
@@ -46,7 +55,7 @@ class Content extends React.Component {
                     if(!this.props.isOffline){
                         if(this.props.search){
                             return (<Fade distance="10%" bottom>
-                            <div className="search-title">Search Results {this.props.searchContent ? `(${this.props.searchContent.length})` : ''}</div>
+                            <div className="search-title">Search Results {this.props.searchContent ? this.props.searchContent.length ? `(${this.props.searchContent.length})`: '' : ''}</div>
                             </Fade>)
                         }
                     }

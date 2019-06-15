@@ -634,7 +634,7 @@ html {
     bottom: 0;
     background: rgb(255, 244, 242);
     opacity: 0;
-    transform: translateX(-25%);
+    transform: translateX(-15%);
     transform-origin: top;
     transition: 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     border-radius: 999px;

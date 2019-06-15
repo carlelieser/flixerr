@@ -124,8 +124,10 @@ class Player extends React.Component {
         let currentTime = document
             .querySelector("video")
             .currentTime;
-        
-        this.props.setPlayerLoading(true);
+
+        this
+            .props
+            .setPlayerLoading(true);
 
         this
             .props

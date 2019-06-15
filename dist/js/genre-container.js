@@ -28,19 +28,24 @@ var GenreContainer = function (_React$Component) {
 
         _this.handleResize = function () {
             if (document.querySelector('.movie-list-paginated')) {
-                if (_this.props.movies.length * 230 > document.querySelector('.movie-list-paginated').offsetWidth) {
-                    _this.setState({ showArrows: true });
-                } else {
-                    _this.setState({ showArrows: false });
+                if (_this.props.movies) {
+                    if (_this.props.movies.length * 230 > document.querySelector('.movie-list-paginated').offsetWidth) {
+                        _this.setState({ showArrows: true });
+                    } else {
+                        _this.setState({ showArrows: false });
+                    }
                 }
             }
         };
 
         _this.handleOpenGenre = function () {
-            _this.props.toggleGenre(true, _this.props.name, _this.props.genreID);
+            if (_this.props.toggleGenre) {
+                _this.props.toggleGenre(true, _this.props.name, _this.props.genreID);
+            }
         };
 
         _this.state = {
+            permitted: ['Suggested for you', 'Recently Played', 'Favorites'],
             showArrows: false
         };
         return _this;
@@ -71,7 +76,7 @@ var GenreContainer = function (_React$Component) {
         value: function render() {
             var _this2 = this;
 
-            var genreID = 'movie-' + this.props.name.toLowerCase().replace(/ /g, '-');
+            var genreID = "movie-" + this.props.name.toLowerCase().replace(/ /g, '-');
 
             return React.createElement(
                 _Fade2.default,
@@ -82,7 +87,7 @@ var GenreContainer = function (_React$Component) {
                     React.createElement(
                         "div",
                         {
-                            className: "movie-genre " + (this.props.name == 'Recently Played' || this.props.name == 'Favorites' ? "movie-blocked" : ""),
+                            className: "movie-genre " + (this.state.permitted.indexOf(this.props.name) > -1 ? 'movie-blocked' : ''),
                             onClick: this.handleOpenGenre },
                         React.createElement(
                             "span",

@@ -29,7 +29,16 @@ var Content = function (_React$Component) {
         _this.count = 0;
 
         _this.state = {
-            collection: ['Recently Played', 'Favorites']
+            collection: [{
+                name: 'Suggested for you',
+                target: 'suggested'
+            }, {
+                name: 'Recently Played',
+                target: 'recentlyPlayed'
+            }, {
+                name: 'Favorites',
+                target: 'favorites'
+            }]
         };
         return _this;
     }
@@ -37,7 +46,7 @@ var Content = function (_React$Component) {
     _createClass(Content, [{
         key: "shouldComponentUpdate",
         value: function shouldComponentUpdate(nextProps) {
-            if (this.props.content == nextProps.content && this.props.searchContent == nextProps.searchContent && this.props.favorites == nextProps.favorites && this.props.recentlyPlayed == nextProps.recentlyPlayed && this.props.results == nextProps.results && this.props.isOffline == nextProps.isOffline) {
+            if (this.props.content == nextProps.content && this.props.searchContent == nextProps.searchContent && this.props.favorites == nextProps.favorites && this.props.recentlyPlayed == nextProps.recentlyPlayed && this.props.suggested == nextProps.suggested && this.props.results == nextProps.results && this.props.isOffline == nextProps.isOffline) {
                 return false;
             } else {
                 return true;
@@ -59,7 +68,7 @@ var Content = function (_React$Component) {
             var _this2 = this;
 
             this.genreCollection = this.state.collection.map(function (item) {
-                return React.createElement(GenreContainer, { key: (0, _uniqid2.default)(), scrollMovieGenre: _this2.props.scrollMovieGenre, openBox: _this2.props.openBox, strip: _this2.props.strip, name: item, movies: item == 'Favorites' ? _this2.props.favorites : _this2.props.recentlyPlayed });
+                return React.createElement(GenreContainer, { key: (0, _uniqid2.default)(), scrollMovieGenre: _this2.props.scrollMovieGenre, openBox: _this2.props.openBox, strip: _this2.props.strip, name: item.name, movies: _this2.props[item.target] });
             });
 
             return React.createElement(
@@ -77,7 +86,7 @@ var Content = function (_React$Component) {
                                     "div",
                                     { className: "search-title" },
                                     "Search Results ",
-                                    _this2.props.searchContent ? "(" + _this2.props.searchContent.length + ")" : ''
+                                    _this2.props.searchContent ? _this2.props.searchContent.length ? "(" + _this2.props.searchContent.length + ")" : '' : ''
                                 )
                             );
                         }

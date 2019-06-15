@@ -29,10 +29,9 @@ var BackupTorrents = function (_React$Component) {
         _this.handleReload = function () {
             _this.props.setPlayerLoading(true);
             _this.props.resetClient(true).then(function (result) {
-                console.log(result);
                 var movie = _this.props.movie;
                 movie.magnet = false;
-                _this.props.searchTorrent(movie);
+                _this.props.searchTorrent(movie, true);
             }).catch(function (err) {
                 return console.log(err);
             });
