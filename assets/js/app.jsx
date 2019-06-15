@@ -330,7 +330,7 @@ class App extends Component {
     };
 
     setDiff = (data) => {
-        let change = ["favorites", "recentlyPlayed", "movieTimeArray", "suggested", "quality"];
+        let change = ["favorites", "recentlyPlayed", "movieTimeArray", "quality"];
         return new Promise((resolve, reject) => {
             let newState = {};
             for (let i = 0; i < change.length; i++) {
@@ -352,7 +352,7 @@ class App extends Component {
                 }
             }
 
-            if (newState.suggested) {
+            if (!newState.suggested && this.setEverything) {
                 this
                     .getSuggested(data)
                     .then((suggested) => {
@@ -424,7 +424,6 @@ class App extends Component {
             favorites: this.state.favorites,
             recentlyPlayed: this.state.recentlyPlayed,
             movieTimeArray: this.state.movieTimeArray,
-            suggested: this.state.suggested,
             quality: this.state.quality
         }, (error) => {
             if (error) {
@@ -457,10 +456,6 @@ class App extends Component {
                         movieTimeArray: data
                             ? data.movieTimeArray
                                 ? data.movieTimeArray
-                                : []: [],
-                        suggested: data
-                            ? data.suggested
-                                ? data.suggested
                                 : []: [],
                         quality: data
                             ? data.quality

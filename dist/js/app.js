@@ -296,7 +296,7 @@ var App = function (_Component) {
         };
 
         _this.setDiff = function (data) {
-            var change = ["favorites", "recentlyPlayed", "movieTimeArray", "suggested", "quality"];
+            var change = ["favorites", "recentlyPlayed", "movieTimeArray", "quality"];
             return new Promise(function (resolve, reject) {
                 var newState = {};
                 for (var i = 0; i < change.length; i++) {
@@ -318,7 +318,7 @@ var App = function (_Component) {
                     }
                 }
 
-                if (newState.suggested) {
+                if (!newState.suggested && _this.setEverything) {
                     _this.getSuggested(data).then(function (suggested) {
                         newState.suggested = suggested;
                         _this.setState(newState, function () {
@@ -381,7 +381,6 @@ var App = function (_Component) {
                 favorites: _this.state.favorites,
                 recentlyPlayed: _this.state.recentlyPlayed,
                 movieTimeArray: _this.state.movieTimeArray,
-                suggested: _this.state.suggested,
                 quality: _this.state.quality
             }, function (error) {
                 if (error) {
@@ -406,7 +405,6 @@ var App = function (_Component) {
                             favorites: data ? data.favorites ? data.favorites : [] : [],
                             recentlyPlayed: data ? data.recentlyPlayed ? data.recentlyPlayed : [] : [],
                             movieTimeArray: data ? data.movieTimeArray ? data.movieTimeArray : [] : [],
-                            suggested: data ? data.suggested ? data.suggested : [] : [],
                             quality: data ? data.quality ? data.quality : "HD" : "HD"
                         }, function (error) {
                             setTimeout(function () {
