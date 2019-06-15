@@ -10,6 +10,10 @@ var _reactLazyLoad = require("react-lazy-load");
 
 var _reactLazyLoad2 = _interopRequireDefault(_reactLazyLoad);
 
+var _fastAverageColor = require("fast-average-color");
+
+var _fastAverageColor2 = _interopRequireDefault(_fastAverageColor);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -35,18 +39,38 @@ var MovieItem = function (_React$Component) {
 			_this.imageURL = _this.props.movie.poster_path ? "https://image.tmdb.org/t/p/w780" + _this.props.movie.poster_path : "https://image.tmdb.org/t/p/w780" + _this.props.movie.backdrop_path;
 			_this.image.src = _this.imageURL;
 
-			_this.backdropImage = new Image();
-			_this.backdropImageURL = "https://image.tmdb.org/t/p/original" + _this.props.movie.backdrop_path;
-			_this.backdropImage.src = _this.backdropImageURL;
+			var image = new Image();
+			image.src = "https://image.tmdb.org/t/p/w300" + _this.props.movie.backdrop_path;
+
+			var fac = new _fastAverageColor2.default();
+
+			fac.getColorAsync(image, { algorithm: 'sqrt' }).then(function (color) {
+				_this.setState({ averageColor: color });
+			}).catch(function (err) {
+				return console.log(err);
+			});
 
 			if (_this.props.featured) {
+				_this.backdropImage = new Image();
+				_this.backdropImageURL = "https://image.tmdb.org/t/p/original" + _this.props.movie.backdrop_path;
+				_this.backdropImage.src = _this.backdropImageURL;
 				_this.backdropImage.onload = _this.loadImage;
 			} else {
 				_this.image.onload = _this.loadImage;
 			}
 		};
 
+		_this.handleMovieClick = function () {
+			var movie = _this.props.movie;
+			movie.averageColor = _this.state.averageColor;
+			_this.props.openBox(movie);
+		};
+
 		_this.state = {
+			averageColor: {
+				hex: '#000',
+				value: [0, 0, 0]
+			},
 			backdrop: false,
 			fontSize: 1
 		};
@@ -74,10 +98,6 @@ var MovieItem = function (_React$Component) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _this2 = this;
-
-			var movie = this.props.movie;
-
 			return React.createElement(
 				_Fade2.default,
 				{ delay: 50, distance: "10%", bottom: true },
@@ -85,9 +105,7 @@ var MovieItem = function (_React$Component) {
 					"div",
 					{
 						className: "movie-item",
-						onClick: function onClick() {
-							return _this2.props.openBox(movie);
-						}
+						onClick: this.handleMovieClick
 					},
 					React.createElement(
 						"div",
@@ -100,12 +118,12 @@ var MovieItem = function (_React$Component) {
 									fontSize: this.state.fontSize + "em"
 								}
 							},
-							movie.title
+							this.props.movie.title
 						),
 						React.createElement(
 							"div",
 							{ className: "movie-item-summary" },
-							this.props.strip(movie.overview, 80) + "..."
+							this.props.strip(this.props.movie.overview, 80) + "..."
 						)
 					),
 					React.createElement("div", { className: "movie-item-bg" }),

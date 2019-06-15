@@ -76,7 +76,8 @@ var Content = function (_React$Component) {
                                 React.createElement(
                                     "div",
                                     { className: "search-title" },
-                                    "Search Results"
+                                    "Search Results ",
+                                    _this2.props.searchContent ? "(" + _this2.props.searchContent.length + ")" : ''
                                 )
                             );
                         }

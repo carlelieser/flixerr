@@ -32,7 +32,9 @@ var BackupTorrents = function (_React$Component) {
                 console.log(result);
                 var movie = _this.props.movie;
                 movie.magnet = false;
-                _this.props.streamTorrent(movie);
+                _this.props.searchTorrent(movie);
+            }).catch(function (err) {
+                return console.log(err);
             });
             _this.props.closeBackup();
         };

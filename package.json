@@ -1,6 +1,6 @@
 {
     "name": "flixerr",
-    "version": "1.1.8",
+    "version": "1.2.0",
     "description": "A movie torrent streaming service.",
     "main": "main.js",
     "scripts": {
@@ -33,6 +33,7 @@
         "electron-titlebar": "0.0.3",
         "electron-window-state": "^5.0.3",
         "electron-winstaller": "^3.0.4",
+        "fast-average-color": "^5.1.0",
         "get-json": "^1.0.1",
         "https-proxy-agent": "^2.2.1",
         "jquery": "^3.4.0",

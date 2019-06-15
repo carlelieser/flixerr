@@ -31,81 +31,81 @@ function createWindow() {
 
     mainWindowState.manage(mainWindow);
 
-    var template = [...(process.platform === 'darwin'
-            ? [
+    var template = [
+        {
+            label: app.name,
+            submenu: [
                 {
-                    label: app.name,
-                    submenu: [
-                        {
-                            label: 'About Flixerr',
-                            role: 'about'
-                        }, {
-                            type: 'separator'
-                        }, {
-                            role: 'services'
-                        }, {
-                            type: 'separator'
-                        }, {
-                            label: 'Hide Flixerr',
-                            role: 'hide'
-                        }, {
-                            role: 'hideothers'
-                        }, {
-                            label: 'Unhide Flixerr',
-                            role: 'unhide'
-                        }, {
-                            type: 'separator'
-                        }, {
-                            label: 'Quit Flixerr',
-                            role: 'quit'
-                        }
-                    ]
+                    label: 'About Flixerr',
+                    role: 'about'
                 }, {
-                    label: "Edit",
-                    submenu: [
-                        {
-                            label: "Undo",
-                            accelerator: "CmdOrCtrl+Z",
-                            selector: "undo:"
-                        }, {
-                            label: "Redo",
-                            accelerator: "Shift+CmdOrCtrl+Z",
-                            selector: "redo:"
-                        }, {
-                            type: "separator"
-                        }, {
-                            label: "Cut",
-                            accelerator: "CmdOrCtrl+X",
-                            selector: "cut:"
-                        }, {
-                            label: "Copy",
-                            accelerator: "CmdOrCtrl+C",
-                            selector: "copy:"
-                        }, {
-                            label: "Paste",
-                            accelerator: "CmdOrCtrl+V",
-                            selector: "paste:"
-                        }, {
-                            label: "Select All",
-                            accelerator: "CmdOrCtrl+A",
-                            selector: "selectAll:"
-                        }
-                    ]
+                    type: 'separator'
                 }, {
-                    role: 'help',
-                    submenu: [
-                        {
-                            label: 'Learn More',
-                            click() {
-                                shell.openExternal('https://www.flixerr.co')
-                            }
-                        }
-                    ]
+                    role: 'services'
+                }, {
+                    type: 'separator'
+                }, {
+                    label: 'Hide Flixerr',
+                    role: 'hide'
+                }, {
+                    role: 'hideothers'
+                }, {
+                    label: 'Unhide Flixerr',
+                    role: 'unhide'
+                }, {
+                    type: 'separator'
+                }, {
+                    label: 'Quit Flixerr',
+                    role: 'quit'
                 }
             ]
-            : [])];
+        }, {
+            label: "Edit",
+            submenu: [
+                {
+                    label: "Undo",
+                    accelerator: "CmdOrCtrl+Z",
+                    selector: "undo:"
+                }, {
+                    label: "Redo",
+                    accelerator: "Shift+CmdOrCtrl+Z",
+                    selector: "redo:"
+                }, {
+                    type: "separator"
+                }, {
+                    label: "Cut",
+                    accelerator: "CmdOrCtrl+X",
+                    selector: "cut:"
+                }, {
+                    label: "Copy",
+                    accelerator: "CmdOrCtrl+C",
+                    selector: "copy:"
+                }, {
+                    label: "Paste",
+                    accelerator: "CmdOrCtrl+V",
+                    selector: "paste:"
+                }, {
+                    label: "Select All",
+                    accelerator: "CmdOrCtrl+A",
+                    selector: "selectAll:"
+                }
+            ]
+        }, {
+            role: 'help',
+            submenu: [
+                {
+                    label: 'Learn More',
+                    click() {
+                        shell.openExternal('https://www.flixerr.co')
+                    }
+                }
+            ]
+        }
+    ];
 
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+    if (process.platform === 'darwin') {
+        Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+    }
 
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'index.html'),
@@ -113,9 +113,7 @@ function createWindow() {
         slashes: true
     }))
 
-    mainWindow
-        .webContents
-        .openDevTools()
+    // mainWindow.webContents.openDevTools();
 
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();

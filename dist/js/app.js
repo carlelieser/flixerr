@@ -485,7 +485,9 @@ var App = function (_React$Component) {
 
         _this.setVideoIndex = function (videoIndex) {
             return new Promise(function (resolve, reject) {
-                _this.setState({ videoIndex: videoIndex }, function () {
+                _this.setState({
+                    videoIndex: videoIndex
+                }, function () {
                     resolve();
                 });
             });
@@ -516,18 +518,22 @@ var App = function (_React$Component) {
                     if (result.length) {
                         _this.getPreferredTorrent(result).then(function (torrents) {
                             var torrent = torrents[0];
-                            _this.setState({
-                                backupTorrents: torrents
-                            }, function () {
-                                _this.state.playMovie.preferredTorrents = _this.state.backupTorrents;
-                                _this.changeCurrentMagnet(torrent.magnet);
-                                _this.updateMovieTimeArray(true);
-                                _this.fetchAttempts = 0;
-                                _this.streamTorrent(torrent);
-                            });
+                            if (torrent) {
+                                _this.setState({
+                                    backupTorrents: torrents
+                                }, function () {
+                                    _this.state.playMovie.preferredTorrents = _this.state.backupTorrents;
+                                    _this.changeCurrentMagnet(torrent.magnet);
+                                    _this.updateMovieTimeArray(true);
+                                    _this.fetchAttempts = 0;
+                                    _this.streamTorrent(torrent);
+                                });
+                            } else {
+                                _this.applyTimeout();
+                            }
                         });
                     } else {
-                        _this.setState({ error: true });
+                        _this.applyTimeout();
                     }
                 }).catch(function (err) {
                     if (_this.fetchAttempts == 6) {
@@ -572,6 +578,8 @@ var App = function (_React$Component) {
                                         resolve(result);
                                     });
                                 }
+                            } else {
+                                reject('No torrent.');
                             }
                         } else {
                             resolve();

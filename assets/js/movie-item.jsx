@@ -1,11 +1,16 @@
 import Fade from "react-reveal/Fade"
 import LazyLoad from "react-lazy-load"
+import FastAverageColor from 'fast-average-color'
 
 class MovieItem extends React.Component{
 	constructor(props){
 		super(props);
 
 		this.state = {
+			averageColor: {
+				hex: '#000',
+				value: [0,0,0]
+			},
 			backdrop: false,
 			fontSize: 1
 		}
@@ -20,15 +25,32 @@ class MovieItem extends React.Component{
 		this.imageURL = this.props.movie.poster_path ? `https://image.tmdb.org/t/p/w780${this.props.movie.poster_path}` : `https://image.tmdb.org/t/p/w780${this.props.movie.backdrop_path}`;
 		this.image.src = this.imageURL;
 
-		this.backdropImage = new Image();
-		this.backdropImageURL = `https://image.tmdb.org/t/p/original${this.props.movie.backdrop_path}`;
-		this.backdropImage.src = this.backdropImageURL;
+		let image = new Image();
+		image.src = `https://image.tmdb.org/t/p/w300${this.props.movie.backdrop_path}`;
+
+		let fac = new FastAverageColor();
+
+		fac
+			.getColorAsync(image, { algorithm: 'sqrt' })
+			.then((color) => {
+				this.setState({ averageColor: color});
+			})
+			.catch((err) => console.log(err));
 
 		if(this.props.featured){
+			this.backdropImage = new Image();
+			this.backdropImageURL = `https://image.tmdb.org/t/p/original${this.props.movie.backdrop_path}`;
+			this.backdropImage.src = this.backdropImageURL;
 			this.backdropImage.onload = this.loadImage;
 		}else{
 			this.image.onload = this.loadImage;
 		}
+	}
+
+	handleMovieClick = () => {
+		let movie = this.props.movie;
+		movie.averageColor = this.state.averageColor;
+		this.props.openBox(movie);
 	}
 
 	componentDidMount(){
@@ -48,13 +70,11 @@ class MovieItem extends React.Component{
     }
 
 	render() {
-		let movie = this.props.movie;
-
 		return(
 			<Fade delay={50} distance="10%" bottom>
 				<div
 	                className="movie-item"
-	                onClick={() => this.props.openBox(movie)}
+	                onClick={this.handleMovieClick}
 	            >
 	                <div className="movie-item-desc">
 	                    <div
@@ -63,10 +83,10 @@ class MovieItem extends React.Component{
 	                            fontSize: `${this.state.fontSize}em`
 	                        }}
 	                    >
-	                        {movie.title}
+	                        {this.props.movie.title}
 	                    </div>
 	                    <div className="movie-item-summary">
-	                        {this.props.strip(movie.overview, 80) + "..."}
+	                        {this.props.strip(this.props.movie.overview, 80) + "..."}
 	                    </div>
 	                </div>
 	                <div className="movie-item-bg" />

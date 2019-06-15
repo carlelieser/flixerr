@@ -45,7 +45,9 @@ class Content extends React.Component {
                 {(() => {
                     if(!this.props.isOffline){
                         if(this.props.search){
-                            return <Fade distance="10%" bottom><div className="search-title">Search Results</div></Fade>
+                            return (<Fade distance="10%" bottom>
+                            <div className="search-title">Search Results {this.props.searchContent ? `(${this.props.searchContent.length})` : ''}</div>
+                            </Fade>)
                         }
                     }
                 })()}

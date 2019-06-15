@@ -16,8 +16,8 @@ class BackupTorrents extends React.Component {
                 movie.magnet = false;
                 this
                     .props
-                    .streamTorrent(movie);
-            });
+                    .searchTorrent(movie);
+            }).catch(err => console.log(err));
         this
             .props
             .closeBackup();

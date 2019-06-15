@@ -452,46 +452,53 @@ html {
     transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
 }
 
+.light-modal {
+    color: rgba(0,0,0,0.81) !important;
+}
+
+.dark-modal {
+    color: rgba(255, 255, 255,0.81) !important;
+}
+
 .movie-modal {
     width: 700px;
-    height: auto;
-    min-height: 500px;
+    height: 600px;
     padding: 10px;
     top: 50%;
     left: 50%;
     position: fixed;
     transform: translate(-50%, -50%);
-    background-color: #000;
     border-radius: 4px;
     box-shadow: 0 6px 40px 0 rgba(0, 0, 0, 0.31);
     z-index: 800;
     overflow: hidden;
     cursor: default;
     will-change: transform;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
 
 .movie-modal > .movie-modal-image {
     width: 120%;
-    height: 240px;
-    top: 0;
-    margin-top: -22px;
-    margin-left: -14%;
-    filter: blur(4px);
+    height: 270px;
+    top: 0px;
+    margin-top:-8px;
+    filter: blur(5px);
     background-size: cover;
     background-repeat: no-repeat;
     position: absolute;
-    z-index: -10;
+    z-index: 0;
 }
 
 .movie-modal > .movie-gradient {
     width: 100%;
-    height: 227px;
-    background: linear-gradient(180deg, rgba(2, 0, 36, 0) 0%, rgba(0, 0, 0, 0.40) 50%, rgba(0, 0, 0, 1) 100%);
+    height: 278px;
     top: 0;
     left: 0;
     position: absolute;
-    margin-top: 0;
-    z-index: -10;
+    z-index: 10;
 }
 
 .movie-modal > .movie-modal-info {
@@ -503,13 +510,16 @@ html {
     padding: 40px;
     box-sizing: border-box;
     font-family: 'Avenir';
-    color: #FFF;
+    color: inherit;
     text-align: center;
+    position: relative;
+    z-index: 20;
 }
 
 .movie-modal > .movie-modal-info > .movie-modal-poster {
     width: 150px;
     height: 227px;
+    min-height: 227px;
     border-radius: 10px;
     background-size: cover;
     background-repeat: no-repeat;
@@ -546,38 +556,50 @@ html {
 
 .movie-modal > .movie-modal-info > .movie-metadata > i {
     width: 50px;
+    height: 20px;
     border-radius: 999px;
-    background-color: rgba(255, 255, 255, 0.1);
     transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     position: relative;
-    overflow: hidden;
-    margin-top: -3px;
     float: right;
 }
 
-.movie-modal > .movie-modal-info > .movie-metadata > i.mdi-heart {
-    border-color: rgb(249, 49, 87);
-}
-.movie-modal > .movie-modal-info > .movie-metadata > i:after {
-    content: "";
+.movie-modal > .movie-modal-info > .movie-metadata > i::before {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
     position: absolute;
-    z-index: -1;
+    z-index: 5;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
+    line-height: 28px;
+}
+
+.movie-modal > .movie-modal-info > .movie-metadata > .mdi-light {
+    background-color: rgba(255, 255, 255, 0.21);
+}
+
+.movie-modal > .movie-modal-info > .movie-metadata > .mdi-dark {
+    background-color: rgba(0, 0, 0, 0.21);
+}
+
+.movie-modal > .movie-modal-info > .movie-metadata > i:after {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    content: '';
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
     opacity: 0;
     background: rgb(249, 49, 87);
-    transform: translateX(-50%);
+    transform: translateX(-25%);
     transition: 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     border-radius: 999px;
 }
 .movie-modal > .movie-modal-info > .movie-metadata > i.mdi-heart:after {
     transform: translateX(0);
     opacity: 1;
-}
-.movie-modal > .movie-modal-info > .movie-metadata > i:before {
-    margin-top: 1px;
 }
 
 .movie-modal > .movie-modal-info > .movie-metadata > * {
@@ -592,13 +614,12 @@ html {
 
 .movie-modal > .movie-modal-info > .movie-modal-play {
     width: 200px;
-    height: 50px;
+    min-height: 50px;
     border-radius: 999px;
     margin-top: 30px;
     background-color: rgb(241, 24, 24);
     position: relative;
     transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
-    overflow: hidden;
 }
 .movie-modal > .movie-modal-info > .movie-modal-play:hover {
     color: rgb(241, 24, 24);
@@ -613,7 +634,7 @@ html {
     bottom: 0;
     background: rgb(255, 244, 242);
     opacity: 0;
-    transform: translateX(-50%);
+    transform: translateX(-25%);
     transform-origin: top;
     transition: 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     border-radius: 999px;
@@ -695,6 +716,10 @@ html {
     margin-top: 20px;
     max-height: 300px;
     overflow-x: hidden;
+}
+
+.backup-container > .torrent-container::-webkit-scrollbar {
+    display: none;
 }
 
 .backup-container > .reload-btn {

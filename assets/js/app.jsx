@@ -236,7 +236,7 @@ class App extends React.Component {
     }
 
     openBackup = () => {
-        this.setState({ backupIsOpen: true });
+        this.setState({backupIsOpen: true});
     }
 
     showBackup = (simple) => {
@@ -336,9 +336,11 @@ class App extends React.Component {
                             .server
                             .listen('8888');
 
-                        this.setVideoIndex(fileIndex).then(() => {
-                            this.setMovieTime(this.state.playMovie);
-                        });
+                        this
+                            .setVideoIndex(fileIndex)
+                            .then(() => {
+                                this.setMovieTime(this.state.playMovie);
+                            });
                     } else if (!file) {
                         this.applyTimeout();
                     } else if (!this.state.playMovie) {
@@ -540,7 +542,9 @@ class App extends React.Component {
 
     setVideoIndex = (videoIndex) => {
         return new Promise((resolve, reject) => {
-            this.setState({ videoIndex }, () => {
+            this.setState({
+                videoIndex
+            }, () => {
                 resolve();
             });
         });
@@ -578,18 +582,22 @@ class App extends React.Component {
                         .getPreferredTorrent(result)
                         .then(torrents => {
                             let torrent = torrents[0];
-                            this.setState({
-                                backupTorrents: torrents
-                            }, () => {
-                                this.state.playMovie.preferredTorrents = this.state.backupTorrents;
-                                this.changeCurrentMagnet(torrent.magnet);
-                                this.updateMovieTimeArray(true);
-                                this.fetchAttempts = 0;
-                                this.streamTorrent(torrent);
-                            });
+                            if (torrent) {
+                                this.setState({
+                                    backupTorrents: torrents
+                                }, () => {
+                                    this.state.playMovie.preferredTorrents = this.state.backupTorrents;
+                                    this.changeCurrentMagnet(torrent.magnet);
+                                    this.updateMovieTimeArray(true);
+                                    this.fetchAttempts = 0;
+                                    this.streamTorrent(torrent);
+                                });
+                            } else {
+                                this.applyTimeout();
+                            }
                         });
                 } else {
-                    this.setState({error: true});
+                    this.applyTimeout();
                 }
             }).catch(err => {
                 if (this.fetchAttempts == 6) {
@@ -605,10 +613,12 @@ class App extends React.Component {
     playMovie = (movie) => {
         movie = this.matchMovie(movie);
         this.initMovie(movie);
-        this.toggleBox().then(() => {
-            this.searchTorrent(movie);
-            this.addToRecentlyPlayed(movie);
-        });
+        this
+            .toggleBox()
+            .then(() => {
+                this.searchTorrent(movie);
+                this.addToRecentlyPlayed(movie);
+            });
     }
 
     destroyClient = (backUp) => {
@@ -635,18 +645,22 @@ class App extends React.Component {
                         this.server = false;
                     }
 
-                    if(backUp){
+                    if (backUp) {
                         if (this.currentMagnet) {
                             if (this.state.client.get(this.currentMagnet)) {
-                                this.removeTorrent(this.currentMagnet).then((result) => {
-                                    resolve(result);
-                                });
+                                this
+                                    .removeTorrent(this.currentMagnet)
+                                    .then((result) => {
+                                        resolve(result);
+                                    });
                             }
+                        } else {
+                            reject('No torrent.');
                         }
-                    }else{
+                    } else {
                         resolve();
                     }
-                    
+
                 });
             }
         }).catch(err => console.log(err));
@@ -656,8 +670,8 @@ class App extends React.Component {
         let browserWindow = require("electron")
             .remote
             .getCurrentWindow();
-        
-        if(full === undefined){
+
+        if (full === undefined) {
             full = false;
         }
         browserWindow.setFullScreen(full);
@@ -728,11 +742,15 @@ class App extends React.Component {
         this.setState({
             error: false
         }, () => {
-            this.destroyClient().then(() => {
-                this.removeTorrent(this.currentMagnet).then((result) => {
-                    console.log(result);
+            this
+                .destroyClient()
+                .then(() => {
+                    this
+                        .removeTorrent(this.currentMagnet)
+                        .then((result) => {
+                            console.log(result);
+                        });
                 });
-            });
         });
         this.setFullScreen();
     }
@@ -756,7 +774,7 @@ class App extends React.Component {
 
     openBox = (movie) => {
         this.toggleBox(true);
-        this.setState({ movieCurrent: movie });
+        this.setState({movieCurrent: movie});
     }
 
     toggleBox = (active) => {
