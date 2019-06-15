@@ -1,5 +1,5 @@
 # Flixerr
-The best free movie torrent streaming app.
+## The best free movie torrent streaming app.
 
 ### Installation
 To install Flixerr, head into the build folder and download the package appropriate for your system. Alternatively, you can click the download button on our website.
