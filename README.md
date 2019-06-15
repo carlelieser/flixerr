@@ -1,4 +1,4 @@
-# ![Flixerr](https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/icon.png?raw=true) Flixerr
+# <img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/icon.png?raw=true=" width="64" height="64"/>Flixerr
 The best free movie torrent streaming app.
 
 ### Installation
