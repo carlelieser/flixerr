@@ -1,0 +1,1331 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #FFF;
+}
+
+* {
+    user-select: none;
+}
+
+.movie-player > .bottom-bar-container > .bottom-bar > span,
+.movie-player > .top-bar-container > .top-bar > div {
+    cursor: default;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+#app {
+    -webkit-app-region: no-drag;
+}
+
+.draggable {
+    width: 100%;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.98);
+    top: 0;
+    left: 0;
+    position: fixed;
+    z-index: 99999;
+    -webkit-app-region: drag;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.draggable.invisible {
+    background-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.app-container {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    overflow-x: hidden;
+    animation: fadeIn 0.5s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.app-container::-webkit-scrollbar {
+    display: none;
+}
+
+.windows-compensate {
+    margin-top: -40px;
+    height: calc(100% + 40px) !important;
+}
+
+.windows-compensate > span > .paginated-genre-results {
+    margin-top: -40px !important;
+    height: calc(100% + 40px) !important;
+}
+
+.windows-compensate > span > .paginated-genre-results > .genre-bar {
+    margin-top: 0 !important;
+}
+
+.app-header {
+    width: 100%;
+    height: 440px;
+    top: 0;
+    left: 0;
+    position: absolute;
+    cursor: default;
+    user-select: none;
+    background-color: #443757;
+    overflow: hidden;
+}
+
+.app-header > .app-header-bg-real {
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.app-header > .app-header-bg {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    padding: 60px;
+    margin-top: 40px;
+    box-sizing: border-box;
+    background: linear-gradient(#562954 0%, rgba(9, 164, 255, 0.575) 100%);
+}
+
+.app-header > .app-header-bg > .search-bar-container {
+    width: 450px;
+    height: 50px;
+    border-radius: 4px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin-left: 60px;
+    margin-bottom: 140px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.1);
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+
+.app-header > .app-header-bg > .search-bar-container > i {
+    margin-right: 20px;
+}
+
+.app-header > .app-header-bg > .search-bar-container > i.mdi-close {
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    position: absolute;
+}
+
+.app-header > .app-header-bg > .search-bar-container > input {
+    width: calc(100% - 50px);
+    border: none;
+    outline: none;
+    font-family: 'Avenir';
+    font-size: 18px;
+    color: #000;
+}
+
+.app-header > .app-header-bg > div {
+    font-family: 'Avenir';
+}
+
+.app-header > .app-header-bg > .app-header-title {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.829);
+}
+
+.app-header > .app-header-bg > .app-header-subtitle {
+    font-size: 68px;
+    font-weight: bold;
+    color: rgb(255, 255, 255);
+    text-transform: uppercase;
+    margin-left: -2px;
+}
+
+.app-header > .app-header-bg > i {
+    top: 0;
+    right: 0;
+    position: absolute;
+    margin: 60px;
+    font-size: 24px !important;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.app-menu {
+    width: 220px;
+    height: auto;
+    background-color: #FFF;
+    top: 0;
+    right: 0;
+    position: absolute;
+    transform: translateY(150px);
+    margin-right: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 6px 8px 0 rgba(0, 0, 0, 0.1);
+    z-index: 99;
+    will-change: transform;
+}
+
+.app-menu > div > i {
+    font-size: 24px;
+    margin-right: 20px;
+}
+
+.app-menu > div > div {
+    line-height: 60px;
+}
+
+.app-menu > div > * {
+    display: inline-block;
+}
+
+.app-menu > div {
+    height: 60px;
+    line-height: 60px;
+    font-family: 'Avenir';
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.71);
+    padding-left: 20px;
+    box-sizing: border-box;
+    cursor: default;
+    user-select: none;
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    display: flex;
+    align-items: center;
+}
+.app-menu > div:hover {
+    background-color: rgb(0, 0, 0);
+    color: #FFF !important;
+    letter-spacing: 2px;
+}
+
+.app-menu > .menu-active {
+    color: #000 !important;
+}
+
+.account-container {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+    background-color: #5e11f1;
+    z-index: 998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.create-container {
+    z-index: 999 !important;
+}
+
+.create-container > .account-form > .account-title {
+    margin-top: 20px !important;
+}
+
+.account-container > .account-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: #FFF;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 20px 0 rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+.account-container > .account-form > .account-title {
+    font-family: 'Avenir', sans-serif;
+    font-size: 28px;
+    margin-top: 50px;
+    margin-bottom: 5px;
+    text-transform: capitalize;
+    color: rgba(0, 0, 0, 0.81);
+}
+
+.account-container > .account-form > .account-desc {
+    font-family: 'Avenir', sans-serif;
+    font-size: 12px;
+    margin-bottom: 10px;
+    color: rgba(0, 0, 0, 0.61);
+    max-width: 280px;
+    text-align: center;
+}
+
+.account-container > .account-form > input {
+    width: 280px;
+    height: 50px;
+    font-size: 16px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border: none;
+    border-radius: 4px;
+    margin-top: 20px;
+    display: block;
+    outline: none;
+    color: rgba(0, 0, 0, 0.81);
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
+.account-container > .account-form > .account-register {
+    width: 100%;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.1);
+    font-family: sans-serif;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 12px;
+}
+
+.account-container > .account-form > .account-register > span {
+    text-decoration: underline;
+    margin-left: 2px;
+}
+
+.account-container > .account-form > .login-error {
+    text-align: center;
+    color: rgb(255, 35, 35);
+    font-size: 12px;
+    font-family: sans-serif;
+    margin-top: 20px;
+    text-transform: capitalize;
+}
+
+.account-container > .account-form > .account-submit {
+    width: 140px;
+    height: 40px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top: 20px;
+    border-radius: 999px;
+    border: 2px solid rgb(24, 255, 120);
+    color: rgb(24, 255, 120);
+    text-align: center;
+    line-height: 40px;
+    text-transform: uppercase;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 16px;
+    letter-spacing: 1.2px;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+.account-container > .account-form > .account-submit:hover {
+    background-color: rgb(240, 40, 157);
+    border-color: rgb(240, 40, 157);
+    color: #FFF !important;
+}
+
+.account-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 18px;
+    margin-right: 40px;
+    z-index: 100;
+}
+
+.genreContainer-anim-enter {
+    transform: translateY(30%);
+    opacity: 0;
+}
+
+.genreContainer-anim-enter.genreContainer-anim-enter-active {
+    transform: translateY(0%);
+    opacity: 1;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.genreContainer-anim-leave {
+    transform: translateY(0%);
+    opacity: 1;
+}
+
+.genreContainer-anim-leave.genreContainer-anim-leave-active {
+    transform: translateY(30%);
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.menu-anim-enter {
+    transform: translateY(170px);
+    opacity: 0;
+}
+
+.menu-anim-enter.menu-anim-enter-active {
+    transform: translateY(150px);
+    opacity: 1;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.menu-anim-leave {
+    transform: translateY(150px);
+    opacity: 1;
+}
+
+.menu-anim-leave.menu-anim-leave-active {
+    transform: translateY(170px);
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.box-anim-enter {
+    opacity: 0;
+}
+
+.box-anim-enter.box-anim-enter-active {
+    opacity: 1;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.box-anim-leave {
+    opacity: 1;
+}
+
+.box-anim-leave.box-anim-leave-active {
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.movie-box-anim-enter {
+    opacity: 0;
+    transform: translate(-50%, -30%);
+}
+
+.movie-box-anim-enter.movie-box-anim-enter-active {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.movie-box-anim-leave {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+}
+
+.movie-box-anim-leave.movie-box-anim-leave-active {
+    opacity: 0;
+    transform: translate(-50%, -30%);
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.movie-modal {
+    width: 700px;
+    height: auto;
+    min-height: 500px;
+    padding: 10px;
+    top: 50%;
+    left: 50%;
+    position: fixed;
+    transform: translate(-50%, -50%);
+    background-color: #000;
+    border-radius: 4px;
+    box-shadow: 0 6px 40px 0 rgba(0, 0, 0, 0.31);
+    z-index: 800;
+    overflow: hidden;
+    cursor: default;
+    will-change: transform;
+}
+
+.movie-modal > .movie-modal-image {
+    width: 120%;
+    height: 240px;
+    top: 0;
+    margin-top: -22px;
+    margin-left: -14%;
+    filter: blur(4px);
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: absolute;
+    z-index: -10;
+}
+
+.movie-modal > .movie-gradient {
+    width: 100%;
+    height: 227px;
+    background: linear-gradient(180deg, rgba(2, 0, 36, 0) 0%, rgba(0, 0, 0, 0.40) 50%, rgba(0, 0, 0, 1) 100%);
+    top: 0;
+    left: 0;
+    position: absolute;
+    margin-top: 0;
+    z-index: -10;
+}
+
+.movie-modal > .movie-modal-info {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 40px;
+    box-sizing: border-box;
+    font-family: 'Avenir';
+    color: #FFF;
+    text-align: center;
+}
+
+.movie-modal > .movie-modal-info > .movie-modal-poster {
+    width: 150px;
+    height: 227px;
+    border-radius: 10px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.41);
+}
+
+.movie-modal > .movie-modal-info > .movie-modal-title {
+    font-size: 36px;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.movie-modal > .movie-modal-info > .movie-modal-desc {
+    font-family: 'Avenir';
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.movie-modal > .movie-modal-info > .movie-metadata {
+    margin-top: 20px;
+}
+
+.movie-modal > .movie-modal-info > .movie-metadata > *,
+.movie-modal > .movie-modal-info > .movie-metadata > .movie-modal-vote,
+.movie-modal > .movie-modal-info > .movie-metadata > .movie-modal-vote > * {
+    display: inline-block;
+    font-family: 'Avenir';
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.movie-modal > .movie-modal-info > .movie-metadata > i {
+    width: 50px;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    position: relative;
+    overflow: hidden;
+    margin-top: -3px;
+    float: right;
+}
+
+.movie-modal > .movie-modal-info > .movie-metadata > i.mdi-heart {
+    border-color: rgb(249, 49, 87);
+}
+.movie-modal > .movie-modal-info > .movie-metadata > i:after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    background: rgb(249, 49, 87);
+    transform: translateX(-50%);
+    transition: 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    border-radius: 999px;
+}
+.movie-modal > .movie-modal-info > .movie-metadata > i.mdi-heart:after {
+    transform: translateX(0);
+    opacity: 1;
+}
+.movie-modal > .movie-modal-info > .movie-metadata > i:before {
+    margin-top: 1px;
+}
+
+.movie-modal > .movie-modal-info > .movie-metadata > * {
+    width: auto;
+    padding: 5px 10px;
+    border-radius: 2px;
+}
+
+.movie-modal > .movie-modal-info > .movie-metadata > .movie-modal-vote > div {
+    margin-left: 5px;
+}
+
+.movie-modal > .movie-modal-info > .movie-modal-play {
+    width: 200px;
+    height: 50px;
+    border-radius: 999px;
+    margin-top: 30px;
+    background-color: rgb(241, 24, 24);
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    overflow: hidden;
+}
+.movie-modal > .movie-modal-info > .movie-modal-play:hover {
+    color: rgb(241, 24, 24);
+}
+.movie-modal > .movie-modal-info > .movie-modal-play:before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgb(255, 244, 242);
+    opacity: 0;
+    transform: translateX(-50%);
+    transform-origin: top;
+    transition: 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    border-radius: 999px;
+}
+.movie-modal > .movie-modal-info > .movie-modal-play:hover:before {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.movie-modal > .movie-modal-info > .movie-modal-play > * {
+    position: absolute;
+    z-index: 100;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.movie-modal > .movie-modal-info > .movie-modal-play > i {
+    color: inherit;
+}
+
+.movie-modal > .movie-modal-info > .movie-modal-play > div {
+    font-family: 'Avenir';
+    font-weight: bold;
+    font-size: 24px;
+    text-transform: uppercase;
+    margin-left: 20px;
+}
+
+.movie-container-bg {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+    z-index: 500;
+    background-color: rgba(0, 0, 0, 0.81);
+    will-change: transform;
+}
+
+.movie-player {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+    z-index: 1000;
+    background-color: #000;
+    background-size: 50px;
+    background-repeat: no-repeat;
+    background-position: center;
+    will-change: transform;
+}
+
+.movie-player > video {
+    width: 100%;
+    height: auto;
+    top: 50%;
+    position: absolute;
+    transform: translateY(-50%);
+}
+
+.movie-player > .top-bar-container {
+    width: 100%;
+    height: 200px;
+    top: 0;
+    left: 0;
+    position: absolute;
+    z-index: 1000;
+    background: linear-gradient(180deg, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0.651) 20%, rgba(0, 0, 0, 0) 100%);
+}
+
+.movie-player > .top-bar-container > .top-bar {
+    width: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    margin-top: 40px;
+    padding-left: 40px;
+    padding-right: 40px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+
+.movie-player > .top-bar-container > .top-bar > div {
+    margin-left: 20px;
+    font-family: 'Avenir';
+    font-size: 18px;
+    color: #FFF;
+}
+
+.movie-player > .bottom-bar-container {
+    width: 100%;
+    height: 200px;
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.651) 80%, rgb(0, 0, 0) 100%);
+    z-index: 1000;
+}
+
+.movie-hide {
+    cursor: none !important;
+}
+
+.top-bar-hide {
+    animation: topHide 0.25s;
+    animation-timing-function: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    animation-fill-mode: forwards;
+}
+@keyframes topHide {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(-200px);
+        opacity: 0;
+    }
+}
+
+.bottom-bar-hide {
+    animation: bottomHide 0.25s;
+    animation-timing-function: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    animation-fill-mode: forwards;
+}
+@keyframes bottomHide {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(200px);
+        opacity: 0;
+    }
+}
+
+.movie-player > .bottom-bar-container > .bottom-bar {
+    width: 100%;
+    height: auto;
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    margin-bottom: 40px;
+    padding-left: 40px;
+    padding-right: 40px;
+    box-sizing: border-box;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+
+.movie-player > .bottom-bar-container > .bottom-bar > * {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.movie-player > .bottom-bar-container > .bottom-bar > input {
+    -webkit-appearance: none;
+    width: calc(100% - 300px);
+    height: 6px;
+    background: transparent;
+    border-radius: 500px;
+    margin: auto;
+}
+
+.movie-player > .bottom-bar-container > .bottom-bar > .fullscreen-button {
+    margin-right: 40px;
+}
+
+.movie-player > .bottom-bar-container > .bottom-bar > span {
+    width: 60px;
+    margin-right: 20px;
+    color: #FFF;
+    font-family: 'Avenir';
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.158);
+    border-radius: 500px;
+    cursor: pointer;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 100%;
+    margin-top: -8px;
+    background-color: rgb(253, 31, 31);
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+input[type=range]:focus {
+    outline: none;
+}
+input[type=range]::-webkit-slider-thumb:hover {
+    width: 30px;
+    height: 30px;
+    margin-top: -13px;
+}
+
+.player-anim-enter {
+    opacity: 0;
+    transform: translateY(30%);
+}
+
+.player-anim-enter.player-anim-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.player-anim-leave {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.player-anim-leave.player-anim-leave-active {
+    opacity: 0;
+    transform: translateY(30%);
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.loading-container {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #5600e2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    z-index: 1000;
+    will-change: opacity;
+}
+
+.loading-container > .logo {
+    width: 240px;
+    height: 240px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-image: url('../imgs/icon.png');
+    will-change: transform;
+}
+
+.loading-anim-enter {
+    opacity: 1;
+}
+
+.loading-anim-enter.loading-anim-enter-active {
+    opacity: 1;
+}
+
+.loading-anim-leave {
+    opacity: 1;
+}
+
+.loading-anim-leave.loading-anim-leave-active {
+    opacity: 0;
+    transform: translateY(-5%);
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.offline-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.offline-container > .offline-error {
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-image: url('../imgs/offline-error.png');
+}
+
+.offline-container > span {
+    font-family: 'Avenir';
+    font-size: 24px;
+}
+.offline-container > span:first-child {
+    color: #000;
+}
+.offline-container > span:last-child {
+    color: rgba(0, 0, 0, 0.61);
+}
+
+.content-container {
+    width: 100%;
+    height: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-top: 440px;
+    display: grid;
+    grid-gap: 40px;
+    grid-template-columns: auto auto auto auto;
+    padding: 40px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+}
+
+.movie-content-container {
+    display: block !important;
+}
+
+.genre-container {
+    width: 100%;
+    height: auto;
+    display: block;
+    position: relative;
+    margin-top: 20px;
+}
+.genre-container:first-child {
+    margin-top: 20px;
+}
+
+.genre-container > * {
+    display: block;
+}
+
+.genre-container > .movie-genre,
+.search-content > .search-title {
+    font-family: 'Avenir';
+    font-weight: bold;
+    font-size: 58px;
+    color: rgba(0, 0, 0, 0.81);
+    display: block;
+    width: auto;
+    margin-bottom: 40px;
+    margin-left: 20px;
+    position: relative;
+    cursor: default;
+    clear: both;
+    float: left;
+}
+.genre-container > .movie-genre:not(.movie-blocked)::before {
+    content: "";
+    width: 0;
+    position: absolute;
+    margin-left: -10px;
+    bottom: 0;
+    height: 100%;
+    background-color: rgb(232, 55, 111);
+    border-radius: 4px 999px 4px 4px;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    z-index: -1;
+}
+.genre-container > .movie-genre:not(.movie-blocked):hover:before {
+    width: 90%;
+}
+
+.search-content > .search-title {
+    position: absolute;
+    margin-left: 40px;
+    margin-top: -60px;
+}
+
+.search-content > .search-empty {
+    font-family: 'Avenir';
+    font-weight: bold;
+    font-size: 36px;
+    color: rgba(0, 0, 0, 0.61);
+    position: absolute;
+    margin-top: 20px;
+    margin-left: 40px;
+}
+
+.paginated-genre-results {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+    z-index: 500;
+    background: linear-gradient(#d9a9c2 0%, #cebaa0 100%);
+    padding: 110px 80px 80px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.paginated-genre-results::-webkit-scrollbar {
+    display: none;
+}
+
+.paginated-genre-results > div {
+    display: block;
+}
+
+.paginated-genre-results > .genre-bar {
+    width: 100%;
+    height: 90px;
+    top: 0;
+    left: 0;
+    margin-top: 40px;
+    position: fixed;
+    background-color: rgb(217, 171, 192);
+    z-index: 100;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    opacity: 0;
+}
+
+.paginated-genre-results > .genre-name {
+    font-family: 'Avenir';
+    font-weight: bold;
+    font-size: 76px;
+    text-align: center;
+    cursor: default;
+    text-transform: uppercase;
+    letter-spacing: 8px;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 70px;
+    line-height: 78px;
+    z-index: 110;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.paginated-genre-results > .close-genre {
+    width: 60px;
+    height: 60px;
+    left: 0;
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-top: 2px;
+    margin-left: 100px;
+    border-radius: 100%;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    z-index: 110;
+}
+.paginated-genre-results > .close-genre:hover {
+    background-color: #000;
+    transform: rotate(360deg);
+    box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0);
+}
+.paginated-genre-results > .close-genre:hover i {
+    color: #FFF;
+}
+
+.paginated-genre-results > .close-genre > i {
+    line-height: 60px;
+    font-size: 24px;
+}
+
+.close-genre-on {
+    background-color: transparent !important;
+    margin-top: -55px !important;
+}
+.close-genre-on:hover {
+    background-color: #000 !important;
+}
+
+.genre-bar-on {
+    opacity: 1 !important;
+}
+
+.genre-name-on {
+    font-size: 45px !important;
+    margin-top: -60px;
+}
+
+.paginated-genre-results > .genre-movie-list {
+    position: absolute;
+    transform: translateX(-50%);
+    left: 50%;
+    margin-top: 82px;
+    width: auto;
+    z-index: 0;
+}
+
+.paginated-genre-results > .genre-movie-list > div {
+    margin-top: 40px !important;
+    margin-left: 40px !important;
+}
+
+.genre-container > .movie-scroll-container > .movie-scroll-left,
+.genre-container > .movie-scroll-container > .movie-scroll-right {
+    top: 50%;
+    transform: translateY(-50%);
+    margin-top: 30px;
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.404);
+    z-index: 500;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    will-change: transform;
+}
+.genre-container > .movie-scroll-container > .movie-scroll-left:hover,
+.genre-container > .movie-scroll-container > .movie-scroll-right:hover {
+    background-color: rgb(23, 219, 170);
+    transform: scale(1.2) translateY(-50%) rotate(360deg);
+}
+
+.genre-container > .movie-scroll-container > .movie-scroll-left {
+    left: 0;
+    margin-left: -25px;
+    display: none;
+}
+
+.genre-container > .movie-scroll-container > .movie-scroll-right {
+    right: 0;
+    margin-right: -25px;
+}
+
+.genre-container > .movie-list-paginated {
+    width: 100%;
+    height: 360px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+}
+
+.genre-container > .movie-list-paginated::-webkit-scrollbar {
+    display: none;
+}
+
+.genre-container > .movie-list-paginated > .movie-item,
+.paginated-genre-results > .genre-movie-list > .movie-item,
+.search-content > .movie-item {
+    width: 210px;
+    height: 320px;
+    margin-left: 20px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    box-shadow: 0 10px 35px 0 rgba(0, 0, 0, 0.13);
+    white-space: normal;
+    will-change: transform;
+}
+.genre-container > .movie-list-paginated > .movie-item:first-child {
+    margin-left: 0;
+}
+
+.content-container > .movie-item {
+    height: 303.70px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.1);
+    background-color: #EFEFEF;
+}
+.content-container > .movie-item:nth-child(1),
+.content-container > .movie-item:nth-child(11) {
+    grid-column: span 3;
+}
+.content-container > .movie-item:nth-child(6) {
+    grid-column: span 4;
+}
+.content-container > .movie-item:nth-child(16),
+.content-container > .movie-item:nth-child(19),
+.content-container > .movie-item:nth-child(20),
+.content-container > .movie-item:nth-child(5),
+.content-container > .movie-item:nth-child(7) {
+    grid-column: span 2;
+}
+
+.search-content {
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: 530px;
+}
+
+.search-content > .movie-item {
+    width: auto !important;
+    margin-left: 0;
+    grid-column: auto !important;
+}
+
+.movie-backdrop {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    z-index: -10;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    will-change: transform;
+}
+
+.movie-backdrop.movie-backdrop-show {
+    opacity: 1;
+}
+
+.movie-item-blurred {
+    width: 120%;
+    height: 120%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: blur(10px);
+    margin-left: -10%;
+    margin-top: -10px;
+    position: absolute;
+    z-index: -20;
+}
+.content-container > .movie-item:hover .movie-backdrop {
+    transform: scale(1.1);
+}
+.content-container > .movie-item:hover .movie-item-desc,
+.genre-container > .movie-list-paginated > .movie-item:hover .movie-item-desc,
+.paginated-genre-results > .genre-movie-list > .movie-item:hover .movie-item-desc {
+    transform: translateY(0);
+    opacity: 1;
+}
+.content-container > .movie-item:hover .movie-item-bg,
+.genre-container > .movie-list-paginated > .movie-item:hover .movie-item-bg,
+.paginated-genre-results > .genre-movie-list > .movie-item:hover .movie-item-bg {
+    opacity: 1;
+}
+
+.content-container > .movie-item > .movie-item-bg,
+.genre-container > .movie-list-paginated > .movie-item > .movie-item-bg,
+.paginated-genre-results > .genre-movie-list > .movie-item > .movie-item-bg {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    z-index: 0;
+    background-color: rgba(0, 0, 0, 0.71);
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.content-container > .movie-item > .movie-item-desc,
+.genre-container > .movie-list-paginated > .movie-item > .movie-item-desc,
+.paginated-genre-results > .genre-movie-list > .movie-item > .movie-item-desc {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    transform: translateY(10%);
+    opacity: 0;
+    position: absolute;
+    transition: all 0.25s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    cursor: default;
+    padding: 30px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 100;
+    will-change: transform;
+}
+
+.content-container > .movie-item > .movie-item-desc > div,
+.genre-container > .movie-list-paginated > .movie-item > .movie-item-desc > div,
+.paginated-genre-results > .genre-movie-list > .movie-item > .movie-item-desc > div {
+    font-family: 'Avenir';
+    text-align: center;
+}
+
+.content-container > .movie-item > .movie-item-desc > .movie-item-title,
+.genre-container > .movie-list-paginated > .movie-item > .movie-item-desc > .movie-item-title,
+.paginated-genre-results > .genre-movie-list > .movie-item > .movie-item-desc > .movie-item-title {
+    font-weight: bold;
+    color: #FFF;
+}
+
+.content-container > .movie-item > .movie-item-desc > .movie-item-summary,
+.genre-container > .movie-list-paginated > .movie-item > .movie-item-desc > .movie-item-summary,
+.paginated-genre-results > .genre-movie-list > .movie-item > .movie-item-desc > .movie-item-summary {
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.81);
+    margin-top: 10px;
+}
+
+.content-container > .movie-item > .movie-item-desc > i,
+.genre-container > .movie-list-paginated > .movie-item > .movie-item-desc > i,
+.paginated-genre-results > .genre-movie-list > .movie-item > .movie-item-desc > i {
+    margin-top: 20px;
+}
+
+.content-loader {
+    width: 50px;
+    height: 50px;
+    background-image: url('../imgs/loading.apng');
+    background-size: cover;
+    background-repeat: no-repeat;
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    margin-top: 40px;
+    will-change: transform;
+}
+@font-face {
+    src: url('../fonts/AvenirLTStd-Black.otf');
+    font-family: 'Avenir';
+    font-weight: bold;
+}
+@font-face {
+    src: url('../fonts/AvenirLTStd-Roman.otf');
+    font-family: 'Avenir';
+    font-weight: normal;
+}
