@@ -37,7 +37,6 @@
         "firebase": "^6.0.2",
         "get-json": "^1.0.1",
         "https-proxy-agent": "^2.2.1",
-        "npm": "^6.9.0",
         "parse-torrent-name": "^0.5.4",
         "react": "^16.8.6",
         "react-dom": "^16.8.6",
