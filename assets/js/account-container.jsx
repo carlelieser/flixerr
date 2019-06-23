@@ -6,6 +6,10 @@ class AccountContainer extends Component {
     constructor(props) {
         super(props);
 
+        this
+            .handleInput
+            .bind(this);
+
         this.state = {
             accountModalInfo: {
                 create: {
@@ -35,6 +39,23 @@ class AccountContainer extends Component {
             },
             showContainer: true
         }
+
+        this.active = this.props.account
+            ? this.state.accountModalInfo.login
+            : this.state.accountModalInfo.create;
+    }
+
+    handleInput = (e) => {
+        if (e.keyCode == 13) {
+            this
+                .active
+                .submit
+                .action();
+        } else {
+            this
+                .props
+                .handleInput(e);
+        }
     }
 
     initalizeAnimation = () => {
@@ -54,9 +75,6 @@ class AccountContainer extends Component {
     }
 
     render() {
-        let active = this.props.account
-            ? this.state.accountModalInfo.login
-            : this.state.accountModalInfo.create;
 
         return (
             <div className='account-container'>
@@ -70,20 +88,20 @@ class AccountContainer extends Component {
                         <div className='account-close' onClick={this.props.closeAccount}>
                             <i className='mdi mdi-close'/>
                         </div>
-                        <div className='account-title'>{active.title}</div>
-                        <div className='account-desc'>{active.desc}</div>
+                        <div className='account-title'>{this.active.title}</div>
+                        <div className='account-desc'>{this.active.desc}</div>
                         <input
                             type='email'
                             placeholder='Email'
                             autoFocus={true}
                             required
-                            onKeyUp={this.props.handleInput}/>
+                            onKeyUp={this.handleInput}/>
                         <span/>
                         <input
                             type='password'
                             placeholder='Password'
                             required
-                            onKeyUp={this.props.handleInput}/>
+                            onKeyUp={this.handleInput}/>
                         <span/>
                         <Fade
                             mountOnEnter
@@ -96,12 +114,12 @@ class AccountContainer extends Component {
                                 {this.props.loginError}
                             </div>
                         </Fade>
-                        <div className='account-submit' onClick={active.submit.action}>{active.submit.text}</div>
+                        <div className='account-submit' onClick={this.active.submit.action}>{this.active.submit.text}</div>
                         <div className='divider'/>
                         <div
                             className='account-submit account-secondary'
-                            onClick={active.secondary.action}>
-                            {active.secondary.text}
+                            onClick={this.active.secondary.action}>
+                            {this.active.secondary.text}
                         </div>
                     </div>
                 </Fade>
