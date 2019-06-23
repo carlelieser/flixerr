@@ -27,6 +27,7 @@ function createWindow() {
         backgroundColor: '#5d16fd',
         titleBarStyle: 'hiddenInset',
         show: false,
+        defaultEncoding: 'utf8',
         webPreferences: {
             nodeIntegration: true
         }
@@ -108,13 +109,15 @@ function createWindow() {
 
     if (process.platform === 'darwin') {
         Menu.setApplicationMenu(Menu.buildFromTemplate(template));
-    } else{
+    } else {
         Menu.setApplicationMenu(null);
     }
 
     mainWindow.loadFile(path.join(__dirname, 'index.html'))
 
-    // mainWindow.webContents.openDevTools();
+    // mainWindow
+    //     .webContents
+    //     .openDevTools();
 
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
