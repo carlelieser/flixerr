@@ -87,19 +87,18 @@ class Header extends Component {
     }
 
     render() {
-        let imageURL = this.props.background
-            ? `https://image.tmdb.org/t/p/original${this.props.background}`
-            : "./assets/imgs/account-bg.png";
-
-        let version = require('electron').remote.app.getVersion();
+        let version = require('electron')
+            .remote
+            .app
+            .getVersion();
 
         return (
             <div className='app-header'>
-                <Fade spy={imageURL} distance='10%' bottom>
+                <Fade spy={this.props.background} distance='10%' bottom>
                     <div
                         className='app-header-bg-real'
                         style={{
-                        backgroundImage: `url(${imageURL})`
+                        backgroundImage: `url(${this.props.background})`
                     }}/>
                 </Fade>
                 <div className='app-header-bg'>
@@ -128,7 +127,10 @@ class Header extends Component {
                             ? "0"
                             : "360"}deg)`
                     }}/>
-                    <div className={`search-bar-container ${this.state.active ? 'search-on' : ''}`}>
+                    <div
+                        className={`search-bar-container ${this.state.active
+                        ? 'search-on'
+                        : ''}`}>
                         <i className='mdi mdi-24px mdi-magnify'/>
                         <input
                             ref={this.searchRef}
