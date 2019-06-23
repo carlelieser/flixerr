@@ -1,7 +1,5 @@
 import React, {Component} from "react";
 
-import readBlob from 'read-blob';
-
 class SubtitleItem extends Component {
     constructor(props) {
         super(props);

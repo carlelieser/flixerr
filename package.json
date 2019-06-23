@@ -1,6 +1,6 @@
 {
     "name": "flixerr",
-    "version": "1.4.0",
+    "version": "1.4.5",
     "description": "A movie torrent streaming service.",
     "main": "main.js",
     "scripts": {
@@ -11,7 +11,8 @@
         "package-linux": "electron-packager . Flixerr --platform=linux --arch=x64 --asar --prune --icon=./assets/imgs/icon.png --out=./build/ --overwrite",
         "create-installer-windows": "node build.js",
         "create-installer-mac": "electron-installer-dmg ./build/Flixerr-darwin-x64/Flixerr.app Flixerr --out=./build --background=./assets/imgs/installer-bg.png --icon=./assets/imgs/external-drive.icns --overwrite",
-        "do-everything": "npm run build && npm run package-win && npm run package-darwin && npm run package-linux && npm run create-installer-mac && npm run create-installer-windows"
+        "create-installer-linux": "electron-installer-debian --src ./build/Flixerr-linux-x64/ --dest ./build/installers/ --arch amd64",
+        "do-everything": "npm run build && npm run package-win && npm run package-darwin && npm run package-linux && npm run create-installer-mac && npm run create-installer-linux && npm run create-installer-windows"
     },
     "author": "Flixerr",
     "devDependencies": {
@@ -28,6 +29,7 @@
         "axios": "^0.19.0",
         "babel-register": "^6.26.0",
         "cheerio": "^1.0.0-rc.3",
+        "electron-installer-debian": "^2.0.0",
         "electron-json-storage": "^4.1.6",
         "electron-squirrel-startup": "^1.0.0",
         "electron-titlebar": "0.0.3",
@@ -35,10 +37,12 @@
         "electron-winstaller": "^3.0.4",
         "fast-average-color": "^5.1.0",
         "firebase": "^6.0.2",
+        "franc-min": "^4.1.0",
         "get-json": "^1.0.1",
         "https-proxy-agent": "^2.2.1",
-        "npm": "^6.9.0",
+        "langs": "^2.0.0",
         "parse-torrent-name": "^0.5.4",
+        "pluralize": "^8.0.0",
         "react": "^16.8.6",
         "react-dom": "^16.8.6",
         "react-lazy-load": "^3.0.13",
