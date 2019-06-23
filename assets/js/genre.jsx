@@ -17,7 +17,7 @@ class Genre extends Component {
     }
 
     loadPage = () => {
-        if (!this.props.genreInfo.showCollection) {
+        if (!this.props.genreInfo.showCollection && this.props.genreInfo.genreID !== 21) {
             let url = `https://api.themoviedb.org/3/discover/movie?api_key=${
             this.props.apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${
             this
@@ -32,7 +32,7 @@ class Genre extends Component {
                     this
                         .props
                         .setOffline();
-                    let movies = response.results;
+                    let movies = this.props.extractMovies(response, false, false);;
                     this.setState((prevState) => {
                         return {
                             movies: prevState
@@ -93,7 +93,7 @@ class Genre extends Component {
 
     setCollection = () => {
         let collection = this.props[this.props.genreInfo.target];
-        this.setState({movies: collection ? collection : [], processing: false});
+        this.setState({movies: this.props.genreInfo.genreID == 21 ? this.props.genreInfo.movies : collection ? collection : [], processing: false});
     }
 
     shouldComponentUpdate(nextProps, nextState) {
