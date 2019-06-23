@@ -24,29 +24,29 @@ class MovieItem extends Component {
     };
 
     loadImage = () => {
-        this.setState({
-            backdrop: `${this.props.fallback
-                ? this.backdropImageURL
-                : this.imageURL}`
-        });
+        if (!this.unMounting) {
+            this.setState({
+                backdrop: `${this.props.fallback
+                    ? this.props.movie.flixerr_data.backdrop_path
+                    : this.props.movie.flixerr_data.poster_path}`
+            });
+        }
     };
 
-    handleImage = () => {
-        this.image = new Image();
-        this.imageURL = this.props.movie.poster_path
-            ? `https://image.tmdb.org/t/p/w780${this.props.movie.poster_path}`
-            : `https://image.tmdb.org/t/p/w780${
-        this.props.movie.backdrop_path}`;
-        this.image.src = this.imageURL;
-
+    createNewImage = (src) => {
         let image = new Image();
-        image.src = `https://image.tmdb.org/t/p/w300${
-        this.props.movie.backdrop_path}`;
+        image.src = src;
 
+        return image;
+    }
+
+    handleImage = () => {
+        let posterImage = this.createNewImage(this.props.movie.flixerr_data.poster_path);
+        let colorImage = this.createNewImage(this.props.movie.flixerr_data.blurry_backdrop_path);
         let fac = new FastAverageColor();
 
         fac
-            .getColorAsync(image, {algorithm: "sqrt"})
+            .getColorAsync(colorImage, {algorithm: "sqrt"})
             .then((color) => {
                 if (!this.unMounting) {
                     this.setState({averageColor: color});
@@ -55,13 +55,10 @@ class MovieItem extends Component {
             .catch((err) => console.log(err));
 
         if (this.props.fallback) {
-            this.backdropImage = new Image();
-            this.backdropImageURL = `https://image.tmdb.org/t/p/original${
-            this.props.movie.backdrop_path}`;
-            this.backdropImage.src = this.backdropImageURL;
-            this.backdropImage.onload = this.loadImage;
+            let backdropImage = this.createNewImage(this.props.movie.flixerr_data.backdrop_path);
+            backdropImage.onload = this.loadImage;
         } else {
-            this.image.onload = this.loadImage;
+            posterImage.onload = this.loadImage;
         }
     };
 
@@ -103,6 +100,14 @@ class MovieItem extends Component {
         return stars;
     };
 
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextState.averageColor === this.state.averageColor && nextState.backdrop === this.state.backdrop && nextState.fontSize === this.state.fontSize && nextState.stars === this.state.stars && nextProps.movie === this.props.movie) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     componentDidMount() {
         this.setState({
             fontSize: -0.0195 * this.props.movie.title.length + 1.6,
@@ -112,15 +117,6 @@ class MovieItem extends Component {
 
     componentWillUnmount() {
         this.unMounting = true;
-        if (this.props.fallback) {
-            if (this.backdropImage) {
-                this.backdropImage.onload = false;
-            }
-        } else {
-            if (this.image) {
-                this.image.onload = false;
-            }
-        }
     }
 
     render() {
@@ -151,11 +147,9 @@ class MovieItem extends Component {
                     <div className='movie-item-bg'/>
                     <img
                         className='movie-item-blurred'
-                        src={`https://image.tmdb.org/t/p/${this.props.fallback
-                        ? "w300"
-                        : "w92"}${this.props.fallback
-                            ? this.props.movie.backdrop_path
-                            : this.props.movie.poster_path}`}
+                        src={this.props.fallback
+                        ? this.props.movie.flixerr_data.blurry_backdrop_path
+                        : this.props.movie.flixerr_data.blurry_poster_path}
                         onLoad={this.handleImage}/> {this.state.backdrop
                         ? (<img
                             className={"movie-backdrop" + (this.state.backdrop
