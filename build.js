@@ -4,7 +4,7 @@ const path = require('path')
 function getInstallerConfig() {
     console.log('Creating Windows Installer')
     const rootPath = path.join('./')
-    const outPath = path.join(rootPath, 'build', 'installers')
+    const outPath = path.join(rootPath, 'build')
     const iconFile = path.join(rootPath, 'assets', 'imgs', 'icon.ico')
     return Promise.resolve({
         appDirectory: path.join(outPath, 'Flixerr-win32-x64/'),
@@ -12,7 +12,7 @@ function getInstallerConfig() {
         title: 'Flixerr',
         authors: 'Flixerr, Inc.',
         noMsi: true,
-        outputDirectory: path.join(outPath, 'installer'),
+        outputDirectory: path.join(outPath, 'installers'),
         exe: 'Flixerr.exe',
         setupExe: 'flixerr-setup.exe',
         setupIcon: iconFile,
