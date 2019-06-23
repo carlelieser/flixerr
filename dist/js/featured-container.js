@@ -39,8 +39,20 @@ var FeaturedContainer = function (_Component) {
         var _this = _possibleConstructorReturn(this, (FeaturedContainer.__proto__ || Object.getPrototypeOf(FeaturedContainer)).call(this, props));
 
         _this.getFeatured = function () {
-            if (_this.props.featured.length === 0) {
+            if (_this.props.featured) {
+                if (!_this.props.featured.length) {
+                    _this.props.loadFeatured();
+                }
+            } else {
                 _this.props.loadFeatured();
+            }
+        };
+
+        _this.setHeader = function () {
+            if (_this.props.featured) {
+                if (_this.props.featured.length) {
+                    _this.props.setHeader(_this.props.featured[0].flixerr_data.backdrop_path);
+                }
             }
         };
 
@@ -50,21 +62,16 @@ var FeaturedContainer = function (_Component) {
     _createClass(FeaturedContainer, [{
         key: "componentDidUpdate",
         value: function componentDidUpdate(prevProps, prevState) {
-            if (this.props.featured) {
-                if (!this.props.featured.length) {
-                    this.getFeatured();
-                }
-            }
-
+            this.getFeatured();
             if (prevProps.featured !== this.props.featured) {
-                this.props.setHeader(this.props.featured);
+                this.setHeader();
             }
         }
     }, {
         key: "componentDidMount",
         value: function componentDidMount() {
             this.getFeatured();
-            this.props.setHeader(this.props.featured);
+            this.setHeader();
         }
     }, {
         key: "render",

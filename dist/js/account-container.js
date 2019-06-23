@@ -30,6 +30,14 @@ var AccountContainer = function (_Component) {
 
         var _this = _possibleConstructorReturn(this, (AccountContainer.__proto__ || Object.getPrototypeOf(AccountContainer)).call(this, props));
 
+        _this.handleInput = function (e) {
+            if (e.keyCode == 13) {
+                _this.active.submit.action();
+            } else {
+                _this.props.handleInput(e);
+            }
+        };
+
         _this.initalizeAnimation = function () {
             _this.setState({
                 showContainer: false
@@ -39,6 +47,8 @@ var AccountContainer = function (_Component) {
                 }, 250);
             });
         };
+
+        _this.handleInput.bind(_this);
 
         _this.state = {
             accountModalInfo: {
@@ -69,6 +79,8 @@ var AccountContainer = function (_Component) {
             },
             showContainer: true
         };
+
+        _this.active = _this.props.account ? _this.state.accountModalInfo.login : _this.state.accountModalInfo.create;
         return _this;
     }
 
@@ -82,7 +94,6 @@ var AccountContainer = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
-            var active = this.props.account ? this.state.accountModalInfo.login : this.state.accountModalInfo.create;
 
             return _react2.default.createElement(
                 'div',
@@ -106,25 +117,25 @@ var AccountContainer = function (_Component) {
                         _react2.default.createElement(
                             'div',
                             { className: 'account-title' },
-                            active.title
+                            this.active.title
                         ),
                         _react2.default.createElement(
                             'div',
                             { className: 'account-desc' },
-                            active.desc
+                            this.active.desc
                         ),
                         _react2.default.createElement('input', {
                             type: 'email',
                             placeholder: 'Email',
                             autoFocus: true,
                             required: true,
-                            onKeyUp: this.props.handleInput }),
+                            onKeyUp: this.handleInput }),
                         _react2.default.createElement('span', null),
                         _react2.default.createElement('input', {
                             type: 'password',
                             placeholder: 'Password',
                             required: true,
-                            onKeyUp: this.props.handleInput }),
+                            onKeyUp: this.handleInput }),
                         _react2.default.createElement('span', null),
                         _react2.default.createElement(
                             _Fade2.default,
@@ -143,16 +154,16 @@ var AccountContainer = function (_Component) {
                         ),
                         _react2.default.createElement(
                             'div',
-                            { className: 'account-submit', onClick: active.submit.action },
-                            active.submit.text
+                            { className: 'account-submit', onClick: this.active.submit.action },
+                            this.active.submit.text
                         ),
                         _react2.default.createElement('div', { className: 'divider' }),
                         _react2.default.createElement(
                             'div',
                             {
                                 className: 'account-submit account-secondary',
-                                onClick: active.secondary.action },
-                            active.secondary.text
+                                onClick: this.active.secondary.action },
+                            this.active.secondary.text
                         )
                     )
                 )

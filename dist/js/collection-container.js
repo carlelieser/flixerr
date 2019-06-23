@@ -34,8 +34,22 @@ var Collection = function (_Component) {
 
         var _this = _possibleConstructorReturn(this, (Collection.__proto__ || Object.getPrototypeOf(Collection)).call(this, props));
 
-        _this.strip = function (string, chars) {
-            return string.substring(0, chars);
+        _this.checkSuggested = function () {
+            if (_this.props.suggested) {
+                if (!_this.props.suggested.length) {
+                    _this.props.updateSuggested();
+                }
+            } else {
+                _this.props.updateSuggested();
+            }
+        };
+
+        _this.setHeader = function () {
+            if (_this.props.suggested) {
+                if (_this.props.suggested.length) {
+                    _this.props.setHeader(_this.props.suggested[0].flixerr_data.backdrop_path);
+                }
+            }
         };
 
         _this.state = {
@@ -66,20 +80,15 @@ var Collection = function (_Component) {
         key: "componentDidUpdate",
         value: function componentDidUpdate(prevProps, prevState) {
             if (prevProps.suggested !== this.props.suggested) {
-                this.props.setHeader(this.props.suggested);
+                this.setHeader();
             }
+            this.checkSuggested();
         }
     }, {
         key: "componentDidMount",
         value: function componentDidMount() {
-            if (this.props.suggested) {
-                if (!this.props.suggested.length) {
-                    this.props.updateSuggested();
-                }
-            } else {
-                this.props.updateSuggested();
-            }
-            this.props.setHeader(this.props.suggested);
+            this.checkSuggested();
+            this.setHeader();
         }
     }, {
         key: "render",

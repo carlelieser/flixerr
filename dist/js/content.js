@@ -49,29 +49,11 @@ var Content = function (_Component) {
         _this.getActiveContainer = function () {
             switch (_this.props.active) {
                 case "Featured":
-                    return _react2.default.createElement(_featuredContainer2.default, {
-                        offline: _this.props.offline,
-                        featured: _this.props.featured,
-                        loadFeatured: _this.props.loadFeatured,
-                        openBox: _this.props.openBox,
-                        setHeader: _this.props.setHeaderBackground });
+                    return _react2.default.createElement(_featuredContainer2.default, _this.props);
                 case "Movies":
-                    return _react2.default.createElement(_movieContainer2.default, {
-                        offline: _this.props.offline,
-                        movies: _this.props.movies,
-                        toggleGenre: _this.props.toggleGenre,
-                        openBox: _this.props.openBox,
-                        loadMovieCategories: _this.props.loadMovieCategories,
-                        setHeader: _this.props.setHeaderBackground });
+                    return _react2.default.createElement(_movieContainer2.default, _this.props);
                 case "Collection":
-                    return _react2.default.createElement(_collectionContainer2.default, {
-                        suggested: _this.props.suggested,
-                        favorites: _this.props.favorites,
-                        recentlyPlayed: _this.props.recentlyPlayed,
-                        updateSuggested: _this.props.updateSuggested,
-                        openBox: _this.props.openBox,
-                        setHeader: _this.props.setHeaderBackground,
-                        toggleGenre: _this.props.toggleGenre });
+                    return _react2.default.createElement(_collectionContainer2.default, _this.props);
             }
         };
 
@@ -98,10 +80,7 @@ var Content = function (_Component) {
         };
 
         _this.getSearchContainer = function () {
-            var search = _react2.default.createElement(_searchContainer2.default, {
-                setHeader: _this.props.setHeaderBackground,
-                searchContent: _this.props.searchContent,
-                openBox: _this.props.openBox });
+            var search = _react2.default.createElement(_searchContainer2.default, _this.props);
             return search;
         };
 
@@ -111,23 +90,17 @@ var Content = function (_Component) {
     _createClass(Content, [{
         key: "shouldComponentUpdate",
         value: function shouldComponentUpdate(nextProps, nextState) {
-            if (nextProps.active === "Featured") {
-                if (nextProps.featured === this.props.featured && nextProps.active === this.props.active && nextProps.offline === this.props.offline && nextProps.searchContent === this.props.searchContent) {
-                    return false;
-                } else {
+            if (nextProps.active !== this.props.active || nextProps.offline !== this.props.offline || nextProps.searchContent !== this.props.searchContent) {
+                return true;
+            } else {
+                if (this.props.active === "Featured" && nextProps.featured !== this.props.featured) {
                     return true;
-                }
-            } else if (nextProps.active === "Movies") {
-                if (nextProps.movies === this.props.movies && nextProps.active === this.props.active && nextProps.offline === this.props.offline && nextProps.searchContent === this.props.searchContent) {
-                    return false;
-                } else {
+                } else if (this.props.active === "Movies" && nextProps.movies !== this.props.movies) {
                     return true;
-                }
-            } else if (nextProps.active === "Collection") {
-                if (nextProps.suggested === this.props.suggested && nextProps.favorites === this.props.favorites && nextProps.recentlyPlayed === this.props.recentlyPlayed && nextProps.active === this.props.active && nextProps.offline === this.props.offline && nextProps.searchContent === this.props.searchContent) {
-                    return false;
-                } else {
+                } else if (this.props.active === "Collection" && (nextProps.suggested !== this.props.suggested || nextProps.favorites !== this.props.favorites || nextProps.recentlyPlayed !== this.props.recentlyPlayed)) {
                     return true;
+                } else {
+                    return false;
                 }
             }
         }

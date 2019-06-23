@@ -97,8 +97,6 @@ var Header = function (_Component) {
     }, {
         key: "render",
         value: function render() {
-            var imageURL = this.props.background ? "https://image.tmdb.org/t/p/original" + this.props.background : "./assets/imgs/account-bg.png";
-
             var version = require('electron').remote.app.getVersion();
 
             return _react2.default.createElement(
@@ -106,11 +104,11 @@ var Header = function (_Component) {
                 { className: "app-header" },
                 _react2.default.createElement(
                     _Fade2.default,
-                    { spy: imageURL, distance: "10%", bottom: true },
+                    { spy: this.props.background, distance: "10%", bottom: true },
                     _react2.default.createElement("div", {
                         className: "app-header-bg-real",
                         style: {
-                            backgroundImage: "url(" + imageURL + ")"
+                            backgroundImage: "url(" + this.props.background + ")"
                         } })
                 ),
                 _react2.default.createElement(
@@ -151,7 +149,8 @@ var Header = function (_Component) {
                         } }),
                     _react2.default.createElement(
                         "div",
-                        { className: "search-bar-container " + (this.state.active ? 'search-on' : '') },
+                        {
+                            className: "search-bar-container " + (this.state.active ? 'search-on' : '') },
                         _react2.default.createElement("i", { className: "mdi mdi-24px mdi-magnify" }),
                         _react2.default.createElement("input", {
                             ref: this.searchRef,

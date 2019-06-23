@@ -40,6 +40,16 @@ var MovieContainer = function (_Component) {
             }
         };
 
+        _this.setHeader = function () {
+            if (_this.props.movies) {
+                if (_this.props.movies.length) {
+                    if (_this.props.movies[0].movies[0]) {
+                        _this.props.setHeader(_this.props.movies[0].movies[0].flixerr_data.backdrop_path);
+                    }
+                }
+            }
+        };
+
         return _this;
     }
 
@@ -53,14 +63,14 @@ var MovieContainer = function (_Component) {
             }
 
             if (prevProps.movies !== this.props.movies) {
-                this.props.setHeader(this.props.movies);
+                this.setHeader();
             }
         }
     }, {
         key: "componentDidMount",
         value: function componentDidMount() {
             this.getMovies();
-            this.props.setHeader(this.props.movies);
+            this.setHeader();
         }
     }, {
         key: "render",

@@ -34,15 +34,13 @@ var TorrentSearch = function TorrentSearch() {
 
     var getProxy = function getProxy() {
         var proxyList = new _proxyList2.default();
-        return new Promise(function (resolve, reject) {
-            proxyList.listProxies().then(function (proxies) {
-                if (proxies) {
-                    var proxy = proxies[Math.floor(Math.random() * proxies.length)];
-                    resolve(proxy);
-                } else {
-                    reject("Error: No proxies found.");
-                }
-            });
+        return proxyList.listProxies().then(function (proxies) {
+            if (proxies) {
+                var proxy = proxies[Math.floor(Math.random() * proxies.length)];
+                return proxy;
+            } else {
+                reject();
+            }
         });
     };
 

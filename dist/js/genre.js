@@ -31,12 +31,12 @@ var Genre = function (_Component) {
         var _this = _possibleConstructorReturn(this, (Genre.__proto__ || Object.getPrototypeOf(Genre)).call(this, props));
 
         _this.loadPage = function () {
-            if (!_this.props.genreInfo.showCollection) {
+            if (!_this.props.genreInfo.showCollection && _this.props.genreInfo.genreID !== 21) {
                 var url = "https://api.themoviedb.org/3/discover/movie?api_key=" + _this.props.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=" + _this.state.page + "&release_date.gte=" + (new Date().getFullYear() - 5) + "&release_date.lte=" + (new Date().getFullYear() - 1) + "&with_genres=" + _this.props.genreInfo.genreID;
 
                 _this.props.fetchContent(url).then(function (response) {
                     _this.props.setOffline();
-                    var movies = response.results;
+                    var movies = _this.props.extractMovies(response, false, false);;
                     _this.setState(function (prevState) {
                         return {
                             movies: prevState.movies.concat(movies),
@@ -106,7 +106,7 @@ var Genre = function (_Component) {
 
         _this.setCollection = function () {
             var collection = _this.props[_this.props.genreInfo.target];
-            _this.setState({ movies: collection ? collection : [], processing: false });
+            _this.setState({ movies: _this.props.genreInfo.genreID == 21 ? _this.props.genreInfo.movies : collection ? collection : [], processing: false });
         };
 
         _this.genreElem = _react2.default.createRef();

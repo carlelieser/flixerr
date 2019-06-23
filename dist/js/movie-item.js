@@ -43,22 +43,26 @@ var MovieItem = function (_Component) {
         };
 
         _this.loadImage = function () {
-            _this.setState({
-                backdrop: "" + (_this.props.fallback ? _this.backdropImageURL : _this.imageURL)
-            });
+            if (!_this.unMounting) {
+                _this.setState({
+                    backdrop: "" + (_this.props.fallback ? _this.props.movie.flixerr_data.backdrop_path : _this.props.movie.flixerr_data.poster_path)
+                });
+            }
+        };
+
+        _this.createNewImage = function (src) {
+            var image = new Image();
+            image.src = src;
+
+            return image;
         };
 
         _this.handleImage = function () {
-            _this.image = new Image();
-            _this.imageURL = _this.props.movie.poster_path ? "https://image.tmdb.org/t/p/w780" + _this.props.movie.poster_path : "https://image.tmdb.org/t/p/w780" + _this.props.movie.backdrop_path;
-            _this.image.src = _this.imageURL;
-
-            var image = new Image();
-            image.src = "https://image.tmdb.org/t/p/w300" + _this.props.movie.backdrop_path;
-
+            var posterImage = _this.createNewImage(_this.props.movie.flixerr_data.poster_path);
+            var colorImage = _this.createNewImage(_this.props.movie.flixerr_data.blurry_backdrop_path);
             var fac = new _fastAverageColor2.default();
 
-            fac.getColorAsync(image, { algorithm: "sqrt" }).then(function (color) {
+            fac.getColorAsync(colorImage, { algorithm: "sqrt" }).then(function (color) {
                 if (!_this.unMounting) {
                     _this.setState({ averageColor: color });
                 }
@@ -67,12 +71,10 @@ var MovieItem = function (_Component) {
             });
 
             if (_this.props.fallback) {
-                _this.backdropImage = new Image();
-                _this.backdropImageURL = "https://image.tmdb.org/t/p/original" + _this.props.movie.backdrop_path;
-                _this.backdropImage.src = _this.backdropImageURL;
-                _this.backdropImage.onload = _this.loadImage;
+                var backdropImage = _this.createNewImage(_this.props.movie.flixerr_data.backdrop_path);
+                backdropImage.onload = _this.loadImage;
             } else {
-                _this.image.onload = _this.loadImage;
+                posterImage.onload = _this.loadImage;
             }
         };
 
@@ -125,6 +127,15 @@ var MovieItem = function (_Component) {
     }
 
     _createClass(MovieItem, [{
+        key: "shouldComponentUpdate",
+        value: function shouldComponentUpdate(nextProps, nextState) {
+            if (nextState.averageColor === this.state.averageColor && nextState.backdrop === this.state.backdrop && nextState.fontSize === this.state.fontSize && nextState.stars === this.state.stars && nextProps.movie === this.props.movie) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }, {
         key: "componentDidMount",
         value: function componentDidMount() {
             this.setState({
@@ -136,15 +147,6 @@ var MovieItem = function (_Component) {
         key: "componentWillUnmount",
         value: function componentWillUnmount() {
             this.unMounting = true;
-            if (this.props.fallback) {
-                if (this.backdropImage) {
-                    this.backdropImage.onload = false;
-                }
-            } else {
-                if (this.image) {
-                    this.image.onload = false;
-                }
-            }
         }
     }, {
         key: "render",
@@ -185,7 +187,7 @@ var MovieItem = function (_Component) {
                     _react2.default.createElement("div", { className: "movie-item-bg" }),
                     _react2.default.createElement("img", {
                         className: "movie-item-blurred",
-                        src: "https://image.tmdb.org/t/p/" + (this.props.fallback ? "w300" : "w92") + (this.props.fallback ? this.props.movie.backdrop_path : this.props.movie.poster_path),
+                        src: this.props.fallback ? this.props.movie.flixerr_data.blurry_backdrop_path : this.props.movie.flixerr_data.blurry_poster_path,
                         onLoad: this.handleImage }),
                     " ",
                     this.state.backdrop ? _react2.default.createElement("img", {

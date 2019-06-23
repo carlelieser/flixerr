@@ -16,6 +16,10 @@ var _Fade = require("react-reveal/Fade");
 
 var _Fade2 = _interopRequireDefault(_Fade);
 
+var _subtitleItem = require("./subtitle-item");
+
+var _subtitleItem2 = _interopRequireDefault(_subtitleItem);
+
 var _backupTorrentContainer = require("./backup-torrent-container");
 
 var _backupTorrentContainer2 = _interopRequireDefault(_backupTorrentContainer);
@@ -36,18 +40,30 @@ var Player = function (_Component) {
 
         var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, props));
 
+        _this.setActiveSubtitle = function (activeSubtitle) {
+            _this.setState({ activeSubtitle: activeSubtitle });
+        };
+
+        _this.toggleSubtitleMenu = function () {
+            _this.setState(function (prevState) {
+                return {
+                    showSubtitles: !prevState.showSubtitles
+                };
+            });
+        };
+
         _this.toggleOverlay = function (show) {
             _this.setState({ showOverlay: show });
         };
 
         _this.mouseStopped = function () {
-            if (!_this.props.openBackup) {
+            if (!_this.props.openBackup && !_this.state.showSubtitles) {
                 _this.toggleOverlay();
             }
         };
 
         _this.mouseMove = function () {
-            if (!_this.props.openBackup) {
+            if (!_this.props.openBackup && !_this.state.showSubtitles) {
                 _this.toggleOverlay(true);
                 clearTimeout(_this.state.timer);
                 _this.setState({
@@ -147,7 +163,7 @@ var Player = function (_Component) {
 
             _this.props.updateMovieTime(_this.videoElement.current.currentTime);
 
-            _this.props.resetClient(true).then(function (result) {
+            _this.props.resetClient(true).then(function () {
                 _this.props.streamTorrent(torrent);
             });
             _this.props.closeBackup();
@@ -158,14 +174,6 @@ var Player = function (_Component) {
                 _this.pauseVideo();
             }
             _this.props.showBackup(true);
-        };
-
-        _this.handleSubtitles = function () {
-            _this.setState(function (prevState) {
-                return {
-                    showSubtitles: !prevState.showSubtitles
-                };
-            });
         };
 
         _this.handleBg = function () {
@@ -192,8 +200,37 @@ var Player = function (_Component) {
             _this.props.toggleIntro();
         };
 
+        _this.setSubtitleData = function (subtitleData) {
+            if (!subtitleData) {
+                _this.setActiveSubtitle();
+            }
+            _this.setState({ subtitleData: subtitleData });
+        };
+
+        _this.handleSubtitlesOff = function () {
+            _this.toggleSubtitleMenu();
+            _this.setSubtitleData();
+        };
+
+        _this.setSubtitles = function () {
+            var track = document.createElement("track");
+            track.kind = "subtitles";
+            track.label = _this.state.subtitleData.language;
+            track.src = _this.state.subtitleData.src;
+            _this.removeSubtitles();
+            _this.videoElement.current.append(track);
+            track.mode = "showing";
+            _this.videoElement.current.textTracks[0].mode = "showing";
+            _this.toggleSubtitleMenu();
+        };
+
+        _this.removeSubtitles = function () {
+            _this.videoElement.current.innerHTML = '';
+        };
+
         _this.videoElement = _react2.default.createRef();
 
+        _this.handleUpdate.bind(_this);
         _this.changeTime.bind(_this);
 
         _this.state = {
@@ -201,7 +238,9 @@ var Player = function (_Component) {
             timer: false,
             showOverlay: true,
             showSubtitles: false,
-            videoBuffering: false
+            videoBuffering: false,
+            subtitleData: false,
+            activeSubtitle: false
         };
         return _this;
     }
@@ -209,7 +248,7 @@ var Player = function (_Component) {
     _createClass(Player, [{
         key: "shouldComponentUpdate",
         value: function shouldComponentUpdate(nextProps, nextState) {
-            if (nextProps.readyToClose === this.props.readyToClose && nextProps.showIntro === this.props.showIntro && nextProps.downloadPercent === this.props.downloadPercent && nextProps.downloadSpeed === this.props.downloadSpeed && nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.videoIndex === this.props.videoIndex && nextProps.time === this.props.time && nextProps.loading === this.props.loading && nextProps.playerStatus.status === this.props.playerStatus.status && nextProps.seekValue === this.props.seekValue && nextProps.currentTime === this.props.currentTime && nextState.videoBuffering === this.state.videoBuffering && nextProps.startTime === this.props.startTime && nextProps.fileLoaded === this.props.fileLoaded) {
+            if (nextProps.readyToClose === this.props.readyToClose && nextProps.showIntro === this.props.showIntro && nextProps.downloadPercent === this.props.downloadPercent && nextProps.downloadSpeed === this.props.downloadSpeed && nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.videoIndex === this.props.videoIndex && nextProps.time === this.props.time && nextProps.loading === this.props.loading && nextProps.playerStatus.status === this.props.playerStatus.status && nextProps.seekValue === this.props.seekValue && nextProps.currentTime === this.props.currentTime && nextState.videoBuffering === this.state.videoBuffering && nextProps.startTime === this.props.startTime && nextProps.fileLoaded === this.props.fileLoaded && nextProps.subtitleOptions === this.props.subtitleOptions && nextState.subtitleData === this.state.subtitleData && nextState.activeSubtitle === this.state.activeSubtitle && nextState.showSubtitles === this.state.showSubtitles) {
                 return false;
             } else {
                 return true;
@@ -217,10 +256,19 @@ var Player = function (_Component) {
         }
     }, {
         key: "componentDidUpdate",
-        value: function componentDidUpdate(prevProps) {
+        value: function componentDidUpdate(prevProps, prevState) {
             if (prevProps.startTime !== this.props.startTime) {
                 this.videoElement.current.currentTime = this.props.startTime;
             }
+
+            if (prevState.subtitleData !== this.state.subtitleData) {
+                if (this.state.subtitleData) {
+                    this.setSubtitles();
+                } else {
+                    this.removeSubtitles();
+                }
+            }
+
             if (this.props.readyToClose === true) {
                 window.removeEventListener("beforeunload", this.handleClose);
                 window.close();
@@ -248,8 +296,21 @@ var Player = function (_Component) {
     }, {
         key: "render",
         value: function render() {
+            var _this2 = this;
+
+            var subtitles = this.props.subtitleOptions ? this.props.subtitleOptions.map(function (item) {
+                var isActive = _this2.state.activeSubtitle ? _this2.state.activeSubtitle.name == item.name ? true : false : false;
+                return _react2.default.createElement(_subtitleItem2.default, {
+                    active: isActive,
+                    setActiveSubtitle: _this2.setActiveSubtitle,
+                    setSubtitleData: _this2.setSubtitleData,
+                    item: item });
+            }) : '';
+
             var backupContainer = this.props.openBackup ? _react2.default.createElement(_backupTorrentContainer2.default, {
                 movie: this.props.movie,
+                currentTime: this.videoElement.current.currentTime,
+                updateMovieTime: this.props.updateMovieTime,
                 torrents: this.props.movie.preferredTorrents,
                 getCurrentMagnet: this.props.getCurrentMagnet,
                 handleTorrentClick: this.handleTorrentClick,
@@ -260,46 +321,10 @@ var Player = function (_Component) {
                 setPlayerLoading: this.props.setPlayerLoading }) : "";
             var backupContainerBg = this.props.openBackup ? _react2.default.createElement("div", { className: "backup-bg", onClick: this.handleBg }) : "";
 
-            var playerStatusContainer = this.props.playerStatus ? _react2.default.createElement(
-                "div",
-                { className: "player-status-container" },
-                _react2.default.createElement(
-                    "span",
-                    null,
-                    this.props.playerStatus.status
-                ),
-                this.props.playerStatus.loading ? _react2.default.createElement("span", { className: "dots" }) : "",
-                this.props.downloadPercent ? _react2.default.createElement(
-                    "div",
-                    { className: "download-info" },
-                    _react2.default.createElement(
-                        "span",
-                        { className: "download-percent" },
-                        this.props.downloadPercent,
-                        "%"
-                    ),
-                    _react2.default.createElement(
-                        "span",
-                        { className: "download-speed" },
-                        this.props.downloadSpeed + " Kb/s"
-                    )
-                ) : "",
-                this.props.downloadPercent ? _react2.default.createElement(
-                    _Fade2.default,
-                    { distance: "10%", bottom: true },
-                    _react2.default.createElement("div", {
-                        className: "progress-bar",
-                        style: {
-                            width: this.props.downloadPercent + "%"
-                        } }),
-                    _react2.default.createElement("div", { className: "progress-bar-shadow" })
-                ) : ""
-            ) : "";
-
             return _react2.default.createElement(
                 "div",
                 {
-                    className: "movie-player " + (this.state.showOverlay ? "" : this.props.openBackup ? "" : this.props.playerStatus ? this.props.playerStatus.status ? "" : "movie-hide" : "movie-hide"),
+                    className: "movie-player " + (this.state.showOverlay ? "" : this.props.openBackup ? "" : this.state.showSubtitles ? "" : this.props.playerStatus ? this.props.playerStatus.status ? "" : "movie-hide" : "movie-hide"),
                     style: {
                         backgroundImage: "" + (this.props.loading ? this.props.error ? "none" : "url(assets/imgs/loading.apng)" : "none")
                     },
@@ -322,12 +347,49 @@ var Player = function (_Component) {
                     backupContainerBg
                 ),
                 _react2.default.createElement(
-                    _reactTransitionGroup.CSSTransitionGroup,
+                    _Fade2.default,
                     {
-                        transitionName: "player-status-anim",
-                        transitionEnterTimeout: 250,
-                        transitionLeaveTimeout: 250 },
-                    playerStatusContainer
+                        mountOnEnter: true,
+                        unmountOnExit: true,
+                        duration: 350,
+                        when: this.props.playerStatus,
+                        distance: "10%",
+                        bottom: true },
+                    _react2.default.createElement(
+                        "div",
+                        { className: "player-status-container" },
+                        _react2.default.createElement(
+                            "span",
+                            null,
+                            this.props.playerStatus.status
+                        ),
+                        this.props.playerStatus.loading ? _react2.default.createElement("span", { className: "dots" }) : "",
+                        this.props.downloadPercent ? _react2.default.createElement(
+                            "div",
+                            { className: "download-info" },
+                            _react2.default.createElement(
+                                "span",
+                                { className: "download-percent" },
+                                this.props.downloadPercent,
+                                "%"
+                            ),
+                            _react2.default.createElement(
+                                "span",
+                                { className: "download-speed" },
+                                this.props.downloadSpeed + " Kb/s"
+                            )
+                        ) : "",
+                        this.props.downloadPercent ? _react2.default.createElement(
+                            _Fade2.default,
+                            { distance: "10%", bottom: true },
+                            _react2.default.createElement("div", {
+                                className: "progress-bar",
+                                style: {
+                                    width: this.props.downloadPercent + "%"
+                                } }),
+                            _react2.default.createElement("div", { className: "progress-bar-shadow" })
+                        ) : ""
+                    )
                 ),
                 _react2.default.createElement(
                     "div",
@@ -360,7 +422,11 @@ var Player = function (_Component) {
                         _react2.default.createElement(
                             "div",
                             { className: "video-data" },
-                            _react2.default.createElement("div", { className: "file-loaded", style: { width: this.props.fileLoaded + "%" } }),
+                            _react2.default.createElement("div", {
+                                className: "file-loaded",
+                                style: {
+                                    width: this.props.fileLoaded + "%"
+                                } }),
                             _react2.default.createElement("input", {
                                 className: "seek-bar",
                                 type: "range",
@@ -380,6 +446,29 @@ var Player = function (_Component) {
                             null,
                             this.props.time
                         ),
+                        _react2.default.createElement(
+                            _Fade2.default,
+                            {
+                                mountOnEnter: true,
+                                unmountOnExit: true,
+                                duration: 350,
+                                when: this.state.showSubtitles,
+                                distance: "10%",
+                                bottom: true },
+                            _react2.default.createElement(
+                                "div",
+                                { className: "subtitle-container" },
+                                subtitles,
+                                _react2.default.createElement(
+                                    "div",
+                                    { onClick: this.handleSubtitlesOff },
+                                    "Off"
+                                )
+                            )
+                        ),
+                        _react2.default.createElement("i", {
+                            className: "mdi mdi-light mdi-subtitles-outline mdi-36px",
+                            onClick: this.toggleSubtitleMenu }),
                         _react2.default.createElement("i", {
                             className: "mdi mdi-light mdi-fullscreen mdi-36px fullscreen-btn",
                             onClick: this.fullScreen })
@@ -393,7 +482,7 @@ var Player = function (_Component) {
                 _react2.default.createElement("video", {
                     autoPlay: true,
                     type: "video/mp4",
-                    onTimeUpdate: this.handleUpdate.bind(this),
+                    onTimeUpdate: this.handleUpdate,
                     onWaiting: this.handleBuffer,
                     src: Number.isInteger(this.props.videoIndex) ? "http://localhost:8888/" + this.props.videoIndex : "",
                     ref: this.videoElement })
