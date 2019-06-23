@@ -10,32 +10,39 @@ class FeaturedContainer extends Component {
     }
 
     getFeatured = () => {
-        if (this.props.featured.length === 0) {
+        if (this.props.featured) {
+            if (!this.props.featured.length) {
+                this
+                    .props
+                    .loadFeatured();
+            }
+        } else {
             this
                 .props
                 .loadFeatured();
         }
     };
 
-    componentDidUpdate(prevProps, prevState) {
+    setHeader = () => {
         if (this.props.featured) {
-            if (!this.props.featured.length) {
-                this.getFeatured();
+            if (this.props.featured.length) {
+                this
+                    .props
+                    .setHeader(this.props.featured[0].flixerr_data.backdrop_path);
             }
         }
+    }
 
+    componentDidUpdate(prevProps, prevState) {
+        this.getFeatured();
         if (prevProps.featured !== this.props.featured) {
-            this
-                .props
-                .setHeader(this.props.featured);
+            this.setHeader();
         }
     }
 
     componentDidMount() {
         this.getFeatured();
-        this
-            .props
-            .setHeader(this.props.featured);
+        this.setHeader();
     }
 
     render() {
