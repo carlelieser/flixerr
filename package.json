@@ -23,18 +23,18 @@
         "babel-preset-stage-0": "^6.24.1",
         "electron": "^5.0.2",
         "electron-installer-dmg": "^2.0.0",
-        "electron-packager": "^12.2.0"
+        "electron-packager": "^12.2.0",
+        "electron-installer-debian": "^2.0.0",
+        "electron-winstaller": "^3.0.4"
     },
     "dependencies": {
         "axios": "^0.19.0",
         "babel-register": "^6.26.0",
         "cheerio": "^1.0.0-rc.3",
-        "electron-installer-debian": "^2.0.0",
         "electron-json-storage": "^4.1.6",
         "electron-squirrel-startup": "^1.0.0",
         "electron-titlebar": "0.0.3",
         "electron-window-state": "^5.0.3",
-        "electron-winstaller": "^3.0.4",
         "fast-average-color": "^5.1.0",
         "firebase": "^6.0.2",
         "franc-min": "^4.1.0",
