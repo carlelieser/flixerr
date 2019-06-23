@@ -15,29 +15,11 @@ class Content extends Component {
     getActiveContainer = () => {
         switch (this.props.active) {
             case "Featured":
-                return (<FeaturedContainer
-                    offline={this.props.offline}
-                    featured={this.props.featured}
-                    loadFeatured={this.props.loadFeatured}
-                    openBox={this.props.openBox}
-                    setHeader={this.props.setHeaderBackground}/>);
+                return (<FeaturedContainer {...this.props}/>);
             case "Movies":
-                return (<MovieContainer
-                    offline={this.props.offline}
-                    movies={this.props.movies}
-                    toggleGenre={this.props.toggleGenre}
-                    openBox={this.props.openBox}
-                    loadMovieCategories={this.props.loadMovieCategories}
-                    setHeader={this.props.setHeaderBackground}/>);
+                return (<MovieContainer {...this.props}/>);
             case "Collection":
-                return (<Collection
-                    suggested={this.props.suggested}
-                    favorites={this.props.favorites}
-                    recentlyPlayed={this.props.recentlyPlayed}
-                    updateSuggested={this.props.updateSuggested}
-                    openBox={this.props.openBox}
-                    setHeader={this.props.setHeaderBackground}
-                    toggleGenre={this.props.toggleGenre}/>);
+                return (<Collection {...this.props}/>);
         }
     };
 
@@ -56,31 +38,22 @@ class Content extends Component {
     };
 
     getSearchContainer = () => {
-        let search = (<SearchContainer
-            setHeader={this.props.setHeaderBackground}
-            searchContent={this.props.searchContent}
-            openBox={this.props.openBox}/>);
+        let search = (<SearchContainer {...this.props}/>);
         return search;
     };
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.active === "Featured") {
-            if (nextProps.featured === this.props.featured && nextProps.active === this.props.active && nextProps.offline === this.props.offline && nextProps.searchContent === this.props.searchContent) {
-                return false;
-            } else {
+        if (nextProps.active !== this.props.active || nextProps.offline !== this.props.offline || nextProps.searchContent !== this.props.searchContent) {
+            return true;
+        } else {
+            if (this.props.active === "Featured" && (nextProps.featured !== this.props.featured)) {
                 return true;
-            }
-        } else if (nextProps.active === "Movies") {
-            if (nextProps.movies === this.props.movies && nextProps.active === this.props.active && nextProps.offline === this.props.offline && nextProps.searchContent === this.props.searchContent) {
-                return false;
-            } else {
+            } else if (this.props.active === "Movies" && (nextProps.movies !== this.props.movies)) {
                 return true;
-            }
-        } else if (nextProps.active === "Collection") {
-            if (nextProps.suggested === this.props.suggested && nextProps.favorites === this.props.favorites && nextProps.recentlyPlayed === this.props.recentlyPlayed && nextProps.active === this.props.active && nextProps.offline === this.props.offline && nextProps.searchContent === this.props.searchContent) {
-                return false;
-            } else {
+            } else if (this.props.active === "Collection" && (nextProps.suggested !== this.props.suggested || nextProps.favorites !== this.props.favorites || nextProps.recentlyPlayed !== this.props.recentlyPlayed)) {
                 return true;
+            } else {
+                return false;
             }
         }
     }
