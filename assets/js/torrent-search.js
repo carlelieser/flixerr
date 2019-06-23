@@ -15,8 +15,7 @@ let TorrentSearch = function () {
             queryFunction: (query) => {
                 return encodeURI(query);
             }
-        },
-        {
+        }, {
             name: "YTS",
             url: "https://yts.lt/movie/",
             queryFunction: (query) => {
@@ -27,18 +26,16 @@ let TorrentSearch = function () {
 
     let getProxy = () => {
         let proxyList = new ProxyList();
-        return new Promise((resolve, reject) => {
-            proxyList
-                .listProxies()
-                .then((proxies) => {
-                    if (proxies) {
-                        let proxy = proxies[Math.floor(Math.random() * proxies.length)];
-                        resolve(proxy);
-                    } else {
-                        reject("Error: No proxies found.");
-                    }
-                });
-        });
+        return proxyList
+            .listProxies()
+            .then((proxies) => {
+                if (proxies) {
+                    let proxy = proxies[Math.floor(Math.random() * proxies.length)];
+                    return proxy;
+                } else {
+                    reject();
+                }
+            });
     };
 
     let searchProvider = (url) => {
