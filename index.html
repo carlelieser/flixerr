@@ -1,27 +1,30 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Flixerr</title>
-    <link href="./libs/materialdesignicons/css/materialdesignicons.min.css" media="all" rel="stylesheet"
-        type="text/css" />
-    <link type="text/css" rel="stylesheet" href="./assets/css/main.css" />
-</head>
+    <head>
+        <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+        <title>Flixerr</title>
+        <link
+            href="./libs/materialdesignicons/css/materialdesignicons.min.css"
+            media="all"
+            rel="stylesheet"
+            type="text/css"/>
+        <link type="text/css" rel="stylesheet" href="./assets/css/main.css"/>
+    </head>
 
-<body>
-    <div id="app"></div>
+    <body>
+        <div id="app"></div>
 
-    <script>
-        process.env.UV_THREADPOOL_SIZE = 128;
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
-        process.env.NODE_ENV = 'production';
+        <script>
+            process.env.UV_THREADPOOL_SIZE = 128;
+            process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+            process.env.NODE_ENV = 'production';
 
-        // require('babel-register');
-        // require('./assets/js/main');
+            // require('babel-register');
+            // require('./assets/js/main');
 
-        require('./dist/js/main');
-    </script>
-</body>
+            require('./dist/js/main');
+        </script>
+    </body>
 
 </html>
