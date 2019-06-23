@@ -581,6 +581,7 @@ var App = function (_Component) {
             _this.setDownloadPercent();
             _this.setDownloadSpeed();
             _this.setFileLoaded(0);
+            _this.setSubtitleOptions([]);
 
             if (!type) {
                 message = "Ooops, we dropped the ball. Please try a different torrent.";

@@ -650,6 +650,7 @@ class App extends Component {
         this.setDownloadPercent();
         this.setDownloadSpeed();
         this.setFileLoaded(0);
+        this.setSubtitleOptions([]);
 
         if (!type) {
             message = "Ooops, we dropped the ball. Please try a different torrent.";
