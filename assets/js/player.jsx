@@ -3,6 +3,7 @@ import React, {Component} from "react";
 import {CSSTransitionGroup} from "react-transition-group";
 import Fade from "react-reveal/Fade";
 
+import SubtitleItem from "./subtitle-item";
 import BackupTorrents from "./backup-torrent-container";
 
 class Player extends Component {
@@ -11,15 +12,34 @@ class Player extends Component {
 
         this.videoElement = React.createRef();
 
-        this.changeTime.bind(this)
+        this
+            .handleUpdate
+            .bind(this);
+        this
+            .changeTime
+            .bind(this)
 
         this.state = {
             fullScreen: false,
             timer: false,
             showOverlay: true,
             showSubtitles: false,
-            videoBuffering: false
+            videoBuffering: false,
+            subtitleData: false,
+            activeSubtitle: false
         };
+    }
+
+    setActiveSubtitle = (activeSubtitle) => {
+        this.setState({activeSubtitle});
+    }
+
+    toggleSubtitleMenu = () => {
+        this.setState((prevState) => {
+            return {
+                showSubtitles: !prevState.showSubtitles
+            }
+        });
     }
 
     toggleOverlay = (show) => {
@@ -27,13 +47,13 @@ class Player extends Component {
     };
 
     mouseStopped = () => {
-        if (!this.props.openBackup) {
+        if (!this.props.openBackup && !this.state.showSubtitles) {
             this.toggleOverlay();
         }
     };
 
     mouseMove = () => {
-        if (!this.props.openBackup) {
+        if (!this.props.openBackup && !this.state.showSubtitles) {
             this.toggleOverlay(true);
             clearTimeout(this.state.timer);
             this.setState({
@@ -164,7 +184,7 @@ class Player extends Component {
         this
             .props
             .resetClient(true)
-            .then((result) => {
+            .then(() => {
                 this
                     .props
                     .streamTorrent(torrent);
@@ -181,14 +201,6 @@ class Player extends Component {
         this
             .props
             .showBackup(true);
-    };
-
-    handleSubtitles = () => {
-        this.setState((prevState) => {
-            return {
-                showSubtitles: !prevState.showSubtitles
-            };
-        });
     };
 
     handleBg = () => {
@@ -221,18 +233,58 @@ class Player extends Component {
             .toggleIntro();
     }
 
+    setSubtitleData = (subtitleData) => {
+        if (!subtitleData) {
+            this.setActiveSubtitle();
+        }
+        this.setState({subtitleData});
+    }
+
+    handleSubtitlesOff = () => {
+        this.toggleSubtitleMenu();
+        this.setSubtitleData();
+    }
+
+    setSubtitles = () => {
+        let track = document.createElement("track");
+        track.kind = "subtitles";
+        track.label = this.state.subtitleData.language;
+        track.src = this.state.subtitleData.src;
+        this.removeSubtitles();
+        this
+            .videoElement
+            .current
+            .append(track);
+        track.mode = "showing";
+        this.videoElement.current.textTracks[0].mode = "showing";
+        this.toggleSubtitleMenu();
+    }
+
+    removeSubtitles = () => {
+        this.videoElement.current.innerHTML = '';
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.readyToClose === this.props.readyToClose && nextProps.showIntro === this.props.showIntro && nextProps.downloadPercent === this.props.downloadPercent && nextProps.downloadSpeed === this.props.downloadSpeed && nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.videoIndex === this.props.videoIndex && nextProps.time === this.props.time && nextProps.loading === this.props.loading && nextProps.playerStatus.status === this.props.playerStatus.status && nextProps.seekValue === this.props.seekValue && nextProps.currentTime === this.props.currentTime && nextState.videoBuffering === this.state.videoBuffering && nextProps.startTime === this.props.startTime && nextProps.fileLoaded === this.props.fileLoaded) {
+        if (nextProps.readyToClose === this.props.readyToClose && nextProps.showIntro === this.props.showIntro && nextProps.downloadPercent === this.props.downloadPercent && nextProps.downloadSpeed === this.props.downloadSpeed && nextProps.openBackup === this.props.openBackup && nextProps.movie === this.props.movie && nextState.showOverlay === this.state.showOverlay && nextProps.paused === this.props.paused && nextProps.videoIndex === this.props.videoIndex && nextProps.time === this.props.time && nextProps.loading === this.props.loading && nextProps.playerStatus.status === this.props.playerStatus.status && nextProps.seekValue === this.props.seekValue && nextProps.currentTime === this.props.currentTime && nextState.videoBuffering === this.state.videoBuffering && nextProps.startTime === this.props.startTime && nextProps.fileLoaded === this.props.fileLoaded && nextProps.subtitleOptions === this.props.subtitleOptions && nextState.subtitleData === this.state.subtitleData && nextState.activeSubtitle === this.state.activeSubtitle && nextState.showSubtitles === this.state.showSubtitles) {
             return false;
         } else {
             return true;
         }
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevState) {
         if (prevProps.startTime !== this.props.startTime) {
             this.videoElement.current.currentTime = this.props.startTime;
         }
+
+        if (prevState.subtitleData !== this.state.subtitleData) {
+            if (this.state.subtitleData) {
+                this.setSubtitles();
+            } else {
+                this.removeSubtitles();
+            }
+        }
+
         if (this.props.readyToClose === true) {
             window.removeEventListener("beforeunload", this.handleClose);
             window.close();
@@ -246,7 +298,9 @@ class Player extends Component {
         this
             .props
             .setColorStop(0);
-        this.props.setFileLoaded(0);
+        this
+            .props
+            .setFileLoaded(0);
         this
             .props
             .setVideoElement(this.videoElement);
@@ -263,9 +317,29 @@ class Player extends Component {
     }
 
     render() {
+        let subtitles = this.props.subtitleOptions
+            ? this
+                .props
+                .subtitleOptions
+                .map((item) => {
+                    let isActive = this.state.activeSubtitle
+                        ? this.state.activeSubtitle.name == item.name
+                            ? true
+                            : false
+                        : false;
+                    return <SubtitleItem
+                        active={isActive}
+                        setActiveSubtitle={this.setActiveSubtitle}
+                        setSubtitleData={this.setSubtitleData}
+                        item={item}/>
+                })
+            : '';
+
         let backupContainer = this.props.openBackup
             ? (<BackupTorrents
                 movie={this.props.movie}
+                currentTime={this.videoElement.current.currentTime}
+                updateMovieTime={this.props.updateMovieTime}
                 torrents={this.props.movie.preferredTorrents}
                 getCurrentMagnet={this.props.getCurrentMagnet}
                 handleTorrentClick={this.handleTorrentClick}
@@ -279,52 +353,19 @@ class Player extends Component {
             ? (<div className="backup-bg" onClick={this.handleBg}/>)
             : ("");
 
-        let playerStatusContainer = this.props.playerStatus
-            ? (
-                <div className="player-status-container">
-                    <span>{this.props.playerStatus.status}</span>
-                    {this.props.playerStatus.loading
-                        ? (<span className="dots"/>)
-                        : ("")}
-                    {this.props.downloadPercent
-                        ? (
-                            <div className="download-info">
-                                <span className="download-percent">
-                                    {this.props.downloadPercent}%
-                                </span>
-                                <span className="download-speed">
-                                    {`${this.props.downloadSpeed} Kb/s`}
-                                </span>
-                            </div>
-                        )
-                        : ("")}
-                    {this.props.downloadPercent
-                        ? (
-                            <Fade distance="10%" bottom>
-                                <div
-                                    className="progress-bar"
-                                    style={{
-                                    width: `${this.props.downloadPercent}%`
-                                }}/>
-                                <div className="progress-bar-shadow"/>
-                            </Fade>
-                        )
-                        : ("")}
-                </div>
-            )
-            : ("");
-
         return (
             <div
                 className={"movie-player " + (this.state.showOverlay
                 ? ""
                 : this.props.openBackup
                     ? ""
-                    : this.props.playerStatus
-                        ? this.props.playerStatus.status
-                            ? ""
-                            : "movie-hide"
-                        : "movie-hide")}
+                    : this.state.showSubtitles
+                        ? ""
+                        : this.props.playerStatus
+                            ? this.props.playerStatus.status
+                                ? ""
+                                : "movie-hide"
+                            : "movie-hide")}
                 style={{
                 backgroundImage: `${this.props.loading
                     ? this.props.error
@@ -347,12 +388,44 @@ class Player extends Component {
                     transitionLeaveTimeout={250}>
                     {backupContainerBg}
                 </CSSTransitionGroup>
-                <CSSTransitionGroup
-                    transitionName="player-status-anim"
-                    transitionEnterTimeout={250}
-                    transitionLeaveTimeout={250}>
-                    {playerStatusContainer}
-                </CSSTransitionGroup>
+                <Fade
+                    mountOnEnter
+                    unmountOnExit
+                    duration={350}
+                    when={this.props.playerStatus}
+                    distance="10%"
+                    bottom>
+                    <div className="player-status-container">
+                        <span>{this.props.playerStatus.status}</span>
+                        {this.props.playerStatus.loading
+                            ? (<span className="dots"/>)
+                            : ("")}
+                        {this.props.downloadPercent
+                            ? (
+                                <div className="download-info">
+                                    <span className="download-percent">
+                                        {this.props.downloadPercent}%
+                                    </span>
+                                    <span className="download-speed">
+                                        {`${this.props.downloadSpeed} Kb/s`}
+                                    </span>
+                                </div>
+                            )
+                            : ("")}
+                        {this.props.downloadPercent
+                            ? (
+                                <Fade distance="10%" bottom>
+                                    <div
+                                        className="progress-bar"
+                                        style={{
+                                        width: `${this.props.downloadPercent}%`
+                                    }}/>
+                                    <div className="progress-bar-shadow"/>
+                                </Fade>
+                            )
+                            : ("")}
+                    </div>
+                </Fade>
                 <div className="top-bar-container">
                     <div className="top-bar">
                         <i
@@ -371,25 +444,44 @@ class Player extends Component {
                             ? "mdi-play"
                             : "mdi-pause")}
                             onClick={this.toggleVideoPlayback}/>
-                            <div className="video-data">
-                        <div className="file-loaded" style={{width: `${this.props.fileLoaded}%`}}></div>
-                        <input
-                            className="seek-bar"
-                            type="range"
-                            value={this.props.seekValue}
-                            onChange={this.changeTime}
-                            onMouseDown={this.handleMouseDown}
-                            onMouseUp={this.playVideo}
-                            min={0}
-                            max={this.state.videoElement
-                            ? this.state.videoElement.current.duration
-                            : 100}
-                            step={0.1}
-                            style={{
-                            backgroundImage: `-webkit-gradient(linear, left top, right top, color-stop(${this.props.colorStop}, rgb(255, 0, 0)), color-stop(${this.props.colorStop}, rgba(255, 255, 255, 0.158)))`
-                        }}/>
+                        <div className="video-data">
+                            <div
+                                className="file-loaded"
+                                style={{
+                                width: `${this.props.fileLoaded}%`
+                            }}></div>
+                            <input
+                                className="seek-bar"
+                                type="range"
+                                value={this.props.seekValue}
+                                onChange={this.changeTime}
+                                onMouseDown={this.handleMouseDown}
+                                onMouseUp={this.playVideo}
+                                min={0}
+                                max={this.state.videoElement
+                                ? this.state.videoElement.current.duration
+                                : 100}
+                                step={0.1}
+                                style={{
+                                backgroundImage: `-webkit-gradient(linear, left top, right top, color-stop(${this.props.colorStop}, rgb(255, 0, 0)), color-stop(${this.props.colorStop}, rgba(255, 255, 255, 0.158)))`
+                            }}/>
                         </div>
                         <span>{this.props.time}</span>
+                        <Fade
+                            mountOnEnter
+                            unmountOnExit
+                            duration={350}
+                            when={this.state.showSubtitles}
+                            distance="10%"
+                            bottom>
+                            <div className="subtitle-container">
+                                {subtitles}
+                                <div onClick={this.handleSubtitlesOff}>Off</div>
+                            </div>
+                        </Fade>
+                        <i
+                            className="mdi mdi-light mdi-subtitles-outline mdi-36px"
+                            onClick={this.toggleSubtitleMenu}/>
                         <i
                             className="mdi mdi-light mdi-fullscreen mdi-36px fullscreen-btn"
                             onClick={this.fullScreen}/>
@@ -405,9 +497,7 @@ class Player extends Component {
                 <video
                     autoPlay
                     type="video/mp4"
-                    onTimeUpdate={this
-                    .handleUpdate
-                    .bind(this)}
+                    onTimeUpdate={this.handleUpdate}
                     onWaiting={this.handleBuffer}
                     src={Number.isInteger(this.props.videoIndex)
                     ? `http://localhost:8888/${this.props.videoIndex}`
