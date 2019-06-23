@@ -24,9 +24,29 @@ class Collection extends Component {
         };
     }
 
-    strip = (string, chars) => {
-        return string.substring(0, chars);
-    };
+    checkSuggested = () => {
+        if (this.props.suggested) {
+            if (!this.props.suggested.length) {
+                this
+                    .props
+                    .updateSuggested();
+            }
+        } else {
+            this
+                .props
+                .updateSuggested();
+        }
+    }
+
+    setHeader = () => {
+        if (this.props.suggested) {
+            if (this.props.suggested.length) {
+                this
+                    .props
+                    .setHeader(this.props.suggested[0].flixerr_data.backdrop_path);
+            }
+        }
+    }
 
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.suggested === this.props.suggested && nextProps.favorites === this.props.favorites && nextProps.recentlyPlayed === this.props.recentlyPlayed) {
@@ -38,25 +58,14 @@ class Collection extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.suggested !== this.props.suggested) {
-            this
-                .props
-                .setHeader(this.props.suggested);
+            this.setHeader();
         }
+        this.checkSuggested();
     }
 
     componentDidMount() {
-        if (this.props.suggested) {
-            if(!this.props.suggested.length){
-                this
-                    .props
-                    .updateSuggested();
-            }
-        }else{
-            this.props.updateSuggested();
-        }
-        this
-            .props
-            .setHeader(this.props.suggested);
+        this.checkSuggested();
+        this.setHeader();
     }
 
     render() {
