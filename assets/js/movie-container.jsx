@@ -17,25 +17,33 @@ class MovieContainer extends Component {
         }
     };
 
+    setHeader = () => {
+        if (this.props.movies) {
+            if (this.props.movies.length) {
+                if (this.props.movies[0].movies[0]) {
+                    this
+                        .props
+                        .setHeader(this.props.movies[0].movies[0].flixerr_data.backdrop_path);
+                }
+            }
+        }
+    }
+
     componentDidUpdate(prevProps, prevState) {
         if (this.props.movies) {
-            if(!this.props.movies.length){
+            if (!this.props.movies.length) {
                 this.getMovies();
             }
         }
 
         if (prevProps.movies !== this.props.movies) {
-            this
-                .props
-                .setHeader(this.props.movies);
+            this.setHeader();
         }
     }
 
     componentDidMount() {
         this.getMovies();
-        this
-            .props
-            .setHeader(this.props.movies);
+        this.setHeader();
     }
 
     render() {
