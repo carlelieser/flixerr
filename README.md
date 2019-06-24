@@ -37,4 +37,4 @@ The process is as follows:
 4. Torrent is saved in case the user tries to watch the same movie more than once.
 
 ### Contributing
- If you want to contribute to making Flixerr better/faster, please don't hesitate!
+ If you want to contribute to making Flixerr better/faster, please don't hesitate!If you have any questions please email info@flixerr.co, issues are only for bugs/feature requests. 
