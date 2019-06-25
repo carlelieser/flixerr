@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -708,6 +710,77 @@ var App = function (_Component) {
             }, 100);
         };
 
+        _this.getLanguage = function (text) {
+            var franc = require('franc-min');
+            var langs = require('langs');
+
+            var language = franc(text);
+            var lang = langs.where("3", language).name;
+
+            return lang;
+        };
+
+        _this.toVTT = function (string) {
+            return string.replace(/\{\\([ibu])\}/g, '</$1>').replace(/\{\\([ibu])1\}/g, '<$1>').replace(/\{([ibu])\}/g, '<$1>').replace(/\{\/([ibu])\}/g, '</$1>').replace(/(\d\d:\d\d:\d\d),(\d\d\d)/g, '$1.$2').replace(/\r\n\{\\an8\}/g, ' line:5%\r\n') + '\r\n\r\n';
+        };
+
+        _this.getBufferAsText = function (buffer) {
+            var utf8 = new TextDecoder().decode(buffer);
+            return utf8;
+        };
+
+        _this.getVttURL = function (bufferText) {
+            var text = _this.toVTT(bufferText);
+            var vttString = 'WEBVTT FILE\r\n\r\n';
+            var blobText = vttString.concat(text);
+            var blob = new Blob([blobText], { type: 'text/vtt' });
+            return URL.createObjectURL(blob);
+        };
+
+        _this.getBuffer = function (file) {
+            return new Promise(function (resolve) {
+                file.getBuffer(function (err, buffer) {
+                    if (!err) {
+                        resolve(buffer);
+                    } else {
+                        resolve(err);
+                    }
+                });
+            });
+        };
+
+        _this.getFileComplete = function (file) {
+            return _this.getBuffer(file).then(function (buffer) {
+                if ((typeof buffer === "undefined" ? "undefined" : _typeof(buffer)) === 'object') {
+                    var text = _this.getBufferAsText(buffer);
+                    var src = _this.getVttURL(text);
+                    var language = _this.getLanguage(text);
+                    var fileClone = _extends({}, file, {
+                        language: language,
+                        src: src
+                    });
+
+                    return fileClone;
+                } else {
+                    return false;
+                }
+            });
+        };
+
+        _this.sanitizeSubtitles = function (arrayOfSubtitles) {
+            var promises = [];
+
+            for (var i = 0; i < arrayOfSubtitles.length; i++) {
+                var fileObject = arrayOfSubtitles[i];
+                var promise = _this.getFileComplete(fileObject);
+                promises.push(promise);
+            }
+
+            return Promise.all(promises).then(function (subtitleOptions) {
+                return subtitleOptions;
+            });
+        };
+
         _this.streamTorrent = function (movie) {
             var magnet = movie.magnet;
 
@@ -766,7 +839,9 @@ var App = function (_Component) {
                         }
                     });
 
-                    _this.setSubtitleOptions(subtitleFiles);
+                    _this.sanitizeSubtitles(subtitleFiles).then(function (subtitleOptions) {
+                        _this.setSubtitleOptions(subtitleOptions);
+                    });
 
                     var file = filtered[0];
                     var fileIndex = torrent.files.findIndex(function (item) {
@@ -1119,7 +1194,8 @@ var App = function (_Component) {
                         isStreaming: false,
                         paused: true,
                         playerLoading: backUp ? true : false,
-                        subtitleOptions: []
+                        subtitleOptions: [],
+                        showIntro: false
                     }, function () {
                         _this.closeServer();
 
