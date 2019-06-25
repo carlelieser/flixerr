@@ -37,20 +37,14 @@ class AccountContainer extends Component {
                     }
                 }
             },
-            showContainer: true
+            showContainer: true,
+            active: 'login'
         }
-
-        this.active = this.props.account
-            ? this.state.accountModalInfo.login
-            : this.state.accountModalInfo.create;
     }
 
     handleInput = (e) => {
         if (e.keyCode == 13) {
-            this
-                .active
-                .submit
-                .action();
+           this.state.accountModalInfo[this.state.active].submit.action();
         } else {
             this
                 .props
@@ -68,14 +62,24 @@ class AccountContainer extends Component {
         });
     }
 
+    setActive = () => {
+        let active = this.props.account ? 'login': 'create';
+        this.setState({active});
+    }
+
     componentDidUpdate(prevProps) {
         if (prevProps.account != this.props.account) {
             this.initalizeAnimation();
+            this.setActive();
         }
     }
 
-    render() {
+    componentDidMount(){
+        this.setActive();
+    }
 
+    render() {
+        let accountInfo = this.state.accountModalInfo[this.state.active];
         return (
             <div className='account-container'>
                 <Fade
@@ -88,8 +92,8 @@ class AccountContainer extends Component {
                         <div className='account-close' onClick={this.props.closeAccount}>
                             <i className='mdi mdi-close'/>
                         </div>
-                        <div className='account-title'>{this.active.title}</div>
-                        <div className='account-desc'>{this.active.desc}</div>
+                        <div className='account-title'>{accountInfo.title}</div>
+                        <div className='account-desc'>{accountInfo.desc}</div>
                         <input
                             type='email'
                             placeholder='Email'
@@ -114,12 +118,12 @@ class AccountContainer extends Component {
                                 {this.props.loginError}
                             </div>
                         </Fade>
-                        <div className='account-submit' onClick={this.active.submit.action}>{this.active.submit.text}</div>
+                        <div className='account-submit' onClick={accountInfo.submit.action}>{accountInfo.submit.text}</div>
                         <div className='divider'/>
                         <div
                             className='account-submit account-secondary'
-                            onClick={this.active.secondary.action}>
-                            {this.active.secondary.text}
+                            onClick={accountInfo.secondary.action}>
+                            {accountInfo.secondary.text}
                         </div>
                     </div>
                 </Fade>

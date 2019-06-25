@@ -32,7 +32,7 @@ var AccountContainer = function (_Component) {
 
         _this.handleInput = function (e) {
             if (e.keyCode == 13) {
-                _this.active.submit.action();
+                _this.state.accountModalInfo[_this.state.active].submit.action();
             } else {
                 _this.props.handleInput(e);
             }
@@ -46,6 +46,11 @@ var AccountContainer = function (_Component) {
                     _this.setState({ showContainer: true });
                 }, 250);
             });
+        };
+
+        _this.setActive = function () {
+            var active = _this.props.account ? 'login' : 'create';
+            _this.setState({ active: active });
         };
 
         _this.handleInput.bind(_this);
@@ -77,10 +82,9 @@ var AccountContainer = function (_Component) {
                     }
                 }
             },
-            showContainer: true
+            showContainer: true,
+            active: 'login'
         };
-
-        _this.active = _this.props.account ? _this.state.accountModalInfo.login : _this.state.accountModalInfo.create;
         return _this;
     }
 
@@ -89,12 +93,18 @@ var AccountContainer = function (_Component) {
         value: function componentDidUpdate(prevProps) {
             if (prevProps.account != this.props.account) {
                 this.initalizeAnimation();
+                this.setActive();
             }
+        }
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            this.setActive();
         }
     }, {
         key: 'render',
         value: function render() {
-
+            var accountInfo = this.state.accountModalInfo[this.state.active];
             return _react2.default.createElement(
                 'div',
                 { className: 'account-container' },
@@ -117,12 +127,12 @@ var AccountContainer = function (_Component) {
                         _react2.default.createElement(
                             'div',
                             { className: 'account-title' },
-                            this.active.title
+                            accountInfo.title
                         ),
                         _react2.default.createElement(
                             'div',
                             { className: 'account-desc' },
-                            this.active.desc
+                            accountInfo.desc
                         ),
                         _react2.default.createElement('input', {
                             type: 'email',
@@ -154,16 +164,16 @@ var AccountContainer = function (_Component) {
                         ),
                         _react2.default.createElement(
                             'div',
-                            { className: 'account-submit', onClick: this.active.submit.action },
-                            this.active.submit.text
+                            { className: 'account-submit', onClick: accountInfo.submit.action },
+                            accountInfo.submit.text
                         ),
                         _react2.default.createElement('div', { className: 'divider' }),
                         _react2.default.createElement(
                             'div',
                             {
                                 className: 'account-submit account-secondary',
-                                onClick: this.active.secondary.action },
-                            this.active.secondary.text
+                                onClick: accountInfo.secondary.action },
+                            accountInfo.secondary.text
                         )
                     )
                 )
