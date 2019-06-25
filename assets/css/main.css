@@ -851,6 +851,7 @@ html {
 
 video::cue {
     background-color: transparent;
+    margin-bottom: 20px;
 }
 
 video::-webkit-media-text-track-background {
