@@ -20,10 +20,12 @@ class MovieContainer extends Component {
     setHeader = () => {
         if (this.props.movies) {
             if (this.props.movies.length) {
-                if (this.props.movies[0].movies[0]) {
-                    this
-                        .props
-                        .setHeader(this.props.movies[0].movies[0].flixerr_data.backdrop_path);
+                if (this.props.movies[0]){
+                    if (this.props.movies[0].movies[0]) {
+                        this
+                            .props
+                            .setHeader(this.props.movies[0].movies[0].flixerr_data.backdrop_path);
+                    }
                 }
             }
         }
