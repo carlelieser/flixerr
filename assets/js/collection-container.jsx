@@ -39,11 +39,13 @@ class Collection extends Component {
     }
 
     setHeader = () => {
-        if (this.props.suggested) {
-            if (this.props.suggested.length) {
-                this
-                    .props
-                    .setHeader(this.props.suggested[0].flixerr_data.backdrop_path);
+        for(let i = 0; i < this.state.collection.length; i++){
+            let target = this.state.collection[i].target;
+            if(this.props[target]){
+                if(this.props[target].length){
+                    this.props.setHeader(this.props[target][0].flixerr_data.backdrop_path);
+                    return;
+                }
             }
         }
     }

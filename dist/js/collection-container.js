@@ -45,9 +45,13 @@ var Collection = function (_Component) {
         };
 
         _this.setHeader = function () {
-            if (_this.props.suggested) {
-                if (_this.props.suggested.length) {
-                    _this.props.setHeader(_this.props.suggested[0].flixerr_data.backdrop_path);
+            for (var i = 0; i < _this.state.collection.length; i++) {
+                var target = _this.state.collection[i].target;
+                if (_this.props[target]) {
+                    if (_this.props[target].length) {
+                        _this.props.setHeader(_this.props[target][0].flixerr_data.backdrop_path);
+                        return;
+                    }
                 }
             }
         };

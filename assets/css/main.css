@@ -1691,7 +1691,6 @@ input[type=range]::-webkit-slider-thumb:hover {
     text-transform: uppercase;
     letter-spacing: 8px;
     position: fixed;
-    margin-left: 25px;
     left: 50%;
     transform: translateX(-50%);
     height: 70px;
