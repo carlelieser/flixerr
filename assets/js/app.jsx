@@ -787,6 +787,90 @@ class App extends Component {
         }, 100);
     };
 
+    getLanguage = (text) => {
+        let franc = require('franc-min');
+        let langs = require('langs');
+
+        let language = franc(text);
+        let lang = langs
+            .where("3", language)
+            .name;
+
+        return lang;
+    }
+
+    toVTT = (string) => {
+        return string
+            .replace(/\{\\([ibu])\}/g, '</$1>')
+            .replace(/\{\\([ibu])1\}/g, '<$1>')
+            .replace(/\{([ibu])\}/g, '<$1>')
+            .replace(/\{\/([ibu])\}/g, '</$1>')
+            .replace(/(\d\d:\d\d:\d\d),(\d\d\d)/g, '$1.$2')
+            .replace(/\r\n\{\\an8\}/g, ' line:5%\r\n') + '\r\n\r\n';
+    }
+
+    getBufferAsText = (buffer) => {
+        let utf8 = new TextDecoder().decode(buffer);
+        return utf8;
+    }
+
+    getVttURL = (bufferText) => {
+        let text = this.toVTT(bufferText);
+        let vttString = 'WEBVTT FILE\r\n\r\n';
+        let blobText = vttString.concat(text);
+        let blob = new Blob([blobText], {type: 'text/vtt'});
+        return URL.createObjectURL(blob);
+    }
+
+    getBuffer = (file) => {
+        return new Promise((resolve) => {
+            file.getBuffer((err, buffer) => {
+                if (!err) {
+                    resolve(buffer);
+                } else {
+                    resolve(err);
+                }
+            });
+        });
+    }
+
+    getFileComplete = (file) => {
+        return this
+            .getBuffer(file)
+            .then((buffer) => {
+                if (typeof buffer === 'object') {
+                    let text = this.getBufferAsText(buffer);
+                    let src = this.getVttURL(text);
+                    let language = this.getLanguage(text);
+                    let fileClone = {
+                        ...file,
+                        language,
+                        src
+                    }
+
+                    return fileClone;
+                } else {
+                    return false;
+                }
+            });
+    }
+
+    sanitizeSubtitles = (arrayOfSubtitles) => {
+        let promises = [];
+
+        for (let i = 0; i < arrayOfSubtitles.length; i++) {
+            let fileObject = arrayOfSubtitles[i];
+            let promise = this.getFileComplete(fileObject);
+            promises.push(promise);
+        }
+
+        return Promise
+            .all(promises)
+            .then((subtitleOptions) => {
+                return subtitleOptions;
+            });
+    }
+
     streamTorrent = (movie) => {
         let magnet = movie.magnet;
 
@@ -864,7 +948,11 @@ class App extends Component {
                         }
                     });
 
-                this.setSubtitleOptions(subtitleFiles);
+                this
+                    .sanitizeSubtitles(subtitleFiles)
+                    .then((subtitleOptions) => {
+                        this.setSubtitleOptions(subtitleOptions);
+                    });
 
                 let file = filtered[0];
                 let fileIndex = torrent
@@ -1271,7 +1359,8 @@ class App extends Component {
                     playerLoading: backUp
                         ? true
                         : false,
-                    subtitleOptions: []
+                    subtitleOptions: [],
+                    showIntro: false
                 }, () => {
                     this.closeServer();
 
@@ -1420,14 +1509,14 @@ class App extends Component {
             });
         } else {
             return array.find((item) => {
-                if(movie.id){
-                    if(item.id === movie.id){
+                if (movie.id) {
+                    if (item.id === movie.id) {
                         return true;
                     }
                 }
-                
-                if(movie.title){
-                    if(item.title === movie.title){
+
+                if (movie.title) {
+                    if (item.title === movie.title) {
                         return true;
                     }
                 }

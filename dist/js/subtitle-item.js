@@ -26,77 +26,18 @@ var SubtitleItem = function (_Component) {
 
         var _this = _possibleConstructorReturn(this, (SubtitleItem.__proto__ || Object.getPrototypeOf(SubtitleItem)).call(this, props));
 
-        _this.setLanguage = function (language) {
-            _this.setState({ language: language });
-        };
-
-        _this.setLoading = function (loading) {
-            _this.setState({ loading: loading });
-        };
-
-        _this.getLanguage = function () {
-            _this.setLoading(true);
-            return _this.props.item.getBuffer(function (err, buffer) {
-                if (!err) {
-                    var text = _this.getBufferAsText(buffer);
-                    var franc = require('franc-min');
-                    var langs = require('langs');
-
-                    var language = franc(text);
-                    var lang = langs.where("3", language).name;
-
-                    _this.setLanguage(lang);
-                    _this.setLoading();
-                } else {
-                    _this.setLoading();
-                }
-            });
-        };
-
-        _this.toVTT = function (utf8str) {
-            return utf8str.replace(/\{\\([ibu])\}/g, '</$1>').replace(/\{\\([ibu])1\}/g, '<$1>').replace(/\{([ibu])\}/g, '<$1>').replace(/\{\/([ibu])\}/g, '</$1>').replace(/(\d\d:\d\d:\d\d),(\d\d\d)/g, '$1.$2').concat('\r\n\r\n');
-        };
-
-        _this.getBufferAsText = function (buffer) {
-            var utf8 = new TextDecoder().decode(buffer);
-            return utf8;
-        };
-
-        _this.getVttURL = function (buffer) {
-            var text = _this.toVTT(_this.getBufferAsText(buffer));
-            var vttString = 'WEBVTT FILE\r\n\r\n';
-            var blobText = vttString.concat(text);
-            var blob = new Blob([blobText], { type: 'text/vtt' });
-            return URL.createObjectURL(blob);
-        };
-
         _this.handleSubtitle = function () {
-            _this.props.item.getBuffer(function (err, buffer) {
-                if (!err) {
-                    var src = _this.getVttURL(buffer);
-                    _this.props.setActiveSubtitle(_this.props.item);
-                    _this.props.setSubtitleData({ language: _this.state.language, src: src });
-                } else {
-                    _this.props.setSubtitleURL();
-                }
-            });
+            _this.props.setSubtitleData(_this.props.item);
+            _this.props.setActiveSubtitle(_this.props.item);
         };
 
-        _this.componentDidMount = function () {
-            _this.getLanguage();
-        };
-
-        _this.state = {
-            language: '',
-            loading: true
-        };
         return _this;
     }
 
     _createClass(SubtitleItem, [{
         key: 'shouldComponentUpdate',
-        value: function shouldComponentUpdate(nextProps, nextState) {
-            if (nextProps.active === this.props.active && nextState.language === this.state.language && nextState.loading === this.state.loading) {
+        value: function shouldComponentUpdate(nextProps) {
+            if (nextProps.active === this.props.active && nextProps.item === this.props.item) {
                 return false;
             } else {
                 return true;
@@ -108,12 +49,12 @@ var SubtitleItem = function (_Component) {
             return _react2.default.createElement(
                 'div',
                 {
-                    className: 'subtitle-item ' + (this.state.loading ? 'loading-subtitle-item' : this.props.active ? 'active-subtitle' : ''),
+                    className: 'subtitle-item ' + (this.props.active ? 'active-subtitle' : ''),
                     onClick: this.handleSubtitle },
-                this.state.loading ? _react2.default.createElement('div', { className: 'subtitle-loading' }) : _react2.default.createElement(
+                _react2.default.createElement(
                     'div',
                     { className: 'subtitle-language' },
-                    this.state.language
+                    this.props.item.language
                 ),
                 this.props.active ? _react2.default.createElement('i', { className: 'mdi mdi-checkbox-blank-circle mdi-light' }) : ''
             );
