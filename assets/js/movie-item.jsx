@@ -64,7 +64,7 @@ class MovieItem extends Component {
 
     handleMovieClick = () => {
         let movie = this.props.movie;
-        movie.averageColor = this.state.averageColor;
+            movie.averageColor = this.state.averageColor;
         this
             .props
             .openBox(movie);
@@ -109,6 +109,7 @@ class MovieItem extends Component {
     }
 
     componentDidMount() {
+        console.log(this.props.movie)
         this.setState({
             fontSize: -0.0195 * this.props.movie.title.length + 1.6,
             stars: this.getStars()

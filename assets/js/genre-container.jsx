@@ -93,7 +93,7 @@ class GenreContainer extends Component {
             scrollVal = container.scrollLeft;
 
         let viewportW = container.offsetWidth - 50,
-            boxW = 230,
+            boxW = this.itemWidth,
             viewItems = Math.ceil(viewportW / boxW) - 1,
             containerScrollWidth = boxW * n - viewportW - 30;
 
@@ -136,7 +136,7 @@ class GenreContainer extends Component {
     handleResize = () => {
         if (this.movieListRef.current) {
             if (this.props.genreInfo.movies) {
-                if (this.props.genreInfo.movies.length * 220 > this.movieListRef.current.offsetWidth) {
+                if (this.props.genreInfo.movies.length * this.itemWidth > this.movieListRef.current.offsetWidth) {
                     this.setState({showArrows: true});
 
                     if (this.movieListRef.current.scrollLeft + this.movieListRef.current.offsetWidth < this.movieListRef.current.scrollWidth - 10) {
@@ -150,6 +150,10 @@ class GenreContainer extends Component {
             }
         }
     };
+
+    setItemWidth = () => {
+        this.itemWidth = this.props.fallback ? 340 : 230;
+    }
 
     handleOpenGenre = () => {
         this
@@ -168,6 +172,7 @@ class GenreContainer extends Component {
     componentDidMount() {
         this.handleResize();
         this.getExploreName();
+        this.setItemWidth();
         window.addEventListener("resize", this.handleResize);
     }
 
@@ -182,10 +187,11 @@ class GenreContainer extends Component {
             .movies
             .slice(0, 20)
             .map((movie, index) => (<MovieItem
+                fallback={this.props.fallback}
                 movie={movie}
                 openBox={this.props.openBox}
                 key={movie.title + index + 'genre'}/>));
-        let n = this.props.genreInfo.movies.length
+        let n = this.props.fallback ? 340 : this.props.genreInfo.movies.length
             ? 470
             : 100;
 
@@ -219,13 +225,13 @@ class GenreContainer extends Component {
                                 <div className="genre-explore">
                                     <div>{`Explore all ${this.state.exploreName} ${this.state.hideMovies
                                             ? ''
-                                            : 'movies'}`}</div>
+                                            : this.props.shows ? 'shows' : 'movies'}`}</div>
                                     <i className="mdi mdi-black mdi-arrow-right"/>
                                 </div>
                             </Fade>
                         </div>
                         {this.state.showArrows
-                            ? <div className='movie-scroll-container'>
+                            ? <div className='movie-scroll-container' style={{height: n - 100}}>
                                     <Fade duration={350} when={this.state.movieScrollLeft} distance="10%" left>
                                         <div className='movie-scroll movie-scroll-left' onClick={this.scrollLeft}>
                                             <i className='mdi mdi-light mdi-24px mdi-chevron-left'/>

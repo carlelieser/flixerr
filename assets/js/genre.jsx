@@ -18,7 +18,7 @@ class Genre extends Component {
 
     loadPage = () => {
         if (!this.props.genreInfo.showCollection && this.props.genreInfo.genreID !== 21) {
-            let url = `https://api.themoviedb.org/3/discover/movie?api_key=${
+            let url = this.props.genreInfo.shows ? `https://api.themoviedb.org/3/discover/tv?api_key=${this.props.apiKey}&region=US&language=en-US&sort_by=popularity.desc&page=${this.state.page}&timezone=America%2FNew_York&include_null_first_air_dates=false&with_genres=${this.props.genreInfo.genreID}&with_original_language=en` : `https://api.themoviedb.org/3/discover/movie?api_key=${
             this.props.apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${
             this
                 .state
@@ -41,8 +41,7 @@ class Genre extends Component {
                             processing: false
                         };
                     });
-                })
-                .catch((err) => this.props.setOffline(true));
+                });
         } else {
             this.setCollection();
         }

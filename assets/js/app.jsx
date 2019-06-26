@@ -54,6 +54,7 @@ class App extends Component {
             magnetArray: [],
             featured: [],
             movies: [],
+            shows: [],
             backupIsOpen: false,
             videoIndex: false,
             genreInfo: {
@@ -1567,31 +1568,36 @@ class App extends Component {
         let movies = data
             ? data
             : response.results;
+        let sanitized = [];
         for (let i = 0; i < movies.length; i++) {
             let movie = movies[i];
-            movie.flixerr_data = {
-                poster_path: `https://image.tmdb.org/t/p/w780${movie.poster_path}`,
-                backdrop_path: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
-                blurry_poster_path: `https://image.tmdb.org/t/p/w92${movie.poster_path}`,
-                blurry_backdrop_path: `https://image.tmdb.org/t/p/w300${movie.backdrop_path}`
-            };
+            if(movie.backdrop_path){
+                movie.title = movie.name ? movie.name : movie.title;
+                movie.release_date = movie.first_air_date ? movie.first_air_date : movie.release_date;
+                    movie.flixerr_data = {
+                    poster_path: `https://image.tmdb.org/t/p/w780${movie.poster_path}`,
+                    backdrop_path: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
+                    blurry_poster_path: `https://image.tmdb.org/t/p/w92${movie.poster_path}`,
+                    blurry_backdrop_path: `https://image.tmdb.org/t/p/w300${movie.backdrop_path}`
+                };
+                sanitized.push(movie);
+            }
         }
 
         movies = shuffle
-            ? this.shuffleArray(movies)
-            : movies;
+            ? this.shuffleArray(sanitized)
+            : sanitized;
 
         return movies;
     };
 
-    getMovies = (genre, genreID) => {
-        let url = genreID != 21
+    getMovies = (genre, genreID, shows) => {
+        let page = Math.floor(Math.random() * this.state.genrePages) + 1;
+        let url = shows ? `https://api.themoviedb.org/3/discover/tv?api_key=${this.state.apiKey}&language=en-US&sort_by=popularity.desc&page=${page}&timezone=America%2FNew_York&include_null_first_air_dates=false&with_genres=${genreID}&with_original_language=en` : genreID != 21
             ? `https://api.themoviedb.org/3/discover/movie?api_key=${
         this
             .state
-            .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${Math
-            .floor(Math.random() * this.state.genrePages) + 1}&primary_release_date.lte=${this.getURLDate(1)}&with_genres=${genreID}` : "https://reelgood.com/movies/source/netflix?filter-sort=1";
-
+            .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&primary_release_date.lte=${this.getURLDate(1)}&with_genres=${genreID}` : "https://reelgood.com/movies/source/netflix?filter-sort=1";
         return new Promise((resolve, reject) => {
             this
                 .fetchContent(url)
@@ -1794,16 +1800,20 @@ class App extends Component {
         this.setState({movies});
     };
 
-    loadMovieCategories = () => {
+    setShows = (shows) => {
+        this.setState({shows});
+    }
+
+    loadCategories = (shows) => {
         let movieGenres = require('./movie-genres');
-        movieGenres = movieGenres.getCategories();
+        movieGenres = shows ? movieGenres.getTVCategories() : movieGenres.getCategories();
 
         let promiseArray = [];
 
         for (let j = 0; j < movieGenres.length; j++) {
             let promise = new Promise((resolve, reject) => {
                 this
-                    .getMovies(movieGenres[j].name, movieGenres[j].id)
+                    .getMovies(movieGenres[j].name, movieGenres[j].id, shows)
                     .then((genreComplete) => {
                         resolve(genreComplete);
                     })
@@ -1816,7 +1826,11 @@ class App extends Component {
         Promise
             .all(promiseArray)
             .then((data) => {
-                this.setMovies(data);
+                if(shows){
+                    this.setShows(data);
+                }else{
+                    this.setMovies(data);
+                }
             })
             .catch(() => this.setOffline(true));
     };
@@ -2042,7 +2056,10 @@ class App extends Component {
             this.loadFeatured();
         }
         if (!this.state.movies.length) {
-            this.loadMovieCategories();
+            this.loadCategories();
+        }
+        if (!this.state.shows.length) {
+            this.loadCategories(true);
         }
     };
 
@@ -2072,7 +2089,8 @@ class App extends Component {
             .then(() => this.getUserCredentials())
             .catch((err) => console.log(err));
         this.loadFeatured();
-        this.loadMovieCategories();
+        this.loadCategories();
+        this.loadCategories(true);
         this.startWebTorrent();
         this.requireTorrent();
         window.addEventListener("online", this.handleConnectionChange);
@@ -2256,10 +2274,11 @@ class App extends Component {
                     searchContent={this.state.searchContent}
                     loadingContent={this.state.loadingContent}
                     setHeader={this.setHeaderBackground}
-                    loadMovieCategories={this.loadMovieCategories}
+                    loadCategories={this.loadCategories}
                     loadFeatured={this.loadFeatured}
                     updateSuggested={this.updateSuggested}
                     movies={this.state.movies}
+                    shows={this.state.shows}
                     suggested={this.state.suggested}
                     favorites={this.state.favorites}
                     recentlyPlayed={this.state.recentlyPlayed}

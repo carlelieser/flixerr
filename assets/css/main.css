@@ -257,7 +257,7 @@ html {
 }
 
 .app-menu {
-    width: 220px;
+    width: 280px;
     height: auto;
     background-color: #FFF;
     top: 0;
@@ -643,7 +643,13 @@ html {
     z-index: 20;
 }
 
-.movie-modal > .movie-modal-info > .movie-modal-poster {
+.movie-modal > .movie-modal-info > .movie-modal-poster-info{
+    display:flex;
+    align-items:center;
+    justify-content: center;
+}
+
+.movie-modal > .movie-modal-info > .movie-modal-poster-info> .movie-modal-poster {
     width: 150px;
     height: 227px;
     min-height: 227px;
@@ -653,6 +659,48 @@ html {
     background-color: #000;
     background-position: center;
     box-shadow: 0 18px 20px -13px rgba(0, 0, 0, 0.61);
+}
+
+.open-series{
+    width: 180px;
+    height: 50px;
+    padding-left:20px;
+    padding-right: 20px;
+    margin-top:30px;
+    border-radius: 9999px;
+    display:flex;
+    align-items:center;
+    justify-content: center;
+    transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    position:relative;
+    background-color: rgb(241, 24, 24);
+}
+
+.open-series>*{
+    position:relative;
+    z-index: 50;
+}
+
+.open-series>div{
+    font-size: 14px;
+    font-family: 'Avenir', sans-serif;
+    text-transform: uppercase;
+    font-weight: bold;
+    width: 120px;
+}
+
+.open-series>i{
+    color: inherit !important;
+}
+
+.series-light{
+    color: #FFF;
+    box-shadow: 0 10px 20px -12px rgba(241, 24, 24, 0.41);
+}
+
+.series-dark{
+    color: #000;
+    box-shadow: 0 10px 20px -12px rgba(255, 255, 255, 0.41);
 }
 
 .movie-modal > .movie-modal-info > .movie-modal-title {
@@ -744,14 +792,15 @@ html {
     border-radius: 999px;
     margin-top: 30px;
     background-color: rgb(241, 24, 24);
+    color: #FFF;
     box-shadow: 0 10px 20px -12px rgba(241, 24, 24, 0.41);
     position: relative;
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:hover {
-    color: rgb(241, 24, 24);
+.movie-modal > .movie-modal-info > .movie-modal-play:hover, .open-series:hover{
+    color: rgb(241, 24, 24) !important;
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:before {
+.movie-modal > .movie-modal-info > .movie-modal-play:before, .open-series:before{
     content: "";
     position: absolute;
     z-index: 0;
@@ -765,12 +814,12 @@ html {
     transition: 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
     border-radius: 999px;
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:hover:before {
+.movie-modal > .movie-modal-info > .movie-modal-play:hover:before, .open-series:hover:before {
     transform: translate(-1%, -1%);
     opacity: 1;
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:hover {
-    box-shadow: 0 10px 20px -12px rgba(255, 255, 255, 0.41);
+.movie-modal > .movie-modal-info > .movie-modal-play:hover, .open-series:hover{
+    box-shadow: 0 10px 20px -12px rgba(255, 255, 255, 0.41) !important;
 }
 
 .movie-modal > .movie-modal-info > .movie-modal-play > * {
@@ -1925,6 +1974,12 @@ input[type=range]::-webkit-slider-thumb:hover {
 .movie-item > .movie-item-desc > i {
     margin-top: 20px;
 }
+
+.content-container>.tv-shows-container>div>.genre-container>.movie-list-paginated>.movie-item{
+    width: 320px;
+    height: 200px;
+}
+
 @font-face {
     src: url('../fonts/AvenirLTStd-Black.otf');
     font-family: 'Avenir';

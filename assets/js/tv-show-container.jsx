@@ -1,82 +1,82 @@
-import React, {Component} from "react";
+import React, { Component } from "react";
 
 import uniqid from "uniqid";
 
 import GenreContainer from "./genre-container";
 
-class MovieContainer extends Component {
+class TVShowContainer extends Component {
     constructor(props) {
         super(props);
     }
 
-    getMovies = () => {
-        if (this.props.movies.length === 0 || this.props.movies[0] === undefined) {
-            this
-                .props
-                .loadCategories();
+    getTVShows = () => {
+        if (this.props.shows) {
+            if (this.props.shows.length === 0 || this.props.shows[0] === undefined) {
+                this
+                    .props
+                    .loadCategories(true);
+            }
         }
     };
 
     setHeader = () => {
-        if (this.props.movies) {
-            if (this.props.movies.length) {
-                if (this.props.movies[0].movies[0]) {
+        if (this.props.shows) {
+            if (this.props.shows.length) {
+                if (this.props.shows[0].movies[0]) {
                     this
                         .props
-                        .setHeader(this.props.movies[0].movies[0].flixerr_data.backdrop_path);
+                        .setHeader(this.props.shows[0].movies[0].flixerr_data.backdrop_path);
                 }
             }
         }
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (this.props.movies) {
-            if (!this.props.movies.length) {
-                this.getMovies();
-            }
-        }
-
-        if (prevProps.movies !== this.props.movies) {
+        this.getTVShows();
+        if (prevProps.shows !== this.props.shows) {
             this.setHeader();
         }
     }
 
     componentDidMount() {
-        this.getMovies();
+        this.getTVShows();
         this.setHeader();
     }
 
     render() {
-        let movieGenres = this
+        let tvShowGenres = this
             .props
-            .movies
+            .shows
             .map((item, i) => {
                 if (item) {
                     let genreInfo = {
                         showCollection: false,
                         activeGenre: item.name,
                         genreID: item.genreID,
+                        shows: true,
                         movies: item.movies
                     }
 
                     return (<GenreContainer
+                        fallback={true}
+                        shows={true}
                         toggleGenre={this.props.toggleGenre}
                         openBox={this.props.openBox}
                         genreInfo={genreInfo}
-                        key={uniqid()}/>);
+                        key={uniqid()} />);
                 }
             });
 
         return (
             <div
-                className='movie-container'
+                className='tv-shows-container'
                 style={{
-                height: `${ 470 * 12}px'`
-            }}>
-                {movieGenres}
+                    height: `${470 * 12}px'`
+                }}>
+                {tvShowGenres}
             </div>
         );
     }
 }
 
-export default MovieContainer;
+export default TVShowContainer;

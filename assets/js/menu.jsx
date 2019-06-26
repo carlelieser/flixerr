@@ -12,10 +12,11 @@ class Menu extends Component {
 			menu: [
 				"Featured",
 				"Movies",
+				"TV Shows",
 				"Collection",
 				this.props.user ? "Sign Out" : "Sign In"
 			],
-			icons: ["star", "filmstrip", "library", "account-circle"]
+			icons: ["star", "filmstrip", "youtube-tv", "library", "account-circle"]
 		};
 	}
 

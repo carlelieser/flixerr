@@ -2,9 +2,10 @@ import React, {Component} from "react";
 
 import Fade from "react-reveal/Fade";
 
-import MovieContainer from "./movie-container";
-import Collection from "./collection-container";
 import FeaturedContainer from "./featured-container";
+import MovieContainer from "./movie-container";
+import TVShowContainer from './tv-show-container'
+import Collection from "./collection-container";
 import SearchContainer from "./search-container";
 
 class Content extends Component {
@@ -18,6 +19,8 @@ class Content extends Component {
                 return (<FeaturedContainer {...this.props}/>);
             case "Movies":
                 return (<MovieContainer {...this.props}/>);
+            case "TV Shows":
+                return (<TVShowContainer {...this.props}/>);
             case "Collection":
                 return (<Collection {...this.props}/>);
         }
@@ -49,6 +52,8 @@ class Content extends Component {
             if (this.props.active === "Featured" && (nextProps.featured !== this.props.featured)) {
                 return true;
             } else if (this.props.active === "Movies" && (nextProps.movies !== this.props.movies)) {
+                return true;
+            } else if (this.props.active === "TV Shows" && (nextProps.tvshows !== this.props.tvshows)){
                 return true;
             } else if (this.props.active === "Collection" && (nextProps.suggested !== this.props.suggested || nextProps.favorites !== this.props.favorites || nextProps.recentlyPlayed !== this.props.recentlyPlayed)) {
                 return true;

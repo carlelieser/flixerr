@@ -44,11 +44,13 @@ class MovieModal extends Component {
                     : "500px"
             }}>
                 <div className='movie-modal-info'>
+                    <div className="movie-modal-poster-info">
                     <div
                         className='movie-modal-poster'
                         style={{
                         backgroundImage: `url(${this.props.movie.flixerr_data.poster_path})`
-                    }}/>
+                    }}></div>
+                    </div>
                     <div className='movie-metadata'>
                         <div className='movie-modal-vote'>
                             <i
@@ -80,10 +82,15 @@ class MovieModal extends Component {
                     <div className='movie-modal-desc'>
                         {this.props.movie.overview}
                     </div>
-
-                    <div className='movie-modal-play' onClick={this.handlePlayMovie}>
+                    {
+                        this.props.movie.first_air_date ?
+                        <div className={`open-series ${this.props.movie.averageColor.isLight ? 'series-dark' : 'series-light'}`}>
+                            <div>View Seasons</div>
+                            <i className="mdi mdi-arrow-right"/></div>
+                        : <div className='movie-modal-play' onClick={this.handlePlayMovie}>
                         <i className='mdi mdi-play-circle-outline mdi-36px'/>
                     </div>
+                    }
                 </div>
                 <div
                     className='movie-modal-image'
