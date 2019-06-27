@@ -257,7 +257,7 @@ html {
 }
 
 .app-menu {
-    width: 280px;
+    width: 240px;
     height: auto;
     background-color: #FFF;
     top: 0;
@@ -590,7 +590,8 @@ html {
 .movie-modal {
     width: 700px;
     height: 600px;
-    padding: 10px;
+    box-sizing:border-box;
+    padding: 40px;
     top: 50%;
     left: 50%;
     position: fixed;
@@ -626,6 +627,104 @@ html {
     left: 0;
     position: absolute;
     z-index: 10;
+}
+
+.movie-modal>.seasons-container{
+    z-index: 20;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+    box-sizing: border-box;
+    font-family: 'Avenir', sans-serif;
+}
+
+.movie-modal>.seasons-container::-webkit-scrollbar{
+    display:none;
+}
+
+.light-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-title{
+    color: rgba(0,0,0,0.81);
+}
+.light-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-desc{
+    color: rgba(0,0,0,0.71);
+}
+
+.dark-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-title{
+    color: rgba(255, 255, 255, 0.81);
+}
+
+.dark-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-desc{
+    color: rgba(255, 255, 255, 0.71);
+}
+
+.movie-modal>.seasons-container>.season{
+    margin-top:20px;
+}
+
+.movie-modal>.seasons-container>.close-seasons{
+	width: 45px;
+	height: 45px;
+	position:absolute;
+	top:0;
+	right: 0;
+	margin:25px;
+	z-index: 100;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+}
+
+.movie-modal>.seasons-container>div>.season>.season-title{
+    font-size: 36px;
+    font-weight: bold;
+    margin-top: 40px;
+}
+
+.movie-modal>.seasons-container>div>.season>.episode{
+    display: flex;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.movie-modal>.seasons-container>div>.season>.episode:first{
+	margin-top:20px;
+}
+
+.movie-modal>.seasons-container>div>.season>.episode>.episode-still{
+    height: 145px;
+    min-width: 240px;
+    background-color: rgba(0,0,0,0.1);
+    background-size:cover;
+    background-repeat:no-repeat;
+    background-position:center;
+    border-radius: 4px;
+    box-shadow: 0px 20px 20px -12px rgba(0,0,0,0.41);
+    display:flex;
+    align-items:center;
+    justify-content: center;
+}
+
+.movie-modal>.seasons-container>div>.season>.episode>.episode-info{
+    margin-left:40px;
+    margin-right: 40px;
+}
+
+.movie-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-title{
+    display:flex;
+    align-items:center;
+    font-weight: bold;
+}
+
+.movie-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-title>div:last-child{
+    margin-left:5px;
+}
+
+.movie-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-desc{
+    font-size:14px;
+    margin-top:5px;
+    overflow:hidden;
+    text-overflow: ellipsis;
 }
 
 .movie-modal > .movie-modal-info {
@@ -693,14 +792,12 @@ html {
     color: inherit !important;
 }
 
-.series-light{
-    color: #FFF;
-    box-shadow: 0 10px 20px -12px rgba(241, 24, 24, 0.41);
+.react-reveal.movie-modal-info{
+    padding:0;
 }
 
-.series-dark{
-    color: #000;
-    box-shadow: 0 10px 20px -12px rgba(255, 255, 255, 0.41);
+.react-reveal.seasons-container{
+    padding:0;
 }
 
 .movie-modal > .movie-modal-info > .movie-modal-title {
