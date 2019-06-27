@@ -16,9 +16,7 @@ import Header from "./header";
 import Content from "./content";
 
 import TorrentSearch from "./torrent-search";
-
-const parseTorrent = require("parse-torrent-name");
-const request = require("axios");
+import { default as request } from "axios";
 
 class App extends Component {
     constructor(props) {
@@ -523,6 +521,7 @@ class App extends Component {
 
     getPreferredTorrents = (torrents) => {
         return new Promise((resolve, reject) => {
+            let parseTorrent = require("parse-torrent-name");
             let preferredTorrents = torrents.filter((item, index) => {
                 if (item) {
                     if (item.download || item.magnet) {
