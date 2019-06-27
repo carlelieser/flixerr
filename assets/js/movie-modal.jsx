@@ -1,8 +1,19 @@
 import React, {Component} from "react";
 
+import Fade from "react-reveal/Fade";
+import {default as request} from "axios";
+
 class MovieModal extends Component {
     constructor(props) {
         super(props);
+
+        this.state = {
+            seasons: []
+        }
+    }
+
+    setSeasons = (seasons) => {
+        this.setState({seasons});
     }
 
     handlePlayMovie = () => {
@@ -23,85 +34,171 @@ class MovieModal extends Component {
         }
     };
 
+    getEpisodes = (season) => {
+        let url = `https://api.themoviedb.org/3/tv/${this.props.movie.id}/season/${season.season_number}?api_key=${this.props.apiKey}&language=en-US`;
+        return request
+            .get(url)
+            .then((response) => {
+                return response.data.episodes
+                    ? {
+                        seasonNumber: season.season_number,
+                        episodes: [...response.data.episodes]
+                    }
+                    : false;
+            })
+            .catch((err) => console.log(err));
+    }
+
+    getSeriesData = () => {
+        let url = `https://api.themoviedb.org/3/tv/${this.props.movie.id}?api_key=${this.props.apiKey}&language=en-US`;
+        return request
+            .get(url)
+            .then((response) => {
+                return response.data;
+            })
+            .catch((err) => console.log(err));
+    }
+
+    getSeasons = () => {
+        if (this.props.movie.first_air_date) {
+            return this
+                .getSeriesData()
+                .then((data) => {
+                    let seasons = data.seasons;
+                    let seasonData = [];
+                    for (let i = 0; i < seasons.length; i++) {
+                        let season = seasons[i];
+                        let episode = this.getEpisodes(season);
+                        seasonData.push(episode);
+                    }
+
+                    return Promise
+                        .all(seasonData)
+                        .then((response) => {
+                            this.setSeasons(response);
+                        });
+                });
+        }
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
-        if (this.props.movie === nextProps.movie && this.props.favorites === nextProps.favorites) {
+        if (this.props.movie === nextProps.movie && this.props.favorites === nextProps.favorites && nextState.seasons === this.state.seasons) {
             return false;
         } else {
             return true;
         }
     }
 
+    componentDidMount() {
+        this.getSeasons();
+    }
+
     render() {
+        let movie = this.props.movie,
+            releaseDate = movie
+                .release_date
+                .substring(0, 4),
+            isLight = movie.averageColor.isLight,
+            isLightClass = isLight
+                ? "mdi-dark"
+                : "mdi-light",
+            averageColor = movie.averageColor,
+            modalHeight = movie
+                ? `${ 500 + movie.overview.length / 4 + movie.title.length / 2}px`
+                : "500px";
+
+        let seasons = this
+            .state
+            .seasons
+            .map((season, index) => {
+                let episodes = season
+                    .episodes
+                    .map((episode, index) => (
+                        <div key={season.name + episode.name + index} className="episode">
+                            <div className="episode-still"></div>
+                            <div className="episode-info">
+                                <div className="episode-title">{`${episode.episode_number} ${episode.name}`}</div>
+                                <div className="episode-desc">{episode.overview}</div>
+                            </div>
+                        </div>
+                    ));
+
+                return (
+                    <div key={season.name + index} className="season">
+                        <div className="season-title">{season.name}</div>
+                        {episodes}
+                    </div>
+                )
+            });
+
         return (
             <div
-                className={`movie-modal ${this.props.movie.averageColor.isLight
+                className={`movie-modal ${isLight
                 ? "light-modal"
                 : "dark-modal"}`}
                 style={{
-                backgroundColor: this.props.movie.averageColor.hex,
-                height: this.props.movie
-                    ? `${ 500 + this.props.movie.overview.length / 4 + this.props.movie.title.length / 2}px`
-                    : "500px"
+                backgroundColor: averageColor.hex,
+                height: modalHeight
             }}>
-                <div className='movie-modal-info'>
-                    <div className="movie-modal-poster-info">
-                    <div
-                        className='movie-modal-poster'
-                        style={{
-                        backgroundImage: `url(${this.props.movie.flixerr_data.poster_path})`
-                    }}></div>
-                    </div>
-                    <div className='movie-metadata'>
-                        <div className='movie-modal-vote'>
+
+                <Fade when={this.state.showSeasons} distance="10%" bottom>
+                    <div className="seasons-container">{seasons}</div>
+                </Fade>
+
+                <Fade when={!this.state.showSeasons} distance="10%" bottom>
+                    <div className='movie-modal-info'>
+                        <div className="movie-modal-poster-info">
+                            <div
+                                className='movie-modal-poster'
+                                style={{
+                                backgroundImage: `url(${movie.flixerr_data.poster_path})`
+                            }}></div>
+                        </div>
+                        <div className='movie-metadata'>
+                            <div className='movie-modal-vote'>
+                                <i className={`mdi ${isLightClass} mdi-star-outline`}/>
+                                <div>{`${movie.vote_average} / 10`}</div>
+                            </div>
+                            <div className='movie-modal-release-date'>
+                                {releaseDate}
+                            </div>
                             <i
-                                className={`mdi ${this.props.movie.averageColor.isLight
-                                ? "mdi-dark"
-                                : "mdi-light"} mdi-star-outline`}/>
-                            <div>{`${this.props.movie.vote_average} / 10`}</div>
-                        </div>
-                        <div className='movie-modal-release-date'>
-                            {this
+                                className={`mdi ${isLightClass} ${this
                                 .props
-                                .movie
-                                .release_date
-                                .substring(0, 4)}
-                        </div>
-                        <i
-                            className={`mdi ${this.props.movie.averageColor.isLight
-                            ? "mdi-dark"
-                            : "mdi-light"} ${this
-                                .props
-                                .isFavorite(this.props.movie)
+                                .isFavorite(movie)
                                 ? "mdi-heart"
                                 : "mdi-heart-outline"}`}
-                            onClick={this.handleFavorites}/>
+                                onClick={this.handleFavorites}/>
+                        </div>
+                        <div className='movie-modal-title'>
+                            {movie.title}
+                        </div>
+                        <div className='movie-modal-desc'>
+                            {movie.overview}
+                        </div>
+                        {movie.first_air_date
+                            ? <div
+                                    className={`open-series ${isLight
+                                    ? 'series-dark'
+                                    : 'series-light'}`}>
+                                    <div>View Seasons</div>
+                                    <i className="mdi mdi-arrow-right"/></div>
+                            : <div className='movie-modal-play' onClick={this.handlePlayMovie}>
+                                <i className='mdi mdi-play-circle-outline mdi-36px'/>
+                            </div>
+}
                     </div>
-                    <div className='movie-modal-title'>
-                        {this.props.movie.title}
-                    </div>
-                    <div className='movie-modal-desc'>
-                        {this.props.movie.overview}
-                    </div>
-                    {
-                        this.props.movie.first_air_date ?
-                        <div className={`open-series ${this.props.movie.averageColor.isLight ? 'series-dark' : 'series-light'}`}>
-                            <div>View Seasons</div>
-                            <i className="mdi mdi-arrow-right"/></div>
-                        : <div className='movie-modal-play' onClick={this.handlePlayMovie}>
-                        <i className='mdi mdi-play-circle-outline mdi-36px'/>
-                    </div>
-                    }
-                </div>
+                </Fade>
                 <div
                     className='movie-modal-image'
                     style={{
-                    backgroundImage: `url(${this.props.movie.flixerr_data.blurry_backdrop_path})`
+                    backgroundImage: `url(${movie.flixerr_data.blurry_backdrop_path})`
                 }}/>
                 <div
                     className='movie-gradient'
                     style={{
-                    background: this.props.movie.averageColor
-                        ? `linear-gradient(180deg, rgba(${this.props.movie.averageColor.value[0]}, ${this.props.movie.averageColor.value[1]}, ${this.props.movie.averageColor.value[2]}, 0.40) 0%, rgba(${this.props.movie.averageColor.value[0]}, ${this.props.movie.averageColor.value[1]}, ${this.props.movie.averageColor.value[2]}, 0.60) 20%, rgba(${this.props.movie.averageColor.value[0]}, ${this.props.movie.averageColor.value[1]}, ${this.props.movie.averageColor.value[2]}, 0.80) 50%, ${this.props.movie.averageColor.hex} 100%)`
+                    background: averageColor
+                        ? `linear-gradient(180deg, rgba(${averageColor.value[0]}, ${averageColor.value[1]}, ${averageColor.value[2]}, 0.40) 0%, rgba(${averageColor.value[0]}, ${averageColor.value[1]}, ${averageColor.value[2]}, 0.60) 20%, rgba(${averageColor.value[0]}, ${averageColor.value[1]}, ${averageColor.value[2]}, 0.80) 50%, ${averageColor.hex} 100%)`
                         : ""
                 }}/>
             </div>
