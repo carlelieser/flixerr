@@ -102,7 +102,7 @@ class Header extends Component {
                     }}/>
                 </Fade>
                 <div className='app-header-bg'>
-                    <Fade spy={this.props.user} distance='10%' cascade bottom>
+                    <Fade spy={this.props.user ? this.props.user.email : this.props.user} distance='10%' cascade bottom>
                         <div className='app-header-title'>
                             <div>{`Flixerr v${version} ·`}</div>
                             <div className='user-email'>
