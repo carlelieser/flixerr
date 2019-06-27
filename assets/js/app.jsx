@@ -2203,6 +2203,7 @@ class App extends Component {
 
         let movieModal = this.state.showBox
             ? (<MovieModal
+                apiKey={this.state.apiKey}
                 movie={this.state.movieCurrent}
                 favorites={this.state.favorites}
                 playMovie={this.playMovie}
