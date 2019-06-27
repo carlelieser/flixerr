@@ -109,7 +109,6 @@ class MovieItem extends Component {
     }
 
     componentDidMount() {
-        console.log(this.props.movie)
         this.setState({
             fontSize: -0.0195 * this.props.movie.title.length + 1.6,
             stars: this.getStars()
