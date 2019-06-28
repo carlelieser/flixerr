@@ -16,7 +16,7 @@ import Header from "./header";
 import Content from "./content";
 
 import TorrentSearch from "./torrent-search";
-import { default as request } from "axios";
+import {default as request} from "axios";
 
 class App extends Component {
     constructor(props) {
@@ -1659,10 +1659,14 @@ class App extends Component {
         let sanitized = [];
         for (let i = 0; i < movies.length; i++) {
             let movie = movies[i];
-            if(movie.backdrop_path){
-                movie.title = movie.name ? movie.name : movie.title;
-                movie.release_date = movie.first_air_date ? movie.first_air_date : movie.release_date;
-                    movie.flixerr_data = {
+            if (movie.backdrop_path) {
+                movie.title = movie.name
+                    ? movie.name
+                    : movie.title;
+                movie.release_date = movie.first_air_date
+                    ? movie.first_air_date
+                    : movie.release_date;
+                movie.flixerr_data = {
                     poster_path: `https://image.tmdb.org/t/p/w780${movie.poster_path}`,
                     backdrop_path: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
                     blurry_poster_path: `https://image.tmdb.org/t/p/w92${movie.poster_path}`,
@@ -1681,11 +1685,14 @@ class App extends Component {
 
     getMovies = (genre, genreID, shows) => {
         let page = Math.floor(Math.random() * this.state.genrePages) + 1;
-        let url = shows ? `https://api.themoviedb.org/3/discover/tv?api_key=${this.state.apiKey}&language=en-US&sort_by=popularity.desc&page=${page}&timezone=America%2FNew_York&include_null_first_air_dates=false&with_genres=${genreID}&with_original_language=en` : genreID != 21
-            ? `https://api.themoviedb.org/3/discover/movie?api_key=${
+        let url = shows
+            ? `https://api.themoviedb.org/3/discover/tv?api_key=${this.state.apiKey}&language=en-US&sort_by=popularity.desc&page=${page}&timezone=America%2FNew_York&include_null_first_air_dates=false&with_genres=${genreID}&with_original_language=en`
+            : genreID != 21
+                ? `https://api.themoviedb.org/3/discover/movie?api_key=${
         this
             .state
-            .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&primary_release_date.lte=${this.getURLDate(1)}&with_genres=${genreID}` : "https://reelgood.com/movies/source/netflix?filter-sort=1";
+            .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&primary_release_date.lte=${this
+            .getURLDate(1)}&with_genres=${genreID}` : "https://reelgood.com/movies/source/netflix?filter-sort=1";
         return new Promise((resolve, reject) => {
             this
                 .fetchContent(url)
@@ -1894,7 +1901,9 @@ class App extends Component {
 
     loadCategories = (shows) => {
         let movieGenres = require('./movie-genres');
-        movieGenres = shows ? movieGenres.getTVCategories() : movieGenres.getCategories();
+        movieGenres = shows
+            ? movieGenres.getTVCategories()
+            : movieGenres.getCategories();
 
         let promiseArray = [];
 
@@ -1914,9 +1923,9 @@ class App extends Component {
         Promise
             .all(promiseArray)
             .then((data) => {
-                if(shows){
+                if (shows) {
                     this.setShows(data);
-                }else{
+                } else {
                     this.setMovies(data);
                 }
             })
