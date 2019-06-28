@@ -1,8 +1,8 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 
 import Fade from "react-reveal/Fade";
 import Season from "./season"
-import { default as request } from "axios";
+import {default as request} from "axios";
 
 class MovieModal extends Component {
     constructor(props) {
@@ -15,7 +15,7 @@ class MovieModal extends Component {
     }
 
     setShowSeasons = (showSeasons) => {
-        this.setState({ showSeasons });
+        this.setState({showSeasons});
     }
 
     openSeasons = () => {
@@ -27,7 +27,7 @@ class MovieModal extends Component {
     }
 
     setSeasons = (seasons) => {
-        this.setState({ seasons });
+        this.setState({seasons});
     }
 
     handlePlayMovie = () => {
@@ -82,7 +82,7 @@ class MovieModal extends Component {
                     let seasonData = [];
                     for (let i = 0; i < seasons.length; i++) {
                         let season = seasons[i];
-                        if(season.season_number){
+                        if (season.season_number) {
                             let episode = this.getEpisodes(season);
                             seasonData.push(episode);
                         }
@@ -123,34 +123,43 @@ class MovieModal extends Component {
                 : "mdi-light",
             averageColor = movie.averageColor,
             modalHeight = movie
-                ? `${500 + movie.overview.length / 4 + movie.title.length / 2}px`
+                ? `${ 500 + movie.overview.length / 4 + movie.title.length / 2}px`
                 : "500px";
 
         let seasons = this
             .state
             .seasons
             .map((season, index) => {
-                return (
-                    <Season key={season.name + index} isLightClass={isLightClass} name={season.name} episodes={season.episodes}/>
-                )
+                return (<Season
+                    key={season.name + index}
+                    isLightClass={isLightClass}
+                    name={season.name}
+                    episodes={season.episodes}/>)
             });
 
         let showInfo = !this.state.showSeasons;
         return (
             <div
                 className={`movie-modal ${isLight
-                    ? "light-modal"
-                    : "dark-modal"}`}
+                ? "light-modal"
+                : "dark-modal"}`}
                 style={{
-                    backgroundColor: averageColor.hex,
-                    height: modalHeight
-                }}>
+                backgroundColor: averageColor.hex,
+                height: modalHeight
+            }}>
 
-                <Fade mountOnEnter unmountOnExit when={this.state.showSeasons} distance="10%" bottom>
-					<div className="seasons-container">
-					<div className="close-seasons" onClick={this.closeSeasons}><i className={`mdi mdi-close mdi-36px ${isLightClass}`}/></div>
-					{seasons}
-					</div>
+                <Fade
+                    mountOnEnter
+                    unmountOnExit
+                    when={this.state.showSeasons}
+                    distance="10%"
+                    bottom>
+                    <div className="seasons-container">
+                        <div className={`close-seasons ${isLight ? 'close-dark' : 'close-light'}`} onClick={this.closeSeasons}>
+                            <i className={`mdi mdi-close ${isLightClass}`}/>
+                        </div>
+                        {seasons}
+                    </div>
                 </Fade>
 
                 <Fade mountOnEnter unmountOnExit when={showInfo} distance="10%" bottom>
@@ -159,12 +168,12 @@ class MovieModal extends Component {
                             <div
                                 className='movie-modal-poster'
                                 style={{
-                                    backgroundImage: `url(${movie.flixerr_data.poster_path})`
-                                }}></div>
+                                backgroundImage: `url(${movie.flixerr_data.poster_path})`
+                            }}></div>
                         </div>
                         <div className='movie-metadata'>
                             <div className='movie-modal-vote'>
-                                <i className={`mdi ${isLightClass} mdi-star-outline`} />
+                                <i className={`mdi ${isLightClass} mdi-star-outline`}/>
                                 <div>{`${movie.vote_average} / 10`}</div>
                             </div>
                             <div className='movie-modal-release-date'>
@@ -172,11 +181,11 @@ class MovieModal extends Component {
                             </div>
                             <i
                                 className={`mdi ${isLightClass} ${this
-                                    .props
-                                    .isFavorite(movie)
-                                    ? "mdi-heart"
-                                    : "mdi-heart-outline"}`}
-                                onClick={this.handleFavorites} />
+                                .props
+                                .isFavorite(movie)
+                                ? "mdi-heart"
+                                : "mdi-heart-outline"}`}
+                                onClick={this.handleFavorites}/>
                         </div>
                         <div className='movie-modal-title'>
                             {movie.title}
@@ -185,29 +194,27 @@ class MovieModal extends Component {
                             {movie.overview}
                         </div>
                         {movie.first_air_date
-                            ? <div
-                                className="open-series"
-                                onClick={this.openSeasons}>
-                                <div>View Seasons</div>
-                                <i className="mdi mdi-arrow-right" /></div>
+                            ? <div className="open-series" onClick={this.openSeasons}>
+                                    <div>View Seasons</div>
+                                    <i className="mdi mdi-arrow-right"/></div>
                             : <div className='movie-modal-play' onClick={this.handlePlayMovie}>
-                                <i className='mdi mdi-play-circle-outline mdi-36px' />
+                                <i className='mdi mdi-play-circle-outline mdi-36px'/>
                             </div>
-                        }
+}
                     </div>
                 </Fade>
                 <div
                     className='movie-modal-image'
                     style={{
-                        backgroundImage: `url(${movie.flixerr_data.blurry_backdrop_path})`
-                    }} />
+                    backgroundImage: `url(${movie.flixerr_data.blurry_backdrop_path})`
+                }}/>
                 <div
                     className='movie-gradient'
                     style={{
-                        background: averageColor
-                            ? `linear-gradient(180deg, rgba(${averageColor.value[0]}, ${averageColor.value[1]}, ${averageColor.value[2]}, 0.40) 0%, rgba(${averageColor.value[0]}, ${averageColor.value[1]}, ${averageColor.value[2]}, 0.60) 20%, rgba(${averageColor.value[0]}, ${averageColor.value[1]}, ${averageColor.value[2]}, 0.80) 50%, ${averageColor.hex} 100%)`
-                            : ""
-                    }} />
+                    background: averageColor
+                        ? `linear-gradient(180deg, rgba(${averageColor.value[0]}, ${averageColor.value[1]}, ${averageColor.value[2]}, 0.40) 0%, rgba(${averageColor.value[0]}, ${averageColor.value[1]}, ${averageColor.value[2]}, 0.60) 20%, rgba(${averageColor.value[0]}, ${averageColor.value[1]}, ${averageColor.value[2]}, 0.80) 50%, ${averageColor.hex} 100%)`
+                        : ""
+                }}/>
             </div>
         );
     }
