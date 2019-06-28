@@ -542,7 +542,7 @@ class App extends Component {
                             delete item.peers;
                         }
 
-                        item.title = `${parsed.title} (${parsed.year}) ${
+                        item.title = `${parsed.title} ${parsed.year ? `(${parsed.year})` : ''} ${
                         parsed.group
                             ? parsed
                                 .group
@@ -1188,9 +1188,9 @@ class App extends Component {
     };
 
     getMovieDate = (movie) => {
-        return movie
+        return movie.release_date ? movie
             .release_date
-            .substring(0, 4);
+            .substring(0, 4) : '';
     };
 
     getQualityTorrent = (torrents) => {
@@ -1224,7 +1224,7 @@ class App extends Component {
             : clone[0];
     };
 
-    searchTorrent = (movie, excludeDate) => {
+    searchTorrent = (movie, show, excludeDate) => {
         this.resetVideo();
         this.removeTorrents();
         this.closeServer();
@@ -1235,25 +1235,28 @@ class App extends Component {
                 .then((cleanMovie) => {
                     this.streamTorrent(cleanMovie);
                 })
-                .catch((movie) => this.searchTorrent(movie));
+                .catch((movie) => this.searchTorrent(movie, show));
         } else {
-            let title = this.prepareMovieTitle(movie.title),
+            if(this.state.playMovie){
+                let title = this.prepareMovieTitle(movie.title),
                 date = this.getMovieDate(movie),
-                query = `${title} ${excludeDate
+                query = show ? movie.query : `${title} ${excludeDate
                     ? ""
                     : date}`;
+            
+            console.log(movie);
 
-            this.setPlayerStatus(`Searching the entire universe for "${movie.title}"`, true);
+            this.setPlayerStatus(`Searching the entire universe for "${movie.show_title || movie.title}"`, true);
 
             let publicSearch = this
                 .publicSearch
                 .search([
                     "1337x", "Rarbg"
-                ], query, "Movies", 20);
+                ], query, show ? "TV" : "Movies", 20);
 
             let proprietarySearch = this
                 .torrentSearch
-                .searchTorrents(query);
+                .searchTorrents(query, show);
 
             Promise
                 .all([publicSearch, proprietarySearch])
@@ -1262,75 +1265,83 @@ class App extends Component {
                         .concat
                         .apply([], data);
 
-                    if (data[0].message || typeof data[0] === "string") {
-                        this.searchTorrent(movie, true);
-                    } else {
-                        let magnetPromises = [];
-                        for (let n = 0; n < data.length; n++) {
-                            let magnetTorrent = data[n];
-                            if (magnetTorrent) {
-                                if (magnetTorrent.desc) {
-                                    let promise = this
-                                        .torrentSearch
-                                        .getMagnetFromLink(magnetTorrent);
-                                    magnetPromises.push(promise);
+                        console.log(data);
+                    if(data[0]){
+                        if ((data[0].message || typeof data[0] === "string") && data.length <= 2) {
+                            this.searchTorrent(movie, show, true);
+                        } else {
+                            let magnetPromises = [];
+                            for (let n = 0; n < data.length; n++) {
+                                let magnetTorrent = data[n];
+                                if (magnetTorrent) {
+                                    if (magnetTorrent.desc) {
+                                        let promise = this
+                                            .torrentSearch
+                                            .getMagnetFromLink(magnetTorrent);
+                                        magnetPromises.push(promise);
+                                    }
                                 }
                             }
-                        }
-
-                        Promise
-                            .all(magnetPromises)
-                            .then((results) => {
-                                results = [
-                                    ...results,
-                                    ...data
-                                ];
-
-                                let cleanResults = results.filter((torrent) => {
-                                    if (torrent) {
-                                        return torrent.magnet;
-                                    }
-                                });
-
-                                if (cleanResults.length) {
-                                    this
-                                        .getPreferredTorrents(cleanResults)
-                                        .then((torrents) => {
-                                            let torrent = this.getQualityTorrent(torrents);
-                                            if (torrent) {
-                                                if (this.state.playMovie) {
-                                                    let movie = this.getObjectClone(this.state.playMovie);
-                                                    movie.preferredTorrents = torrents;
-                                                    this.setState({
-                                                        playMovie: movie
-                                                    }, () => {
-                                                        this.changeCurrentMagnet(torrent.magnet);
-                                                        this.updateMovieTimeArray(movie, true);
-                                                        this.streamTorrent(torrent);
-                                                    });
+    
+                            Promise
+                                .all(magnetPromises)
+                                .then((results) => {
+                                    results = [
+                                        ...results,
+                                        ...data
+                                    ];
+    
+                                    let cleanResults = results.filter((torrent) => {
+                                        if (torrent) {
+                                            return torrent.magnet;
+                                        }
+                                    });
+    
+                                    if (cleanResults.length) {
+                                        this
+                                            .getPreferredTorrents(cleanResults)
+                                            .then((torrents) => {
+                                                let torrent = this.getQualityTorrent(torrents);
+                                                if (torrent) {
+                                                    if (this.state.playMovie) {
+                                                        let movie = this.getObjectClone(this.state.playMovie);
+                                                        movie.preferredTorrents = torrents;
+                                                        this.setState({
+                                                            playMovie: movie
+                                                        }, () => {
+                                                            this.changeCurrentMagnet(torrent.magnet);
+                                                            this.updateMovieTimeArray(movie, true);
+                                                            this.streamTorrent(torrent);
+                                                        });
+                                                    }
+                                                } else {
+                                                    this.applyTimeout(1);
                                                 }
-                                            } else {
-                                                this.applyTimeout(1);
-                                            }
-                                        });
-                                } else {
-                                    this.applyTimeout();
-                                }
-                            })
-                            .catch((err) => console.log(err));
+                                            });
+                                    } else {
+                                        this.applyTimeout();
+                                    }
+                                })
+                                .catch((err) => console.log(err));
+                        }
+                    }else{
+                        this.applyTimeout();
                     }
+
+                    
                 })
                 .catch((err) => console.log(err));
+            }
         }
     };
 
-    playMovie = (movie) => {
+    playMovie = (movie, show) => {
         movie = this.matchMovie(movie);
         this.initMovie(movie);
         this
-            .toggleBox()
+            .toggleBox(show)
             .then(() => {
-                this.searchTorrent(movie);
+                this.searchTorrent(movie, show);
                 this.addToRecentlyPlayed(movie);
             });
     };

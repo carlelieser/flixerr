@@ -26,7 +26,7 @@ class MovieItem extends Component {
     loadImage = () => {
         if (!this.unMounting) {
             this.setState({
-                backdrop: `${this.props.fallback
+                backdrop: `${this.props.shows ? this.props.movie.flixerr_data.blurry_backdrop_path : this.props.fallback
                     ? this.props.movie.flixerr_data.backdrop_path
                     : this.props.movie.flixerr_data.poster_path}`
             });
@@ -147,7 +147,7 @@ class MovieItem extends Component {
                     <div className='movie-item-bg'/>
                     <img
                         className='movie-item-blurred'
-                        src={this.props.fallback
+                        src={this.props.fallback || this.props.shows
                         ? this.props.movie.flixerr_data.blurry_backdrop_path
                         : this.props.movie.flixerr_data.blurry_poster_path}
                         onLoad={this.handleImage}/> {this.state.backdrop

@@ -152,7 +152,7 @@ class GenreContainer extends Component {
     };
 
     setItemWidth = () => {
-        this.itemWidth = this.props.fallback ? 340 : 230;
+        this.itemWidth = this.props.shows ? 340 : 230;
     }
 
     handleOpenGenre = () => {
@@ -187,11 +187,11 @@ class GenreContainer extends Component {
             .movies
             .slice(0, 20)
             .map((movie, index) => (<MovieItem
-                fallback={this.props.fallback}
+                shows={this.props.shows}
                 movie={movie}
                 openBox={this.props.openBox}
                 key={movie.title + index + 'genre'}/>));
-        let n = this.props.fallback ? 340 : this.props.genreInfo.movies.length
+        let n = this.props.shows ? 340 : this.props.genreInfo.movies.length
             ? 470
             : 100;
 

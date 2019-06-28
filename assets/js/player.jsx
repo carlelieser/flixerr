@@ -431,7 +431,7 @@ class Player extends Component {
                         <i
                             className="mdi mdi-light mdi-chevron-left mdi-36px"
                             onClick={this.closeClient}/>
-                        <div>{this.props.movie.title}</div>
+                        <div>{this.props.movie.show_title || this.props.movie.title}</div>
                         <i
                             className="open-backup mdi mdi-light mdi-sort-variant"
                             onClick={this.handleOpenBackup}/>

@@ -43,8 +43,10 @@ class Collection extends Component {
             let target = this.state.collection[i].target;
             if(this.props[target]){
                 if(this.props[target].length){
-                    this.props.setHeader(this.props[target][0].flixerr_data.backdrop_path);
-                    return;
+                    if(this.props[target][0].flixerr_data){
+                        this.props.setHeader(this.props[target][0].flixerr_data.backdrop_path);
+                        return;
+                    }
                 }
             }
         }

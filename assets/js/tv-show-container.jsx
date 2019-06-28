@@ -58,7 +58,6 @@ class TVShowContainer extends Component {
                     }
 
                     return (<GenreContainer
-                        fallback={true}
                         shows={true}
                         toggleGenre={this.props.toggleGenre}
                         openBox={this.props.openBox}

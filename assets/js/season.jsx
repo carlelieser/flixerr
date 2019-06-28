@@ -1,43 +1,43 @@
 import React, { Component } from 'react';
 
+import Episode from './episode'
+
 import Fade from 'react-reveal/Fade';
-import LazyLoad from "react-lazy-load";
 
 class Season extends Component {
 	constructor(props) {
 		super(props);
-
 		this.state = {
 			collapsed: true
 		}
 	}
 
+	handleStreamEpisode = (episode) => {
+		this.props.playMovie(episode, true);
+	}
+
+	toggleCollapse = () => {
+		this.setState((prevState) => {
+			return {
+				collapsed: !prevState.collapsed
+			}
+		});
+	}
+
 	render() {
-		let episodes = this.props.episodes.map((episode, index) => (
-			<Fade key={this.props.name + episode.name + index} distance="10%" cascade top>
-				<div className="episode">
-					<div className="episode-still" style={{ backgroundImage: `url(https://image.tmdb.org/t/p/w300${episode.still_path})` }}>
-						{episode.still_path ? '' : <i className={`mdi ${this.props.isLightClass} mdi-image mdi-36px`} />}
-					</div>
-					<div className="episode-info">
-						<div className="episode-title"><div>{`${episode.episode_number}.`}</div><div>{episode.name}</div></div>
-						<div className="episode-desc">{`${episode.overview.substring(0, 234)}${episode.overview.length < 234 ? '' : '...'}`}</div>
-					</div>
-				</div>
-			</Fade>
+		let episodes = this.props.season.episodes.map((episode, index) => (
+			<Episode handleStreamEpisode={this.handleStreamEpisode} episode={episode} isLightClass={this.props.isLightClass}/>
 		));
 
-		let n = 20 + 43 + (episodes.length * 205);
 		return (
-			<LazyLoad
-				height={n}
-				offsetVertical={n}
-				debounce={false}>
-				<div className="season">
-					<div className="season-title">{this.props.name}</div>
-					{episodes}
-				</div>
-			</LazyLoad>
+			<div className="season" onClick={this.toggleCollapse}>
+				<div className="season-title"><div>{this.props.season.name}</div><i className={`mdi ${this.props.isLightClass} ${this.state.collapsed ? 'mdi-menu-down arrow-collapse' : 'mdi-menu-up'}`}/></div>
+				<Fade when={!this.state.collapsed} duration={450} distance="1%" top>
+					<div className={`episodes ${this.state.collapsed ? 'episodes-collapsed' : ''}`}>
+						{episodes}
+					</div>
+				</Fade>
+			</div>
 		)
 	}
 }

@@ -11,7 +11,8 @@ let TorrentSearch = function () {
     let providers = [
         {
             name: "The Pirate Bay",
-            url: "https://thepiratebay3.org/index.php?video=on&category=0&page=0&orderby=99&q=",
+            url: "https://thepiratebay3.org/search/",
+            forShows: true,
             queryFunction: (query) => {
                 return encodeURI(query);
             }
@@ -21,7 +22,15 @@ let TorrentSearch = function () {
             queryFunction: (query) => {
                 return query.replace(/[^A-Za-z0-9]/g, '-');
             }
-        }
+        },
+            {
+                name: "EZTV",
+                url: "https://eztv.yt/search/",
+                forShows: true,
+                queryFunction: (query) => {
+                    return encodeURI(query);
+                }
+            }
     ];
 
     let getProxy = () => {
@@ -95,7 +104,7 @@ let TorrentSearch = function () {
         });
     };
 
-    let searchTorrents = (query) => {
+    let searchTorrents = (query, show) => {
         return new Promise((resolve, reject) => {
             let searchPromises = [];
             for (let j = 0; j < providers.length; j++) {
@@ -103,8 +112,10 @@ let TorrentSearch = function () {
                 let url = `${provider
                     .url}${provider
                     .queryFunction(query)}`;
-                let promise = searchProvider(url);
-                searchPromises.push(promise);
+                if((show && providers.forShows) || !show){
+                    let promise = searchProvider(url);
+                    searchPromises.push(promise);
+                }
             }
 
             Promise
