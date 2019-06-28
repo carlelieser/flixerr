@@ -590,7 +590,7 @@ html {
 .movie-modal {
     width: 700px;
     height: 600px;
-    box-sizing:border-box;
+    box-sizing: border-box;
     padding: 40px;
     top: 50%;
     left: 50%;
@@ -629,101 +629,112 @@ html {
     z-index: 10;
 }
 
-.movie-modal>.seasons-container{
+.movie-modal > .seasons-container {
     z-index: 20;
     overflow-y: scroll;
     display: flex;
     flex-direction: column;
-    padding: 40px;
     box-sizing: border-box;
     font-family: 'Avenir', sans-serif;
 }
 
-.movie-modal>.seasons-container::-webkit-scrollbar{
-    display:none;
+.movie-modal > .seasons-container::-webkit-scrollbar {
+    display: none;
 }
 
-.light-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-title{
+.light-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-title {
     color: rgba(0,0,0,0.81);
 }
-.light-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-desc{
+.light-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-desc {
     color: rgba(0,0,0,0.71);
 }
 
-.dark-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-title{
+.dark-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-title {
     color: rgba(255, 255, 255, 0.81);
 }
 
-.dark-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-desc{
+.dark-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-desc {
     color: rgba(255, 255, 255, 0.71);
 }
 
-.movie-modal>.seasons-container>.season{
-    margin-top:20px;
+.movie-modal > .seasons-container > .season {
+    margin-top: 20px;
 }
 
-.movie-modal>.seasons-container>.close-seasons{
-	width: 45px;
-	height: 45px;
-	position:absolute;
-	top:0;
-	right: 0;
-	margin:25px;
-	z-index: 100;
-	display:flex;
-	align-items:center;
-	justify-content:center;
+.movie-modal > .seasons-container > .close-seasons {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 40px;
+    border-radius: 100%;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 20px 20px -12px rgba(0,0,0,0.41);
 }
 
-.movie-modal>.seasons-container>div>.season>.season-title{
+.movie-modal>.seasons-container>.close-seasons>i{
+    margin-top:2px;
+}
+
+.close-dark {
+    background-color: rgba(0,0,0,0.41);
+}
+
+.close-light {
+    background-color: rgba(255,255,255,0.41);
+}
+
+.movie-modal > .seasons-container > div > .season > .season-title {
     font-size: 36px;
     font-weight: bold;
     margin-top: 40px;
 }
 
-.movie-modal>.seasons-container>div>.season>.episode{
+.movie-modal > .seasons-container > div > .season > .episode {
     display: flex;
     align-items: center;
     margin-top: 40px;
 }
-
-.movie-modal>.seasons-container>div>.season>.episode:first{
-	margin-top:20px;
+.movie-modal > .seasons-container > div > .season > .episode:first {
+    margin-top: 20px;
 }
 
-.movie-modal>.seasons-container>div>.season>.episode>.episode-still{
+.movie-modal > .seasons-container > div > .season > .episode > .episode-still {
     height: 145px;
     min-width: 240px;
     background-color: rgba(0,0,0,0.1);
-    background-size:cover;
-    background-repeat:no-repeat;
-    background-position:center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
     border-radius: 4px;
-    box-shadow: 0px 20px 20px -12px rgba(0,0,0,0.41);
-    display:flex;
-    align-items:center;
+    box-shadow: 0 20px 20px -12px rgba(0,0,0,0.41);
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
 
-.movie-modal>.seasons-container>div>.season>.episode>.episode-info{
-    margin-left:40px;
+.movie-modal > .seasons-container > div > .season > .episode > .episode-info {
+    margin-left: 40px;
     margin-right: 40px;
 }
 
-.movie-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-title{
-    display:flex;
-    align-items:center;
+.movie-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-title {
+    display: flex;
+    align-items: center;
     font-weight: bold;
 }
-
-.movie-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-title>div:last-child{
-    margin-left:5px;
+.movie-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-title > div:last-child {
+    margin-left: 5px;
 }
 
-.movie-modal>.seasons-container>div>.season>.episode>.episode-info>.episode-desc{
-    font-size:14px;
-    margin-top:5px;
-    overflow:hidden;
+.movie-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-desc {
+    font-size: 14px;
+    margin-top: 5px;
+    overflow: hidden;
     text-overflow: ellipsis;
 }
 
@@ -742,13 +753,13 @@ html {
     z-index: 20;
 }
 
-.movie-modal > .movie-modal-info > .movie-modal-poster-info{
-    display:flex;
-    align-items:center;
+.movie-modal > .movie-modal-info > .movie-modal-poster-info {
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
 
-.movie-modal > .movie-modal-info > .movie-modal-poster-info> .movie-modal-poster {
+.movie-modal > .movie-modal-info > .movie-modal-poster-info > .movie-modal-poster {
     width: 150px;
     height: 227px;
     min-height: 227px;
@@ -760,27 +771,27 @@ html {
     box-shadow: 0 18px 20px -13px rgba(0, 0, 0, 0.61);
 }
 
-.open-series{
+.open-series {
     width: 180px;
     height: 50px;
-    padding-left:20px;
+    padding-left: 20px;
     padding-right: 20px;
-    margin-top:30px;
+    margin-top: 30px;
     border-radius: 9999px;
-    display:flex;
-    align-items:center;
+    display: flex;
+    align-items: center;
     justify-content: center;
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    position:relative;
+    position: relative;
     background-color: rgb(241, 24, 24);
 }
 
-.open-series>*{
-    position:relative;
+.open-series > * {
+    position: relative;
     z-index: 50;
 }
 
-.open-series>div{
+.open-series > div {
     font-size: 14px;
     font-family: 'Avenir', sans-serif;
     text-transform: uppercase;
@@ -788,16 +799,16 @@ html {
     width: 120px;
 }
 
-.open-series>i{
+.open-series > i {
     color: inherit !important;
 }
 
-.react-reveal.movie-modal-info{
-    padding:0;
+.react-reveal.movie-modal-info {
+    padding: 0;
 }
 
-.react-reveal.seasons-container{
-    padding:0;
+.react-reveal.seasons-container {
+    padding: 0;
 }
 
 .movie-modal > .movie-modal-info > .movie-modal-title {
@@ -894,10 +905,12 @@ html {
     position: relative;
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:hover, .open-series:hover{
+.movie-modal > .movie-modal-info > .movie-modal-play:hover,
+.open-series:hover {
     color: rgb(241, 24, 24) !important;
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:before, .open-series:before{
+.movie-modal > .movie-modal-info > .movie-modal-play:before,
+.open-series:before {
     content: "";
     position: absolute;
     z-index: 0;
@@ -911,11 +924,13 @@ html {
     transition: 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
     border-radius: 999px;
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:hover:before, .open-series:hover:before {
+.movie-modal > .movie-modal-info > .movie-modal-play:hover:before,
+.open-series:hover:before {
     transform: translate(-1%, -1%);
     opacity: 1;
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:hover, .open-series:hover{
+.movie-modal > .movie-modal-info > .movie-modal-play:hover,
+.open-series:hover {
     box-shadow: 0 10px 20px -12px rgba(255, 255, 255, 0.41) !important;
 }
 
@@ -2073,11 +2088,10 @@ input[type=range]::-webkit-slider-thumb:hover {
     margin-top: 20px;
 }
 
-.content-container>.tv-shows-container>div>.genre-container>.movie-list-paginated>.movie-item{
+.content-container > .tv-shows-container > div > .genre-container > .movie-list-paginated > .movie-item {
     width: 320px;
     height: 200px;
 }
-
 @font-face {
     src: url('../fonts/AvenirLTStd-Black.otf');
     font-family: 'Avenir';
