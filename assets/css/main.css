@@ -433,13 +433,21 @@ html {
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
     box-shadow: 0 10px 20px -4px rgba(51, 92, 226, 0.41);
 }
-.account-form > .account-submit:hover {
+.account-form > .account-submit:not(.account-secondary):hover {
     background-color: rgb(240, 40, 157);
     box-shadow: 0 10px 20px -4px rgba(240, 40, 157, 0.41);
 }
 
 .account-form > .account-secondary {
-    background-color: rgba(0, 0, 0, 0.41);
+	width: 100%;
+	background-color: transparent;
+	box-shadow:none;
+	color: rgba(0,0,0,0.61);
+	letter-spacing: normal;
+}
+
+.account-form > .account-secondary:hover{
+	color: rgba(0,0,0,0.81);
 }
 
 .account-close {
@@ -629,36 +637,51 @@ html {
     z-index: 10;
 }
 
+.seasons-loading{
+	width: 40px;
+	height: 40px;
+	background-size:cover;
+	background-image: url('../imgs/loading-seasons.apng');
+	background-position:center;
+	background-repeat: no-repeat;
+}
+
 .movie-modal > .seasons-container {
-    z-index: 20;
+	z-index: 20;
     overflow-y: scroll;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
     font-family: 'Avenir', sans-serif;
+    position: absolute;
+    top: 0;
+    max-height: 100%;
+    padding: 40px;
+    width: 100%;
 }
 
 .movie-modal > .seasons-container::-webkit-scrollbar {
     display: none;
 }
 
-.light-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-title {
+.light-modal > .seasons-container > .season > .episode > .episode-info > .episode-title {
     color: rgba(0,0,0,0.81);
 }
-.light-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-desc {
+.light-modal > .seasons-container > .season > .episode > .episode-info > .episode-desc {
     color: rgba(0,0,0,0.71);
 }
 
-.dark-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-title {
+.dark-modal > .seasons-container > .season > .episode > .episode-info > .episode-title {
     color: rgba(255, 255, 255, 0.81);
 }
 
-.dark-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-desc {
+.dark-modal > .seasons-container > .season > .episode > .episode-info > .episode-desc {
     color: rgba(255, 255, 255, 0.71);
 }
 
 .movie-modal > .seasons-container > .season {
-    margin-top: 20px;
+	margin-top: 20px;
+    transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);	
 }
 
 .movie-modal > .seasons-container > .close-seasons {
@@ -673,37 +696,58 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0px 20px 20px -12px rgba(0,0,0,0.41);
+	box-shadow: 0px 20px 20px -12px rgba(0,0,0,0.41);
+    transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);	
+	
+}
+
+.movie-modal > .seasons-container > .close-seasons:hover{
+	box-shadow: 0px 20px 20px -6px rgba(0,0,0,0.51);
 }
 
 .movie-modal>.seasons-container>.close-seasons>i{
-    margin-top:2px;
+    margin-top:5px;
 }
 
 .close-dark {
-    background-color: rgba(0,0,0,0.41);
+    background-color: #FFF;
 }
 
 .close-light {
-    background-color: rgba(255,255,255,0.41);
+	background-color: #000;
 }
 
-.movie-modal > .seasons-container > div > .season > .season-title {
-    font-size: 36px;
+.movie-modal > .seasons-container > .season > .season-title {
+	margin-top: 40px;
+	display:flex;
+	align-items: center;
+}
+
+.movie-modal > .seasons-container > .season >.season-title> div{
+	font-size: 36px;
     font-weight: bold;
-    margin-top: 40px;
 }
 
-.movie-modal > .seasons-container > div > .season > .episode {
+.movie-modal > .seasons-container > .season > .season-title> i{
+	transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);	
+	transform-origin: center;
+	margin-left: 25px;	
+}
+
+.movie-modal > .seasons-container > .season > .season-title>.arrow-collapse{
+	transform: rotate(360deg);
+}
+
+.movie-modal > .seasons-container > .season > .episodes >.episode {
     display: flex;
     align-items: center;
     margin-top: 40px;
 }
-.movie-modal > .seasons-container > div > .season > .episode:first {
+.movie-modal > .seasons-container > .season > .episodes > .episode:first {
     margin-top: 20px;
 }
 
-.movie-modal > .seasons-container > div > .season > .episode > .episode-still {
+.movie-modal > .seasons-container > .season > .episodes >.episode > .episode-still {
     height: 145px;
     min-width: 240px;
     background-color: rgba(0,0,0,0.1);
@@ -714,28 +758,59 @@ html {
     box-shadow: 0 20px 20px -12px rgba(0,0,0,0.41);
     display: flex;
     align-items: center;
-    justify-content: center;
+	justify-content: center;
+	position:relative;
+	overflow:hidden;
+	cursor:pointer;
 }
 
-.movie-modal > .seasons-container > div > .season > .episode > .episode-info {
+.movie-modal > .seasons-container > .season > .episodes >.episode > .episode-still>.still-hover{
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.61);
+	display:flex;
+	align-items:center;
+	justify-content: center;
+	border-radius: inherit;
+	opacity:0;
+	transform: translateY(10%);
+	transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);	
+	will-change: transform;
+}
+
+.movie-modal > .seasons-container > .season > .episodes >.episode > .episode-still:hover .still-hover{
+	opacity:1;
+	transform: translateY(0);
+}
+
+.movie-modal > .seasons-container > .season > .episodes >.episode > .episode-still>.still-hover>i{
+	font-size: 36px;
+	color: rgb(255, 55, 55);
+}
+
+.movie-modal > .seasons-container > .season > .episodes > .episode > .episode-info {
     margin-left: 40px;
     margin-right: 40px;
 }
 
-.movie-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-title {
+.movie-modal > .seasons-container > .season > .episodes > .episode > .episode-info > .episode-title {
     display: flex;
     align-items: center;
     font-weight: bold;
 }
-.movie-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-title > div:last-child {
+.movie-modal > .seasons-container > .season > .episodes > .episode > .episode-info > .episode-title > div:last-child {
     margin-left: 5px;
 }
 
-.movie-modal > .seasons-container > div > .season > .episode > .episode-info > .episode-desc {
+.movie-modal > .seasons-container > .season > .episodes > .episode > .episode-info > .episode-desc {
     font-size: 14px;
     margin-top: 5px;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.episodes-collapsed>.episode{
+	display:none !important;
 }
 
 .movie-modal > .movie-modal-info {
@@ -783,7 +858,8 @@ html {
     justify-content: center;
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
     position: relative;
-    background-color: rgb(241, 24, 24);
+	background-color: rgb(241, 24, 24);
+	color: #FFF;
 }
 
 .open-series > * {
@@ -804,10 +880,6 @@ html {
 }
 
 .react-reveal.movie-modal-info {
-    padding: 0;
-}
-
-.react-reveal.seasons-container {
     padding: 0;
 }
 
