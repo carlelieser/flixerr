@@ -64,7 +64,6 @@ class Collection extends Component {
         if (prevProps.suggested !== this.props.suggested) {
             this.setHeader();
         }
-        this.checkSuggested();
     }
 
     componentDidMount() {
