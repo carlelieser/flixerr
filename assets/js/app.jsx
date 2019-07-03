@@ -542,7 +542,9 @@ class App extends Component {
                             delete item.peers;
                         }
 
-                        item.title = `${parsed.title} ${parsed.year ? `(${parsed.year})` : ''} ${
+                        item.title = `${parsed.title} ${parsed.year
+                            ? `(${parsed.year})`
+                            : ''} ${
                         parsed.group
                             ? parsed
                                 .group
@@ -1077,11 +1079,8 @@ class App extends Component {
         } else {
             let searchResults = [];
             for (let u = 1; u < 5; u++) {
-                let url = `https://api.themoviedb.org/3/search/movie?api_key=${
-                this
-                    .state
-                    .apiKey}&region=US&language=en-US&query=${query}&page=${u}&include_adult=false&primary_release_date.lte=${this
-                    .getURLDate(1, true)}`;
+                let url = `https://api.themoviedb.org/3/search/multi?api_key=${
+                this.state.apiKey}&region=US&language=en-US&query=${query}&page=${u}&include_adult=false`;
 
                 let promise = new Promise((resolve, reject) => {
                     this
@@ -1188,9 +1187,11 @@ class App extends Component {
     };
 
     getMovieDate = (movie) => {
-        return movie.release_date ? movie
-            .release_date
-            .substring(0, 4) : '';
+        return movie.release_date
+            ? movie
+                .release_date
+                .substring(0, 4)
+            : '';
     };
 
     getQualityTorrent = (torrents) => {
@@ -1237,100 +1238,100 @@ class App extends Component {
                 })
                 .catch((movie) => this.searchTorrent(movie, show));
         } else {
-            if(this.state.playMovie){
+            if (this.state.playMovie) {
                 let title = this.prepareMovieTitle(movie.title),
-                date = this.getMovieDate(movie),
-                query = show ? movie.query : `${title} ${excludeDate
-                    ? ""
-                    : date}`;
-            
-            console.log(movie);
+                    date = this.getMovieDate(movie),
+                    query = show
+                        ? movie.query
+                        : `${title} ${excludeDate
+                            ? ""
+                            : date}`;
 
-            this.setPlayerStatus(`Searching the entire universe for "${movie.show_title || movie.title}"`, true);
+                this.setPlayerStatus(`Searching the entire universe for "${movie.show_title || movie.title}"`, true);
 
-            let publicSearch = this
-                .publicSearch
-                .search([
-                    "1337x", "Rarbg"
-                ], query, show ? "TV" : "Movies", 20);
+                let publicSearch = this
+                    .publicSearch
+                    .search([
+                        "1337x", "Rarbg"
+                    ], query, show
+                        ? "TV"
+                        : "Movies", 20);
 
-            let proprietarySearch = this
-                .torrentSearch
-                .searchTorrents(query, show);
+                let proprietarySearch = this
+                    .torrentSearch
+                    .searchTorrents(query, show);
 
-            Promise
-                .all([publicSearch, proprietarySearch])
-                .then((data) => {
-                    data = []
-                        .concat
-                        .apply([], data);
+                Promise
+                    .all([publicSearch, proprietarySearch])
+                    .then((data) => {
+                        data = []
+                            .concat
+                            .apply([], data);
 
-                        console.log(data);
-                    if(data[0]){
-                        if ((data[0].message || typeof data[0] === "string") && data.length <= 2) {
-                            this.searchTorrent(movie, show, true);
-                        } else {
-                            let magnetPromises = [];
-                            for (let n = 0; n < data.length; n++) {
-                                let magnetTorrent = data[n];
-                                if (magnetTorrent) {
-                                    if (magnetTorrent.desc) {
-                                        let promise = this
-                                            .torrentSearch
-                                            .getMagnetFromLink(magnetTorrent);
-                                        magnetPromises.push(promise);
+                        if (data[0]) {
+                            if ((data[0].message || typeof data[0] === "string") && data.length <= 2) {
+                                this.searchTorrent(movie, show, true);
+                            } else {
+                                let magnetPromises = [];
+                                for (let n = 0; n < data.length; n++) {
+                                    let magnetTorrent = data[n];
+                                    if (magnetTorrent) {
+                                        if (magnetTorrent.desc) {
+                                            let promise = this
+                                                .torrentSearch
+                                                .getMagnetFromLink(magnetTorrent);
+                                            magnetPromises.push(promise);
+                                        }
                                     }
                                 }
-                            }
-    
-                            Promise
-                                .all(magnetPromises)
-                                .then((results) => {
-                                    results = [
-                                        ...results,
-                                        ...data
-                                    ];
-    
-                                    let cleanResults = results.filter((torrent) => {
-                                        if (torrent) {
-                                            return torrent.magnet;
-                                        }
-                                    });
-    
-                                    if (cleanResults.length) {
-                                        this
-                                            .getPreferredTorrents(cleanResults)
-                                            .then((torrents) => {
-                                                let torrent = this.getQualityTorrent(torrents);
-                                                if (torrent) {
-                                                    if (this.state.playMovie) {
-                                                        let movie = this.getObjectClone(this.state.playMovie);
-                                                        movie.preferredTorrents = torrents;
-                                                        this.setState({
-                                                            playMovie: movie
-                                                        }, () => {
-                                                            this.changeCurrentMagnet(torrent.magnet);
-                                                            this.updateMovieTimeArray(movie, true);
-                                                            this.streamTorrent(torrent);
-                                                        });
-                                                    }
-                                                } else {
-                                                    this.applyTimeout(1);
-                                                }
-                                            });
-                                    } else {
-                                        this.applyTimeout();
-                                    }
-                                })
-                                .catch((err) => console.log(err));
-                        }
-                    }else{
-                        this.applyTimeout();
-                    }
 
-                    
-                })
-                .catch((err) => console.log(err));
+                                Promise
+                                    .all(magnetPromises)
+                                    .then((results) => {
+                                        results = [
+                                            ...results,
+                                            ...data
+                                        ];
+
+                                        let cleanResults = results.filter((torrent) => {
+                                            if (torrent) {
+                                                return torrent.magnet;
+                                            }
+                                        });
+
+                                        if (cleanResults.length) {
+                                            this
+                                                .getPreferredTorrents(cleanResults)
+                                                .then((torrents) => {
+                                                    let torrent = this.getQualityTorrent(torrents);
+                                                    if (torrent) {
+                                                        if (this.state.playMovie) {
+                                                            let movie = this.getObjectClone(this.state.playMovie);
+                                                            movie.preferredTorrents = torrents;
+                                                            this.setState({
+                                                                playMovie: movie
+                                                            }, () => {
+                                                                this.changeCurrentMagnet(torrent.magnet);
+                                                                this.updateMovieTimeArray(movie, true);
+                                                                this.streamTorrent(torrent);
+                                                            });
+                                                        }
+                                                    } else {
+                                                        this.applyTimeout(1);
+                                                    }
+                                                });
+                                        } else {
+                                            this.applyTimeout();
+                                        }
+                                    })
+                                    .catch((err) => console.log(err));
+                            }
+                        } else {
+                            this.applyTimeout(1);
+                        }
+
+                    })
+                    .catch((err) => console.log(err));
             }
         }
     };
@@ -1505,29 +1506,40 @@ class App extends Component {
     returnCorrectMovie = (array, movie, index) => {
         if (index) {
             return array.findIndex((item) => {
-                if (movie.id) {
-                    if (item.id === movie.id) {
+                if (movie.show_title) {
+                    if (item.show_title === movie.show_title) {
                         return true;
                     }
-                }
-
-                if (movie.title) {
-                    if (item.title === movie.title) {
-                        return true;
+                } else {
+                    if (movie.id) {
+                        if (item.id === movie.id) {
+                            return true;
+                        }
+                    }
+                    if (movie.title) {
+                        if (item.title === movie.title) {
+                            return true;
+                        }
                     }
                 }
             });
         } else {
             return array.find((item) => {
-                if (movie.id) {
-                    if (item.id === movie.id) {
+                if (movie.show_title) {
+                    if (item.show_title === movie.show_title) {
                         return true;
                     }
-                }
+                } else {
+                    if (movie.id) {
+                        if (item.id === movie.id) {
+                            return true;
+                        }
+                    }
 
-                if (movie.title) {
-                    if (item.title === movie.title) {
-                        return true;
+                    if (movie.title) {
+                        if (item.title === movie.title) {
+                            return true;
+                        }
                     }
                 }
             });
@@ -1648,7 +1660,7 @@ class App extends Component {
                 let item = netflixData[object];
                 item.vote_average = item.imdb_rating;
                 item.release_date = item.released_on;
-
+                item.isNetflix = true;
                 item.flixerr_data = {
                     poster_path: `https://img.reelgood.com/content/movie/${item.rg_id}/poster-780.jpg`,
                     backdrop_path: `https://img.reelgood.com/content/movie/${item.rg_id}/backdrop-1280.jpg`,
@@ -1667,6 +1679,7 @@ class App extends Component {
         let movies = data
             ? data
             : response.results;
+
         let sanitized = [];
         for (let i = 0; i < movies.length; i++) {
             let movie = movies[i];
@@ -1677,9 +1690,14 @@ class App extends Component {
                 movie.release_date = movie.first_air_date
                     ? movie.first_air_date
                     : movie.release_date;
+                movie.isSeries = movie.first_air_date
+                    ? true
+                    : false;
+                movie.isNetflix = false;
                 movie.flixerr_data = {
                     poster_path: `https://image.tmdb.org/t/p/w780${movie.poster_path}`,
                     backdrop_path: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
+                    show_backdrop_path: `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`,
                     blurry_poster_path: `https://image.tmdb.org/t/p/w92${movie.poster_path}`,
                     blurry_backdrop_path: `https://image.tmdb.org/t/p/w300${movie.backdrop_path}`
                 };
@@ -1697,7 +1715,7 @@ class App extends Component {
     getMovies = (genre, genreID, shows) => {
         let page = Math.floor(Math.random() * this.state.genrePages) + 1;
         let url = shows
-            ? `https://api.themoviedb.org/3/discover/tv?api_key=${this.state.apiKey}&language=en-US&sort_by=popularity.desc&page=${page}&timezone=America%2FNew_York&include_null_first_air_dates=false&with_genres=${genreID}&with_original_language=en`
+            ? `https://api.themoviedb.org/3/discover/tv?api_key=${this.state.apiKey}&language=en-US&sort_by=popularity.desc&page=${page}&timezone=America%2FNew_York&with_genres=${genreID}&with_original_language=en`
             : genreID != 21
                 ? `https://api.themoviedb.org/3/discover/movie?api_key=${
         this
@@ -1736,7 +1754,7 @@ class App extends Component {
 
     chooseRandom = (array, limit) => {
         let results = [],
-            previousItem = {};
+            clonedArray = this.getClone(array);
 
         if (array) {
             if (array.length < limit) {
@@ -1744,18 +1762,13 @@ class App extends Component {
             }
 
             for (let i = 0; i < limit; i++) {
-                let item = array[Math.floor(Math.random() * array.length)];
-                if (previousItem.title) {
-                    while (previousItem.title == item.title) {
-                        item = array[Math.floor(Math.random() * array.length)];
-                    }
-                }
-                previousItem = item;
+                let n = Math.floor(Math.random() * clonedArray.length - 1);
+                let item = clonedArray.splice(n, 1);
                 results.push(item);
             }
         }
-
-        return results;
+        
+        return [].concat.apply([], results);
     };
 
     getRecommended = (url) => {
@@ -1785,14 +1798,25 @@ class App extends Component {
                 if (collection.length) {
                     for (let j = 0; j <= collection.length; j++) {
                         let movie = collection[j],
-                            page = this.chooseRandom(pages, 1);
+                            page = this.chooseRandom(pages, 1),
+                            url = '';
+
                         if (movie) {
-                            let url = `https://api.themoviedb.org/3/movie/${
-                            movie.id}/recommendations?api_key=${
-                            this
-                                .state
-                                .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&primary_release_date.lte=${this
-                                .getURLDate(1)}`;
+                            if (movie.isSeries) {
+                                url = `https://api.themoviedb.org/3/tv/${
+                                movie.id}/recommendations?api_key=${
+                                this
+                                    .state
+                                    .apiKey}&region=US&language=en-US&sort_by=popularity.desc`;
+                            }else if(movie.id){
+                                url = `https://api.themoviedb.org/3/movie/${
+                                    movie.id}/recommendations?api_key=${
+                                    this
+                                        .state
+                                        .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&primary_release_date.lte=${this
+                                            .getURLDate(1)}`;
+                            }
+                            
                             let promise = this.getRecommended(url);
                             promises.push(promise);
                         }
@@ -1855,6 +1879,10 @@ class App extends Component {
     };
 
     addToFavorites = (movie) => {
+        if (movie.show) {
+            movie = movie.show;
+        }
+
         let clone = this.getClone(this.state.favorites);
         clone.push(movie);
         this.setState({
@@ -1865,6 +1893,10 @@ class App extends Component {
     };
 
     removeFromFavorites = (movie) => {
+        if (movie.show) {
+            movie = movie.show;
+        }
+
         let clone = this.getClone(this.state.favorites);
         let index = this.returnCorrectMovie(clone, movie, true);
 
@@ -1878,6 +1910,9 @@ class App extends Component {
 
     addToRecentlyPlayed = (movie) => {
         let clone = this.getClone(this.state.recentlyPlayed);
+        if (movie.show) {
+            movie = movie.show;
+        }
         if (!this.isRecent(movie)) {
             if (clone.length > 20) {
                 clone.splice(-1, 1);
@@ -1962,6 +1997,7 @@ class App extends Component {
     updateMenu = (active) => {
         this.closeMenu();
         this.closeSearch();
+        this.setOffline();
         if (active != undefined) {
             this.setState({active});
         }
