@@ -77,7 +77,7 @@ html {
 
 .app-header {
     width: 100%;
-    height: 440px;
+    height: 500px;
     top: 0;
     left: 0;
     position: absolute;
@@ -85,6 +85,13 @@ html {
     user-select: none;
     background-color: #443757;
     overflow: hidden;
+}
+
+svg {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 10vw;
 }
 
 .app-header > .app-header-bg-real {
@@ -115,7 +122,7 @@ html {
     position: absolute;
     bottom: 0;
     right: 0;
-    margin-bottom: 80px;
+    margin-bottom: 220px;
     margin-right: 50px;
 }
 
@@ -180,10 +187,10 @@ html {
     height: 50px;
     border-radius: 4px;
     position: absolute;
-    bottom: 0;
+    bottom:0;
     left: 0;
     margin-left: 60px;
-    margin-bottom: 140px;
+    margin-bottom:200px;
     background-color: rgb(255, 255, 255);
     box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.1);
     padding-left: 20px;
@@ -192,12 +199,13 @@ html {
     display: flex;
     align-items: center;
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transform-origin: center;
 }
 
 .search-on {
     width: 460px !important;
     height: 70px !important;
-    margin-bottom: 130px !important;
+    margin-bottom: 190px !important;
     box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -265,7 +273,7 @@ html {
     position: absolute;
     transform: translateY(150px);
     margin-right: 60px;
-    border-radius: 4px;
+    border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 18px 25px -4px rgba(0, 0, 0, 0.4);
     z-index: 99;
@@ -303,13 +311,13 @@ html {
     align-items: center;
 }
 .app-menu > div:hover {
-    background-color: rgb(0, 0, 0);
+    background-color: rgb(99, 53, 183);
     color: #FFF !important;
     letter-spacing: 2px;
 }
 
 .app-menu > .menu-active {
-    color: #000 !important;
+    color: rgb(99, 53, 183) !important;
 }
 
 .account-container {
@@ -687,7 +695,7 @@ html {
 .movie-modal > .seasons-container > .close-seasons {
     width: 50px;
     height: 50px;
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
     margin: 40px;
@@ -698,11 +706,10 @@ html {
     justify-content: center;
 	box-shadow: 0px 20px 20px -12px rgba(0,0,0,0.41);
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);	
-	
 }
 
 .movie-modal > .seasons-container > .close-seasons:hover{
-	box-shadow: 0px 20px 20px -6px rgba(0,0,0,0.51);
+	box-shadow: 0px 10px 20px -6px rgba(0,0,0,0.51);
 }
 
 .movie-modal>.seasons-container>.close-seasons>i{
@@ -713,9 +720,26 @@ html {
     background-color: #FFF;
 }
 
+.close-dark:hover{
+    background-color: #000;
+}
+
+.close-dark:hover i::before{
+    color: #FFF !important;
+}
+
 .close-light {
 	background-color: #000;
 }
+
+.close-light:hover{
+    background-color: #FFF;
+}
+
+.close-light:hover i::before {
+    color: #000 !important;
+}
+
 
 .movie-modal > .seasons-container > .season > .season-title {
 	margin-top: 40px;
@@ -729,6 +753,7 @@ html {
 }
 
 .movie-modal > .seasons-container > .season > .season-title> i{
+    font-size: 32px;
 	transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);	
 	transform-origin: center;
 	margin-left: 25px;	
@@ -760,7 +785,6 @@ html {
     align-items: center;
 	justify-content: center;
 	position:relative;
-	overflow:hidden;
 	cursor:pointer;
 }
 
@@ -1683,12 +1707,12 @@ input[type=range]::-webkit-slider-thumb:hover {
 .content-container {
     width: 100%;
     height: auto;
-    min-height: calc(100% - 440px);
+    min-height: calc(100% - 500px);
     position: absolute;
     top: 0;
     left: 0;
-    margin-top: 440px;
-    padding: 40px 60px;
+    margin-top: 500px;
+    padding: 60px;
     box-sizing: border-box;
     background-color: #ffffff;
     background-size: 5%;
