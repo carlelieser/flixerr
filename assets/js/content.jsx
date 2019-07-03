@@ -75,9 +75,6 @@ class Content extends Component {
                 display: this.props.active == "Featured"
                     ? "flex"
                     : "block",
-                padding: this.props.active === "Featured"
-                    ? "40px 40px"
-                    : "40px 60px",
                 backgroundImage: this.props.loadingContent
                     ? "url(./assets/imgs/loading.apng)"
                     : ""
