@@ -48,39 +48,39 @@ class MovieModal extends Component {
                 .props
                 .addToFavorites(this.props.movie);
         }
-	};
-	
-	formatNumber = (number) => {
-		number = number.toString();
-		let formatted = number.length === 1 ? `0${number}` : number;
-		return formatted;
-	}
+    };
+
+    formatNumber = (number) => {
+        number = number.toString();
+        let formatted = number.length === 1
+            ? `0${number}`
+            : number;
+        return formatted;
+    }
 
     getEpisodes = (season) => {
         let url = `https://api.themoviedb.org/3/tv/${this.props.movie.id}/season/${season.season_number}?api_key=${this.props.apiKey}&language=en-US`;
         return request
             .get(url)
             .then((response) => {
-				let episodes = response.data.episodes;
-				let flixerrEpisodes = [];
-				if(episodes){
-					for(let i = 0; i < episodes.length; i++){
-						let episode = episodes[i];
-						let newEpisode = {...episode};
-						newEpisode.show_title = `${this.props.movie.title}: ${newEpisode.name}`;
-						newEpisode.episode_number_formatted = this.formatNumber(newEpisode.episode_number);
-						newEpisode.query = `${this.props.movie.title} S${season.season_number_formatted}E${newEpisode.episode_number_formatted}`;
-						newEpisode.flixerr_data = this.props.movie.flixerr_data;
-						newEpisode.title = this.props.movie.title;
-						flixerrEpisodes.push(newEpisode);
-					}
+                let episodes = response.data.episodes;
+                let flixerrEpisodes = [];
+                if (episodes) {
+                    for (let i = 0; i < episodes.length; i++) {
+                        let episode = episodes[i];
+                        let clonedMovie = {...this.props.movie};
+                        let newEpisode = {
+                            ...episode
+                        };
+                        newEpisode.show_title = `${clonedMovie.title} / ${newEpisode.name}`;
+                        newEpisode.episode_number_formatted = this.formatNumber(newEpisode.episode_number);
+                        newEpisode.query = `${clonedMovie.title} S${season.season_number_formatted}E${newEpisode.episode_number_formatted}`;
+                        newEpisode.show = clonedMovie;
+                        flixerrEpisodes.push(newEpisode);
+                    }
 
-					return {
-						name: season.name,
-						number: season.season_number,
-						episodes: flixerrEpisodes
-					}
-				}
+                    return {name: season.name, number: season.season_number, episodes: flixerrEpisodes}
+                }
             })
             .catch((err) => console.log(err));
     }
@@ -96,15 +96,15 @@ class MovieModal extends Component {
     }
 
     getSeasons = () => {
-        if (this.props.movie.first_air_date) {
+        if (this.props.movie.first_air_date !== false) {
             return this
                 .getSeriesData()
                 .then((data) => {
                     let seasons = data.seasons;
                     let seasonData = [];
                     for (let i = 0; i < seasons.length; i++) {
-						let season = seasons[i];
-							season.season_number_formatted = this.formatNumber(season.season_number);
+                        let season = seasons[i];
+                        season.season_number_formatted = this.formatNumber(season.season_number);
                         if (season.season_number) {
                             let episodes = this.getEpisodes(season);
                             seasonData.push(episodes);
@@ -153,16 +153,15 @@ class MovieModal extends Component {
             .state
             .seasons
             .map((season, index) => {
-                if(season){
-					if(season.episodes){
-						return (
-							<Season
-								key={uniqid()}
-								isLightClass={isLightClass}
-								playMovie={this.props.playMovie}
-								season={season}/>)
-					}
-				}
+                if (season) {
+                    if (season.episodes) {
+                        return (<Season
+                            key={uniqid()}
+                            isLightClass={isLightClass}
+                            playMovie={this.props.playMovie}
+                            season={season}/>)
+                    }
+                }
             });
 
         let showInfo = !this.state.showSeasons;
@@ -179,19 +178,33 @@ class MovieModal extends Component {
                 <Fade
                     mountOnEnter
                     unmountOnExit
-					when={this.state.showSeasons}
-					duration={450}
+                    when={this.state.showSeasons}
+                    duration={450}
                     distance="5%"
                     bottom>
-                    <div className="seasons-container" style={{height: modalHeight}}>
-                        <div className={`close-seasons ${isLight ? 'close-dark' : 'close-light'}`} onClick={this.closeSeasons}>
+                    <div
+                        className="seasons-container"
+                        style={{
+                        height: modalHeight
+                    }}>
+                        <div
+                            className={`close-seasons ${isLight
+                            ? 'close-dark'
+                            : 'close-light'}`}
+                            onClick={this.closeSeasons}>
                             <i className={`mdi mdi-close ${isLightClass}`}/>
                         </div>
                         {seasons}
                     </div>
                 </Fade>
 
-                <Fade mountOnEnter unmountOnExit when={showInfo} duration={450} distance="5%" bottom>
+                <Fade
+                    mountOnEnter
+                    unmountOnExit
+                    when={showInfo}
+                    duration={450}
+                    distance="5%"
+                    bottom>
                     <div className='movie-modal-info'>
                         <div className="movie-modal-poster-info">
                             <div
