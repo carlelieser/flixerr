@@ -26,7 +26,7 @@ class MovieItem extends Component {
     loadImage = () => {
         if (!this.unMounting) {
             this.setState({
-                backdrop: `${this.props.shows ? this.props.movie.flixerr_data.show_backdrop_path : this.props.fallback
+                backdrop: `${this.props.shows ? this.props.movie.flixerr_data.series_backdrop_path : this.props.fallback
                     ? this.props.movie.flixerr_data.backdrop_path
                     : this.props.movie.flixerr_data.poster_path}`
             });
@@ -63,7 +63,7 @@ class MovieItem extends Component {
     };
 
     handleMovieClick = () => {
-        let movie = this.props.movie;
+        let movie = {...this.props.movie};
             movie.averageColor = this.state.averageColor;
         this
             .props

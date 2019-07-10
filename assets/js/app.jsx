@@ -27,6 +27,7 @@ class App extends Component {
         this.qualityTimeout = false;
         this.streamTimeout = false;
         this.fileLoadedTimeout = false;
+        this.gettingSuggested = false;
 
         this.state = {
             apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
@@ -358,15 +359,17 @@ class App extends Component {
             }
 
             if (this.setEverything) {
-                this
-                    .getSuggested(data)
-                    .then((suggested) => {
-                        newState.suggested = suggested;
-                        this.setState(newState, () => {
-                            resolve();
-                        });
-                    })
-                    .catch((err) => console.log(err));
+                setTimeout(() => {
+                    this
+                        .getSuggested(data)
+                        .then((suggested) => {
+                            newState.suggested = suggested;
+                            this.setState(newState, () => {
+                                resolve();
+                            });
+                        })
+                        .catch((err) => resolve(err));
+                }, 9000);
             } else {
                 this.setState(newState, () => {
                     resolve();
@@ -1080,7 +1083,7 @@ class App extends Component {
             let searchResults = [];
             for (let u = 1; u < 5; u++) {
                 let url = `https://api.themoviedb.org/3/search/multi?api_key=${
-                this.state.apiKey}&region=US&language=en-US&query=${query}&page=${u}&include_adult=false`;
+                this.state.apiKey}&query=${query}&page=${u}&include_adult=false`;
 
                 let promise = new Promise((resolve, reject) => {
                     this
@@ -1103,9 +1106,7 @@ class App extends Component {
                         .concat
                         .apply([], results);
 
-                    if (!results.every((val) => {
-                        return !val;
-                    })) {
+                    if (results) {
                         results = this.sortQuery(results);
 
                         if (results.length === 0) {
@@ -1203,7 +1204,7 @@ class App extends Component {
         let torrent = clone.find((item) => {
             if (item.resolution || item.quality) {
                 if (item.resolution == quality || item.quality == quality) {
-                    if (item.title.indexOf("YIFY") > -1) {
+                    if (item.title.indexOf("YIFY") > -1 || item.title.indexOf("eztv") > -1) {
                         return item;
                     }
                 }
@@ -1649,6 +1650,50 @@ class App extends Component {
         return array;
     };
 
+    sanitizeMovie = (movie) => {
+        let item = this.getObjectClone(movie),
+            properties = [
+                'title',
+                'id',
+                'rg_id',
+                'overview',
+                'vote_average',
+                'poster_path',
+                'backdrop_path',
+                'release_date',
+                'isNetflix',
+                'isSeries',
+                'popularity'
+            ],
+            sanitized = {};
+
+        item.title = item.name
+            ? item.name
+            : item.title;
+        item.isNetflix = item.imdb_rating
+            ? true
+            : false;
+        item.isSeries = item.first_air_date
+            ? true
+            : false;
+        item.vote_average = item.imdb_rating
+            ? item.imdb_rating
+            : item.vote_average;
+        item.release_date = item.released_on
+            ? item.released_on
+            : item.first_air_date
+                ? item.first_air_date
+                : item.release_date;
+
+        for (let property in item) {
+            if (properties.indexOf(property) > -1) {
+                sanitized[property] = item[property];
+            }
+        }
+
+        return sanitized;
+    }
+
     extractNetflixMovies = (response) => {
         let extracted = response.substring(response.indexOf('"entities"'), response.indexOf('"meta"'));
         let netflixData = JSON.parse(`{${extracted.substring(0, extracted.length - 1)}}}`).entities.entries;
@@ -1657,10 +1702,7 @@ class App extends Component {
         Object
             .keys(netflixData)
             .map((object, index) => {
-                let item = netflixData[object];
-                item.vote_average = item.imdb_rating;
-                item.release_date = item.released_on;
-                item.isNetflix = true;
+                let item = this.sanitizeMovie(netflixData[object]);
                 item.flixerr_data = {
                     poster_path: `https://img.reelgood.com/content/movie/${item.rg_id}/poster-780.jpg`,
                     backdrop_path: `https://img.reelgood.com/content/movie/${item.rg_id}/backdrop-1280.jpg`,
@@ -1682,22 +1724,12 @@ class App extends Component {
 
         let sanitized = [];
         for (let i = 0; i < movies.length; i++) {
-            let movie = movies[i];
+            let movie = this.sanitizeMovie(movies[i]);
             if (movie.backdrop_path) {
-                movie.title = movie.name
-                    ? movie.name
-                    : movie.title;
-                movie.release_date = movie.first_air_date
-                    ? movie.first_air_date
-                    : movie.release_date;
-                movie.isSeries = movie.first_air_date
-                    ? true
-                    : false;
-                movie.isNetflix = false;
                 movie.flixerr_data = {
                     poster_path: `https://image.tmdb.org/t/p/w780${movie.poster_path}`,
                     backdrop_path: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
-                    show_backdrop_path: `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`,
+                    series_backdrop_path: `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`,
                     blurry_poster_path: `https://image.tmdb.org/t/p/w92${movie.poster_path}`,
                     blurry_backdrop_path: `https://image.tmdb.org/t/p/w300${movie.backdrop_path}`
                 };
@@ -1767,8 +1799,10 @@ class App extends Component {
                 results.push(item);
             }
         }
-        
-        return [].concat.apply([], results);
+
+        return []
+            .concat
+            .apply([], results);
     };
 
     getRecommended = (url) => {
@@ -1796,29 +1830,33 @@ class App extends Component {
             let pages = [1, 2, 3];
             if (collection) {
                 if (collection.length) {
-                    for (let j = 0; j <= collection.length; j++) {
-                        let movie = collection[j],
-                            page = this.chooseRandom(pages, 1),
-                            url = '';
+                    if(!this.gettingSuggested){
+                        console.log('Getting Suggested');
+                        this.gettingSuggested = true;
+                        for (let j = 0; j <= collection.length; j++) {
+                            let movie = collection[j],
+                                page = this.chooseRandom(pages, 1),
+                                url = '';
 
-                        if (movie) {
-                            if (movie.isSeries) {
-                                url = `https://api.themoviedb.org/3/tv/${
-                                movie.id}/recommendations?api_key=${
-                                this
-                                    .state
-                                    .apiKey}&region=US&language=en-US&sort_by=popularity.desc`;
-                            }else if(movie.id){
-                                url = `https://api.themoviedb.org/3/movie/${
-                                    movie.id}/recommendations?api_key=${
-                                    this
-                                        .state
-                                        .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&primary_release_date.lte=${this
-                                            .getURLDate(1)}`;
+                            if (movie) {
+                                if (movie.isSeries) {
+                                    url = `https://api.themoviedb.org/3/tv/${
+                                        movie.id}/recommendations?api_key=${
+                                        this.state.apiKey}&region=US&language=en-US&sort_by=popularity.desc`;
+                                } else if (movie.id) {
+                                    url = `https://api.themoviedb.org/3/movie/${
+                                        movie.id}/recommendations?api_key=${
+                                        this
+                                            .state
+                                            .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&primary_release_date.lte=${this
+                                                .getURLDate(1)}`;
+                                }
+
+                                if (url) {
+                                    let promise = this.getRecommended(url);
+                                    promises.push(promise);
+                                }
                             }
-                            
-                            let promise = this.getRecommended(url);
-                            promises.push(promise);
                         }
                     }
 
@@ -1835,6 +1873,7 @@ class App extends Component {
                             }
 
                             clean = this.extractMovies(false, clean, true);
+                            this.gettingSuggested = false;
                             resolve(clean);
                         })
                         .catch((err) => reject(err));

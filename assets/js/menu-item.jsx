@@ -6,12 +6,10 @@ class MenuItem extends Component {
 	}
 
 	handleMenuClick = () => {
-		if (this.props.item == "Sign Out") {
-			this.props.signOut();
-		} else if (this.props.item == "Sign In") {
-			this.props.openAccount();
-		} else {
-			this.props.toggleItem(this.props.item);
+		if(this.props.item.action){
+			this.props.item.action();
+		}else{
+			this.props.toggleItem(this.props.item.name);
 		}
 	};
 
@@ -22,8 +20,9 @@ class MenuItem extends Component {
 					this.props.active ? "menu-active" : ""
 				}`}
 				onClick={this.handleMenuClick}>
-				<i className={this.props.iconClass} />
-				<div>{this.props.item}</div>
+				<i className={`mdi mdi-${this.props.item.icon}`} />
+				<div>{this.props.item.name}</div>
+				{this.props.item.beta ? <div className="beta-tag">Beta</div> : ''}
 			</div>
 		);
 	}

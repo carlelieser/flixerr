@@ -85,13 +85,8 @@ html {
     user-select: none;
     background-color: #443757;
     overflow: hidden;
-}
-
-svg {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 10vw;
+    border-bottom-left-radius: 50% 20%;
+    border-bottom-right-radius: 50% 20%;
 }
 
 .app-header > .app-header-bg-real {
@@ -187,10 +182,10 @@ svg {
     height: 50px;
     border-radius: 4px;
     position: absolute;
-    bottom:0;
+    bottom: 0;
     left: 0;
     margin-left: 60px;
-    margin-bottom:200px;
+    margin-bottom: 200px;
     background-color: rgb(255, 255, 255);
     box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.1);
     padding-left: 20px;
@@ -267,30 +262,31 @@ svg {
 .app-menu {
     width: 240px;
     height: auto;
-    background-color: #FFF;
     top: 0;
     right: 0;
     position: absolute;
     transform: translateY(150px);
     margin-right: 60px;
     border-radius: 8px;
-    overflow: hidden;
+    background-color: transparent;
     box-shadow: 0 18px 25px -4px rgba(0, 0, 0, 0.4);
     z-index: 99;
     will-change: transform;
 }
 
+.app-menu>div:first-child{
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.app-menu>div:last-child{
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
 .app-menu > div > i {
     font-size: 24px;
     margin-right: 20px;
-}
-
-.app-menu > div > div {
-    line-height: 60px;
-}
-
-.app-menu > div > * {
-    display: inline-block;
 }
 
 .app-menu > div {
@@ -309,11 +305,31 @@ svg {
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
     display: flex;
     align-items: center;
+    background-color: #FFF;
 }
 .app-menu > div:hover {
     background-color: rgb(99, 53, 183);
     color: #FFF !important;
-    letter-spacing: 2px;
+}
+
+.app-menu > div > .beta-tag {
+    height: 24px;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 20px;
+    background-color: rgb(99, 53, 183);
+    border-radius: 9999px;
+    color: #FFF;
+    font-size: 10px;
+    letter-spacing: 1px;
+    transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+}
+.app-menu > div:hover .beta-tag {
+    background-color: #FFF;
+    color: #6335b7;
 }
 
 .app-menu > .menu-active {
@@ -447,15 +463,14 @@ svg {
 }
 
 .account-form > .account-secondary {
-	width: 100%;
-	background-color: transparent;
-	box-shadow:none;
-	color: rgba(0,0,0,0.61);
-	letter-spacing: normal;
+    width: 100%;
+    background-color: transparent;
+    box-shadow: none;
+    color: rgba(0,0,0,0.61);
+    letter-spacing: normal;
 }
-
-.account-form > .account-secondary:hover{
-	color: rgba(0,0,0,0.81);
+.account-form > .account-secondary:hover {
+    color: rgba(0,0,0,0.81);
 }
 
 .account-close {
@@ -645,17 +660,17 @@ svg {
     z-index: 10;
 }
 
-.seasons-loading{
-	width: 40px;
-	height: 40px;
-	background-size:cover;
-	background-image: url('../imgs/loading-seasons.apng');
-	background-position:center;
-	background-repeat: no-repeat;
+.seasons-loading {
+    width: 100%;
+    height: 100%;
+    background-size: 40px;
+    background-image: url("../imgs/loading-seasons.apng");
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .movie-modal > .seasons-container {
-	z-index: 20;
+    z-index: 20;
     overflow-y: scroll;
     display: flex;
     flex-direction: column;
@@ -688,8 +703,8 @@ svg {
 }
 
 .movie-modal > .seasons-container > .season {
-	margin-top: 20px;
-    transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);	
+    margin-top: 20px;
+    transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
 }
 
 .movie-modal > .seasons-container > .close-seasons {
@@ -704,66 +719,61 @@ svg {
     display: flex;
     align-items: center;
     justify-content: center;
-	box-shadow: 0px 20px 20px -12px rgba(0,0,0,0.41);
-    transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);	
+    box-shadow: 0 20px 20px -12px rgba(0,0,0,0.41);
+    transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+}
+.movie-modal > .seasons-container > .close-seasons:hover {
+    box-shadow: 0 10px 20px -6px rgba(0,0,0,0.51);
+    transform: rotate(180deg);
 }
 
-.movie-modal > .seasons-container > .close-seasons:hover{
-	box-shadow: 0px 10px 20px -6px rgba(0,0,0,0.51);
-}
-
-.movie-modal>.seasons-container>.close-seasons>i{
-    margin-top:5px;
+.movie-modal > .seasons-container > .close-seasons > i {
+    margin-top: 5px;
 }
 
 .close-dark {
     background-color: #FFF;
 }
-
-.close-dark:hover{
+.close-dark:hover {
     background-color: #000;
 }
-
-.close-dark:hover i::before{
+.close-dark:hover i::before {
     color: #FFF !important;
 }
 
 .close-light {
-	background-color: #000;
+    background-color: #000;
 }
-
-.close-light:hover{
+.close-light:hover {
     background-color: #FFF;
 }
-
 .close-light:hover i::before {
     color: #000 !important;
 }
 
-
 .movie-modal > .seasons-container > .season > .season-title {
-	margin-top: 40px;
-	display:flex;
-	align-items: center;
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
 }
 
-.movie-modal > .seasons-container > .season >.season-title> div{
-	font-size: 36px;
+.movie-modal > .seasons-container > .season > .season-title > div {
+    font-size: 36px;
     font-weight: bold;
 }
 
-.movie-modal > .seasons-container > .season > .season-title> i{
+.movie-modal > .seasons-container > .season > .season-title > i {
     font-size: 32px;
-	transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);	
-	transform-origin: center;
-	margin-left: 25px;	
+    transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transform-origin: center;
+    margin-left: 25px;
 }
 
-.movie-modal > .seasons-container > .season > .season-title>.arrow-collapse{
-	transform: rotate(360deg);
+.movie-modal > .seasons-container > .season > .season-title > .arrow-collapse {
+    transform: rotate(360deg);
 }
 
-.movie-modal > .seasons-container > .season > .episodes >.episode {
+.movie-modal > .seasons-container > .season > .episodes > .episode {
     display: flex;
     align-items: center;
     margin-top: 40px;
@@ -772,7 +782,7 @@ svg {
     margin-top: 20px;
 }
 
-.movie-modal > .seasons-container > .season > .episodes >.episode > .episode-still {
+.movie-modal > .seasons-container > .season > .episodes > .episode > .episode-still {
     height: 145px;
     min-width: 240px;
     background-color: rgba(0,0,0,0.1);
@@ -783,33 +793,32 @@ svg {
     box-shadow: 0 20px 20px -12px rgba(0,0,0,0.41);
     display: flex;
     align-items: center;
-	justify-content: center;
-	position:relative;
-	cursor:pointer;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
 }
 
-.movie-modal > .seasons-container > .season > .episodes >.episode > .episode-still>.still-hover{
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0,0,0,0.61);
-	display:flex;
-	align-items:center;
-	justify-content: center;
-	border-radius: inherit;
-	opacity:0;
-	transform: translateY(10%);
-	transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);	
-	will-change: transform;
+.movie-modal > .seasons-container > .season > .episodes > .episode > .episode-still > .still-hover {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.61);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: inherit;
+    opacity: 0;
+    transform: translateY(10%);
+    transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    will-change: transform;
+}
+.movie-modal > .seasons-container > .season > .episodes > .episode > .episode-still:hover .still-hover {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-.movie-modal > .seasons-container > .season > .episodes >.episode > .episode-still:hover .still-hover{
-	opacity:1;
-	transform: translateY(0);
-}
-
-.movie-modal > .seasons-container > .season > .episodes >.episode > .episode-still>.still-hover>i{
-	font-size: 36px;
-	color: rgb(255, 55, 55);
+.movie-modal > .seasons-container > .season > .episodes > .episode > .episode-still > .still-hover > i {
+    font-size: 36px;
+    color: rgb(255, 55, 55);
 }
 
 .movie-modal > .seasons-container > .season > .episodes > .episode > .episode-info {
@@ -833,8 +842,8 @@ svg {
     text-overflow: ellipsis;
 }
 
-.episodes-collapsed>.episode{
-	display:none !important;
+.episodes-collapsed > .episode {
+    display: none !important;
 }
 
 .movie-modal > .movie-modal-info {
@@ -882,8 +891,8 @@ svg {
     justify-content: center;
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
     position: relative;
-	background-color: rgb(241, 24, 24);
-	color: #FFF;
+    background-color: rgb(241, 24, 24);
+    color: #FFF;
 }
 
 .open-series > * {
@@ -1711,7 +1720,7 @@ input[type=range]::-webkit-slider-thumb:hover {
     position: absolute;
     top: 0;
     left: 0;
-    margin-top: 500px;
+    margin-top: 525px;
     padding: 60px;
     box-sizing: border-box;
     background-color: #ffffff;

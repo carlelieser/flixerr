@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 
 import uniqid from "uniqid";
 
@@ -22,10 +22,12 @@ class TVShowContainer extends Component {
     setHeader = () => {
         if (this.props.shows) {
             if (this.props.shows.length) {
-                if (this.props.shows[0].movies[0]) {
-                    this
-                        .props
-                        .setHeader(this.props.shows[0].movies[0].flixerr_data.backdrop_path);
+                if (this.props.shows[0]) {
+                    if (this.props.shows[0].movies[0]) {
+                        this
+                            .props
+                            .setHeader(this.props.shows[0].movies[0].flixerr_data.backdrop_path);
+                    }
                 }
             }
         }
@@ -62,7 +64,7 @@ class TVShowContainer extends Component {
                         toggleGenre={this.props.toggleGenre}
                         openBox={this.props.openBox}
                         genreInfo={genreInfo}
-                        key={uniqid()} />);
+                        key={uniqid()}/>);
                 }
             });
 
@@ -70,8 +72,8 @@ class TVShowContainer extends Component {
             <div
                 className='tv-shows-container'
                 style={{
-                    height: `${470 * 12}px'`
-                }}>
+                height: `${ 470 * 12}px'`
+            }}>
                 {tvShowGenres}
             </div>
         );

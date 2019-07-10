@@ -12,8 +12,13 @@ class MovieModal extends Component {
 
         this.state = {
             seasons: [],
-            showSeasons: false
+            showSeasons: false,
+            loading: false
         }
+    }
+
+    setLoading = (loading) => {
+        this.setState({loading});
     }
 
     setShowSeasons = (showSeasons) => {
@@ -68,11 +73,13 @@ class MovieModal extends Component {
                 if (episodes) {
                     for (let i = 0; i < episodes.length; i++) {
                         let episode = episodes[i];
-                        let clonedMovie = {...this.props.movie};
+                        let clonedMovie = {
+                            ...this.props.movie
+                        };
                         let newEpisode = {
                             ...episode
                         };
-                        newEpisode.show_title = `${clonedMovie.title} / ${newEpisode.name}`;
+                        newEpisode.title = `${clonedMovie.title} / ${newEpisode.name}`;
                         newEpisode.episode_number_formatted = this.formatNumber(newEpisode.episode_number);
                         newEpisode.query = `${clonedMovie.title} S${season.season_number_formatted}E${newEpisode.episode_number_formatted}`;
                         newEpisode.show = clonedMovie;
@@ -96,7 +103,8 @@ class MovieModal extends Component {
     }
 
     getSeasons = () => {
-        if (this.props.movie.first_air_date !== false) {
+        if (this.props.movie.isSeries) {
+            this.setLoading(true);
             return this
                 .getSeriesData()
                 .then((data) => {
@@ -116,7 +124,8 @@ class MovieModal extends Component {
                         .then((response) => {
                             response.sort((a, b) => {
                                 return b.name - a.name;
-                            })
+                            });
+                            this.setLoading();
                             this.setSeasons(response);
                         });
                 });
@@ -124,7 +133,7 @@ class MovieModal extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (this.props.movie === nextProps.movie && this.props.favorites === nextProps.favorites && nextState.seasons === this.state.seasons && nextState.showSeasons === this.state.showSeasons) {
+        if (this.props.movie === nextProps.movie && this.props.favorites === nextProps.favorites && nextState.seasons === this.state.seasons && nextState.showSeasons === this.state.showSeasons && nextState.loading === this.state.loading) {
             return false;
         } else {
             return true;
@@ -194,7 +203,9 @@ class MovieModal extends Component {
                             onClick={this.closeSeasons}>
                             <i className={`mdi mdi-close ${isLightClass}`}/>
                         </div>
-                        {seasons}
+                        {this.state.loading
+                            ? <div className="seasons-loading"></div>
+                            : seasons}
                     </div>
                 </Fade>
 
@@ -235,7 +246,7 @@ class MovieModal extends Component {
                         <div className='movie-modal-desc'>
                             {movie.overview}
                         </div>
-                        {movie.first_air_date
+                        {movie.isSeries
                             ? <div className="open-series" onClick={this.openSeasons}>
                                     <div>View Seasons</div>
                                     <i className="mdi mdi-arrow-right"/></div>

@@ -12,7 +12,6 @@ let TorrentSearch = function () {
         {
             name: "The Pirate Bay",
             url: "https://thepiratebay3.org/index.php?q=",
-            forShows: true,
             queryFunction: (query) => {
                 return `${encodeURI(query)}&video=on&category=0&page=0&orderby=99`;
             }
@@ -32,7 +31,6 @@ let TorrentSearch = function () {
         }, {
             name: "1337x",
             url: "https://www.1377x.to/search/",
-            forShows: true,
             queryFunction: (query) => {
                 return `${encodeURI(query)}/1/`
             }
@@ -118,7 +116,7 @@ let TorrentSearch = function () {
                 let url = `${provider
                     .url}${provider
                     .queryFunction(query)}`;
-                if ((show && providers.forShows) || !show) {
+                if ((show && provider.forShows) || (!show && !provider.forShows)) {
                     let promise = searchProvider(url);
                     searchPromises.push(promise);
                 }
