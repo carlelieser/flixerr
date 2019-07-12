@@ -359,17 +359,19 @@ class App extends Component {
             }
 
             if (this.setEverything) {
-                setTimeout(() => {
-                    this
-                        .getSuggested(data)
-                        .then((suggested) => {
-                            newState.suggested = suggested;
-                            this.setState(newState, () => {
-                                resolve();
-                            });
-                        })
-                        .catch((err) => resolve(err));
-                }, 9000);
+                this
+                    .getSuggested(data)
+                    .then((suggested) => {
+                        newState.suggested = suggested;
+                        this.setState(newState, () => {
+                            resolve();
+                        });
+                    })
+                    .catch(() => {
+                        this.setState(newState, () => {
+                            resolve();
+                        });
+                    });
             } else {
                 this.setState(newState, () => {
                     resolve();
@@ -1812,7 +1814,7 @@ class App extends Component {
                 .then((response) => {
                     resolve(response.results.slice(0, 5));
                 })
-                .catch((err) => reject(err));
+                .catch((err) => resolve(err));
         });
     };
 
@@ -1831,7 +1833,6 @@ class App extends Component {
             if (collection) {
                 if (collection.length) {
                     if(!this.gettingSuggested){
-                        console.log('Getting Suggested');
                         this.gettingSuggested = true;
                         for (let j = 0; j <= collection.length; j++) {
                             let movie = collection[j],
@@ -1852,7 +1853,7 @@ class App extends Component {
                                                 .getURLDate(1)}`;
                                 }
 
-                                if (url) {
+                                if (url) { 
                                     let promise = this.getRecommended(url);
                                     promises.push(promise);
                                 }
@@ -1993,15 +1994,7 @@ class App extends Component {
         let promiseArray = [];
 
         for (let j = 0; j < movieGenres.length; j++) {
-            let promise = new Promise((resolve, reject) => {
-                this
-                    .getMovies(movieGenres[j].name, movieGenres[j].id, shows)
-                    .then((genreComplete) => {
-                        resolve(genreComplete);
-                    })
-                    .catch((err) => console.log(err));
-            });
-
+            let promise = this.getMovies(movieGenres[j].name, movieGenres[j].id, shows);
             promiseArray.push(promise);
         }
 
@@ -2272,8 +2265,6 @@ class App extends Component {
             .then(() => this.getUserCredentials())
             .catch((err) => console.log(err));
         this.loadFeatured();
-        this.loadCategories();
-        this.loadCategories(true);
         this.startWebTorrent();
         this.requireTorrent();
         window.addEventListener("online", this.handleConnectionChange);
