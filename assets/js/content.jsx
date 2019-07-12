@@ -53,7 +53,7 @@ class Content extends Component {
                 return true;
             } else if (this.props.active === "Movies" && (nextProps.movies !== this.props.movies)) {
                 return true;
-            } else if (this.props.active === "TV Shows" && (nextProps.tvshows !== this.props.tvshows)){
+            } else if (this.props.active === "TV Shows" && (nextProps.shows !== this.props.shows)){
                 return true;
             } else if (this.props.active === "Collection" && (nextProps.suggested !== this.props.suggested || nextProps.favorites !== this.props.favorites || nextProps.recentlyPlayed !== this.props.recentlyPlayed)) {
                 return true;
