@@ -11,7 +11,7 @@ class TVShowContainer extends Component {
 
     getTVShows = () => {
         if (this.props.shows) {
-            if (this.props.shows.length === 0 || this.props.shows[0] === undefined) {
+            if (!this.props.shows.length || this.props.shows[0] === undefined) {
                 this
                     .props
                     .loadCategories(true);
