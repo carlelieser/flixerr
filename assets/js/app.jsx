@@ -16,6 +16,7 @@ import Header from "./header";
 import Content from "./content";
 
 import TorrentSearch from "./torrent-search";
+import SubtitleSearch from "./subtitle-search";
 import {default as request} from "axios";
 
 class App extends Component {
@@ -798,9 +799,9 @@ class App extends Component {
         let langs = require('langs');
 
         let language = franc(text);
-        let lang = langs
+        let lang = language ? langs
             .where("3", language)
-            .name;
+            .name : '';
 
         return lang;
     }
@@ -830,13 +831,17 @@ class App extends Component {
 
     getBuffer = (file) => {
         return new Promise((resolve) => {
-            file.getBuffer((err, buffer) => {
-                if (!err) {
-                    resolve(buffer);
-                } else {
-                    resolve(err);
-                }
-            });
+            if (file.data) {
+                resolve(file.data);
+            } else {
+                file.getBuffer((err, buffer) => {
+                    if (!err) {
+                        resolve(buffer);
+                    } else {
+                        resolve(err);
+                    }
+                });
+            }
         });
     }
 
@@ -848,13 +853,21 @@ class App extends Component {
                     let text = this.getBufferAsText(buffer);
                     let src = this.getVttURL(text);
                     let language = this.getLanguage(text);
-                    let fileClone = {
-                        ...file,
-                        language,
-                        src
+                    let fileClone = this.getObjectClone(file);
+
+                    if (fileClone.data) {
+                        fileClone.data = false;
                     }
 
-                    return fileClone;
+                    let newFile = {
+                        ...fileClone,
+                        language,
+                        src,
+                    }
+
+                    newFile.name = (newFile.name ? newFile.name : newFile.path) + language;
+
+                    return newFile;
                 } else {
                     return false;
                 }
@@ -874,6 +887,22 @@ class App extends Component {
             .all(promises)
             .then((subtitleOptions) => {
                 return subtitleOptions;
+            });
+    }
+
+    getAlternateSubtitles = () => {
+        let search = new SubtitleSearch(),
+            title = this.state.playMovie.title,
+            year = this.state.playMovie.release_date;
+
+        return search
+            .searchSubtitles(title, year)
+            .then((subtitles) => {
+                return this
+                    .sanitizeSubtitles(subtitles)
+                    .then((subtitleOptions) => {
+                        this.setSubtitleOptions(subtitleOptions);
+                    })
             });
     }
 
@@ -957,7 +986,11 @@ class App extends Component {
                 this
                     .sanitizeSubtitles(subtitleFiles)
                     .then((subtitleOptions) => {
-                        this.setSubtitleOptions(subtitleOptions);
+                        if (subtitleOptions.length) {
+                            this.setSubtitleOptions(subtitleOptions);
+                        } else {
+                            this.getAlternateSubtitles();
+                        }
                     });
 
                 let file = filtered[0];
@@ -1832,7 +1865,7 @@ class App extends Component {
             let pages = [1, 2, 3];
             if (collection) {
                 if (collection.length) {
-                    if(!this.gettingSuggested){
+                    if (!this.gettingSuggested) {
                         this.gettingSuggested = true;
                         for (let j = 0; j <= collection.length; j++) {
                             let movie = collection[j],
@@ -1842,18 +1875,18 @@ class App extends Component {
                             if (movie) {
                                 if (movie.isSeries) {
                                     url = `https://api.themoviedb.org/3/tv/${
-                                        movie.id}/recommendations?api_key=${
-                                        this.state.apiKey}&region=US&language=en-US&sort_by=popularity.desc`;
+                                    movie.id}/recommendations?api_key=${
+                                    this.state.apiKey}&region=US&language=en-US&sort_by=popularity.desc`;
                                 } else if (movie.id) {
                                     url = `https://api.themoviedb.org/3/movie/${
-                                        movie.id}/recommendations?api_key=${
-                                        this
-                                            .state
-                                            .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&primary_release_date.lte=${this
-                                                .getURLDate(1)}`;
+                                    movie.id}/recommendations?api_key=${
+                                    this
+                                        .state
+                                        .apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&primary_release_date.lte=${this
+                                        .getURLDate(1)}`;
                                 }
 
-                                if (url) { 
+                                if (url) {
                                     let promise = this.getRecommended(url);
                                     promises.push(promise);
                                 }
