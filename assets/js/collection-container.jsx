@@ -31,6 +31,8 @@ class Collection extends Component {
                     .props
                     .updateSuggested();
             }
+        }else{
+            this.props.updateSuggested();
         }
     }
 
