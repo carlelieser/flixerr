@@ -137,7 +137,7 @@ class Header extends Component {
                             onFocus={this.activateFocus}
                             onBlur={this.deactivateFocus}
                             type='text'
-                            placeholder='Search Movies'
+                            placeholder='Search Movies & TV Shows'
                             value={this.props.inputValue}
                             onChange={this.handleInput}
                             onKeyUp={this.handleSearch}/>{" "} {this.props.searchContent
