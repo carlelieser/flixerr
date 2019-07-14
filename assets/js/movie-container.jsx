@@ -10,7 +10,13 @@ class MovieContainer extends Component {
     }
 
     getMovies = () => {
-        if (this.props.movies.length === 0 || this.props.movies[0] === undefined) {
+        if (this.props.movies) {
+            if (this.props.movies.length === 0 || this.props.movies[0] === undefined) {
+                this
+                    .props
+                    .loadCategories();
+            }
+        } else {
             this
                 .props
                 .loadCategories();
@@ -20,7 +26,7 @@ class MovieContainer extends Component {
     setHeader = () => {
         if (this.props.movies) {
             if (this.props.movies.length) {
-                if (this.props.movies[0]){
+                if (this.props.movies[0]) {
                     if (this.props.movies[0].movies[0]) {
                         this
                             .props
