@@ -1,7 +1,7 @@
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+    value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -27,62 +27,74 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Menu = function (_Component) {
-	_inherits(Menu, _Component);
+    _inherits(Menu, _Component);
 
-	function Menu(props) {
-		_classCallCheck(this, Menu);
+    function Menu(props) {
+        _classCallCheck(this, Menu);
 
-		var _this = _possibleConstructorReturn(this, (Menu.__proto__ || Object.getPrototypeOf(Menu)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (Menu.__proto__ || Object.getPrototypeOf(Menu)).call(this, props));
 
-		_this.toggleItem = function (item) {
-			_this.props.updateMenu(item);
-			_this.props.resetSearch();
-		};
+        _this.toggleItem = function (item) {
+            _this.props.updateMenu(item);
+            _this.props.resetSearch();
+        };
 
-		_this.state = {
-			menu: ["Featured", "Movies", "Collection", _this.props.user ? "Sign Out" : "Sign In"],
-			icons: ["star", "filmstrip", "library", "account-circle"]
-		};
-		return _this;
-	}
+        _this.state = {
+            menu: [{
+                name: 'Featured',
+                icon: 'star'
+            }, {
+                name: 'Movies',
+                icon: 'filmstrip'
+            }, {
+                name: 'TV Shows',
+                icon: 'youtube-tv',
+                beta: true
+            }, {
+                name: 'Collection',
+                icon: 'library'
+            }, {
+                name: _this.props.user ? 'Sign Out' : 'Sign In',
+                icon: 'account-circle',
+                action: _this.props.user ? _this.props.signOut : _this.props.openAccount
+            }]
+        };
+        return _this;
+    }
 
-	_createClass(Menu, [{
-		key: "shouldComponentUpdate",
-		value: function shouldComponentUpdate(nextProps, nextState) {
-			if (nextProps.user !== this.props.user) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}, {
-		key: "render",
-		value: function render() {
-			var _this2 = this;
+    _createClass(Menu, [{
+        key: "shouldComponentUpdate",
+        value: function shouldComponentUpdate(nextProps, nextState) {
+            if (nextProps.user !== this.props.user) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var _this2 = this;
 
-			var menuItems = this.state.menu.map(function (item, index) {
-				var active = _this2.props.active == item ? true : false;
+            var menuItems = this.state.menu.map(function (item, index) {
+                var active = _this2.props.active == item.name ? true : false;
 
-				return _react2.default.createElement(_menuItem2.default, {
-					item: item,
-					active: active,
-					iconClass: "mdi mdi-" + _this2.state.icons[index],
-					signOut: _this2.props.signOut,
-					openAccount: _this2.props.openAccount,
-					toggleItem: _this2.toggleItem,
-					key: (0, _uniqid2.default)()
-				});
-			});
+                return _react2.default.createElement(_menuItem2.default, {
+                    item: item,
+                    active: active,
+                    toggleItem: _this2.toggleItem,
+                    key: (0, _uniqid2.default)() });
+            });
 
-			return _react2.default.createElement(
-				"div",
-				{ className: "app-menu" },
-				menuItems
-			);
-		}
-	}]);
+            return _react2.default.createElement(
+                "div",
+                { className: "app-menu" },
+                menuItems
+            );
+        }
+    }]);
 
-	return Menu;
+    return Menu;
 }(_react.Component);
 
 exports.default = Menu;

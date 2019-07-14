@@ -27,12 +27,10 @@ var MenuItem = function (_Component) {
 		var _this = _possibleConstructorReturn(this, (MenuItem.__proto__ || Object.getPrototypeOf(MenuItem)).call(this, props));
 
 		_this.handleMenuClick = function () {
-			if (_this.props.item == "Sign Out") {
-				_this.props.signOut();
-			} else if (_this.props.item == "Sign In") {
-				_this.props.openAccount();
+			if (_this.props.item.action) {
+				_this.props.item.action();
 			} else {
-				_this.props.toggleItem(_this.props.item);
+				_this.props.toggleItem(_this.props.item.name);
 			}
 		};
 
@@ -47,12 +45,17 @@ var MenuItem = function (_Component) {
 				{
 					className: "menu-item " + (this.props.active ? "menu-active" : ""),
 					onClick: this.handleMenuClick },
-				_react2.default.createElement("i", { className: this.props.iconClass }),
+				_react2.default.createElement("i", { className: "mdi mdi-" + this.props.item.icon }),
 				_react2.default.createElement(
 					"div",
 					null,
-					this.props.item
-				)
+					this.props.item.name
+				),
+				this.props.item.beta ? _react2.default.createElement(
+					"div",
+					{ className: "beta-tag" },
+					"Beta"
+				) : ''
 			);
 		}
 	}]);

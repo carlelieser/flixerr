@@ -116,7 +116,7 @@ var Header = function (_Component) {
                     { className: "app-header-bg" },
                     _react2.default.createElement(
                         _Fade2.default,
-                        { spy: this.props.user, distance: "10%", cascade: true, bottom: true },
+                        { spy: this.props.user ? this.props.user.email : this.props.user, distance: "10%", cascade: true, bottom: true },
                         _react2.default.createElement(
                             "div",
                             { className: "app-header-title" },
@@ -157,7 +157,7 @@ var Header = function (_Component) {
                             onFocus: this.activateFocus,
                             onBlur: this.deactivateFocus,
                             type: "text",
-                            placeholder: "Search Movies",
+                            placeholder: "Search Movies & TV Shows",
                             value: this.props.inputValue,
                             onChange: this.handleInput,
                             onKeyUp: this.handleSearch }),

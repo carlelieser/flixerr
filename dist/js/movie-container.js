@@ -35,8 +35,12 @@ var MovieContainer = function (_Component) {
         var _this = _possibleConstructorReturn(this, (MovieContainer.__proto__ || Object.getPrototypeOf(MovieContainer)).call(this, props));
 
         _this.getMovies = function () {
-            if (_this.props.movies.length === 0 || _this.props.movies[0] === undefined) {
-                _this.props.loadMovieCategories();
+            if (_this.props.movies) {
+                if (_this.props.movies.length === 0 || _this.props.movies[0] === undefined) {
+                    _this.props.loadCategories();
+                }
+            } else {
+                _this.props.loadCategories();
             }
         };
 

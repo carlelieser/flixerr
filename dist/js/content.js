@@ -14,17 +14,21 @@ var _Fade = require("react-reveal/Fade");
 
 var _Fade2 = _interopRequireDefault(_Fade);
 
+var _featuredContainer = require("./featured-container");
+
+var _featuredContainer2 = _interopRequireDefault(_featuredContainer);
+
 var _movieContainer = require("./movie-container");
 
 var _movieContainer2 = _interopRequireDefault(_movieContainer);
 
+var _tvShowContainer = require("./tv-show-container");
+
+var _tvShowContainer2 = _interopRequireDefault(_tvShowContainer);
+
 var _collectionContainer = require("./collection-container");
 
 var _collectionContainer2 = _interopRequireDefault(_collectionContainer);
-
-var _featuredContainer = require("./featured-container");
-
-var _featuredContainer2 = _interopRequireDefault(_featuredContainer);
 
 var _searchContainer = require("./search-container");
 
@@ -52,6 +56,8 @@ var Content = function (_Component) {
                     return _react2.default.createElement(_featuredContainer2.default, _this.props);
                 case "Movies":
                     return _react2.default.createElement(_movieContainer2.default, _this.props);
+                case "TV Shows":
+                    return _react2.default.createElement(_tvShowContainer2.default, _this.props);
                 case "Collection":
                     return _react2.default.createElement(_collectionContainer2.default, _this.props);
             }
@@ -97,6 +103,8 @@ var Content = function (_Component) {
                     return true;
                 } else if (this.props.active === "Movies" && nextProps.movies !== this.props.movies) {
                     return true;
+                } else if (this.props.active === "TV Shows" && nextProps.shows !== this.props.shows) {
+                    return true;
                 } else if (this.props.active === "Collection" && (nextProps.suggested !== this.props.suggested || nextProps.favorites !== this.props.favorites || nextProps.recentlyPlayed !== this.props.recentlyPlayed)) {
                     return true;
                 } else {
@@ -117,7 +125,6 @@ var Content = function (_Component) {
                     className: "content-container",
                     style: {
                         display: this.props.active == "Featured" ? "flex" : "block",
-                        padding: this.props.active === "Featured" ? "40px 40px" : "40px 60px",
                         backgroundImage: this.props.loadingContent ? "url(./assets/imgs/loading.apng)" : ""
                     } },
                 this.props.loadingContent ? "" : this.props.offline ? offlineContainer : this.props.searchContent ? searchContainer : activeContainer

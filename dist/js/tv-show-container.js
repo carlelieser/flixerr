@@ -26,73 +26,51 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Collection = function (_Component) {
-    _inherits(Collection, _Component);
+var TVShowContainer = function (_Component) {
+    _inherits(TVShowContainer, _Component);
 
-    function Collection(props) {
-        _classCallCheck(this, Collection);
+    function TVShowContainer(props) {
+        _classCallCheck(this, TVShowContainer);
 
-        var _this = _possibleConstructorReturn(this, (Collection.__proto__ || Object.getPrototypeOf(Collection)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (TVShowContainer.__proto__ || Object.getPrototypeOf(TVShowContainer)).call(this, props));
 
-        _this.checkSuggested = function () {
-            if (_this.props.suggested) {
-                if (!_this.props.suggested.length) {
-                    _this.props.updateSuggested();
+        _this.getTVShows = function () {
+            if (_this.props.shows) {
+                if (!_this.props.shows.length || _this.props.shows[0] === undefined) {
+                    _this.props.loadCategories(true);
                 }
             } else {
-                _this.props.updateSuggested();
+                _this.props.loadCategories(true);
             }
         };
 
         _this.setHeader = function () {
-            for (var i = 0; i < _this.state.collection.length; i++) {
-                var target = _this.state.collection[i].target;
-                if (_this.props[target]) {
-                    if (_this.props[target].length) {
-                        if (_this.props[target][0].flixerr_data) {
-                            _this.props.setHeader(_this.props[target][0].flixerr_data.backdrop_path);
-                            return;
+            if (_this.props.shows) {
+                if (_this.props.shows.length) {
+                    if (_this.props.shows[0]) {
+                        if (_this.props.shows[0].movies[0]) {
+                            _this.props.setHeader(_this.props.shows[0].movies[0].flixerr_data.backdrop_path);
                         }
                     }
                 }
             }
         };
 
-        _this.state = {
-            collection: [{
-                name: "Suggestions",
-                target: "suggested"
-            }, {
-                name: "Recents",
-                target: "recentlyPlayed"
-            }, {
-                name: "Favorites",
-                target: "favorites"
-            }]
-        };
         return _this;
     }
 
-    _createClass(Collection, [{
-        key: "shouldComponentUpdate",
-        value: function shouldComponentUpdate(nextProps, nextState) {
-            if (nextProps.suggested === this.props.suggested && nextProps.favorites === this.props.favorites && nextProps.recentlyPlayed === this.props.recentlyPlayed) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-    }, {
+    _createClass(TVShowContainer, [{
         key: "componentDidUpdate",
         value: function componentDidUpdate(prevProps, prevState) {
-            if (prevProps.suggested !== this.props.suggested) {
+            this.getTVShows();
+            if (prevProps.shows !== this.props.shows) {
                 this.setHeader();
             }
         }
     }, {
         key: "componentDidMount",
         value: function componentDidMount() {
-            this.checkSuggested();
+            this.getTVShows();
             this.setHeader();
         }
     }, {
@@ -100,31 +78,38 @@ var Collection = function (_Component) {
         value: function render() {
             var _this2 = this;
 
-            var genreCollection = this.state.collection.map(function (item) {
+            var tvShowGenres = this.props.shows.map(function (item, i) {
+                if (item) {
+                    var genreInfo = {
+                        showCollection: false,
+                        activeGenre: item.name,
+                        genreID: item.genreID,
+                        shows: true,
+                        movies: item.movies
+                    };
 
-                var genreInfo = {
-                    showCollection: true,
-                    activeGenre: item.name,
-                    target: item.target,
-                    movies: _this2.props[item.target] ? _this2.props[item.target] : []
-                };
-
-                return _react2.default.createElement(_genreContainer2.default, {
-                    key: (0, _uniqid2.default)(),
-                    genreInfo: genreInfo,
-                    toggleGenre: _this2.props.toggleGenre,
-                    openBox: _this2.props.openBox });
+                    return _react2.default.createElement(_genreContainer2.default, {
+                        shows: true,
+                        toggleGenre: _this2.props.toggleGenre,
+                        openBox: _this2.props.openBox,
+                        genreInfo: genreInfo,
+                        key: (0, _uniqid2.default)() });
+                }
             });
 
             return _react2.default.createElement(
                 "div",
-                { className: "collection-container" },
-                genreCollection
+                {
+                    className: "tv-shows-container",
+                    style: {
+                        height: 470 * 12 + "px'"
+                    } },
+                tvShowGenres
             );
         }
     }]);
 
-    return Collection;
+    return TVShowContainer;
 }(_react.Component);
 
-exports.default = Collection;
+exports.default = TVShowContainer;

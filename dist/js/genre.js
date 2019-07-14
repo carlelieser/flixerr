@@ -32,7 +32,7 @@ var Genre = function (_Component) {
 
         _this.loadPage = function () {
             if (!_this.props.genreInfo.showCollection && _this.props.genreInfo.genreID !== 21) {
-                var url = "https://api.themoviedb.org/3/discover/movie?api_key=" + _this.props.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=" + _this.state.page + "&release_date.gte=" + (new Date().getFullYear() - 5) + "&release_date.lte=" + (new Date().getFullYear() - 1) + "&with_genres=" + _this.props.genreInfo.genreID;
+                var url = _this.props.genreInfo.shows ? "https://api.themoviedb.org/3/discover/tv?api_key=" + _this.props.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&page=" + _this.state.page + "&timezone=America%2FNew_York&include_null_first_air_dates=false&with_genres=" + _this.props.genreInfo.genreID + "&with_original_language=en" : "https://api.themoviedb.org/3/discover/movie?api_key=" + _this.props.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=" + _this.state.page + "&release_date.gte=" + (new Date().getFullYear() - 5) + "&release_date.lte=" + (new Date().getFullYear() - 1) + "&with_genres=" + _this.props.genreInfo.genreID;
 
                 _this.props.fetchContent(url).then(function (response) {
                     _this.props.setOffline();
@@ -43,8 +43,6 @@ var Genre = function (_Component) {
                             processing: false
                         };
                     });
-                }).catch(function (err) {
-                    return _this.props.setOffline(true);
                 });
             } else {
                 _this.setCollection();

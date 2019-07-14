@@ -64,6 +64,14 @@ var _torrentSearch = require("./torrent-search");
 
 var _torrentSearch2 = _interopRequireDefault(_torrentSearch);
 
+var _subtitleSearch = require("./subtitle-search");
+
+var _subtitleSearch2 = _interopRequireDefault(_subtitleSearch);
+
+var _axios = require("axios");
+
+var _axios2 = _interopRequireDefault(_axios);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -75,9 +83,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var parseTorrent = require("parse-torrent-name");
-var request = require("axios");
 
 var App = function (_Component) {
     _inherits(App, _Component);
@@ -334,8 +339,10 @@ var App = function (_Component) {
                         _this.setState(newState, function () {
                             resolve();
                         });
-                    }).catch(function (err) {
-                        return console.log(err);
+                    }).catch(function () {
+                        _this.setState(newState, function () {
+                            resolve();
+                        });
                     });
                 } else {
                     _this.setState(newState, function () {
@@ -468,6 +475,7 @@ var App = function (_Component) {
 
         _this.getPreferredTorrents = function (torrents) {
             return new Promise(function (resolve, reject) {
+                var parseTorrent = require("parse-torrent-name");
                 var preferredTorrents = torrents.filter(function (item, index) {
                     if (item) {
                         if (item.download || item.magnet) {
@@ -486,7 +494,7 @@ var App = function (_Component) {
                                 delete item.peers;
                             }
 
-                            item.title = parsed.title + " (" + parsed.year + ") " + (parsed.group ? parsed.group.match(/^\[.*?\]$/g) ? "" + parsed.group : "(" + parsed.group + ")" : "");
+                            item.title = parsed.title + " " + (parsed.year ? "(" + parsed.year + ")" : '') + " " + (parsed.group ? parsed.group.match(/^\[.*?\]$/g) ? "" + parsed.group : "(" + parsed.group + ")" : "");
                             item.quality = parsed.quality;
                             item.resolution = parsed.resolution;
 
@@ -715,7 +723,7 @@ var App = function (_Component) {
             var langs = require('langs');
 
             var language = franc(text);
-            var lang = langs.where("3", language).name;
+            var lang = language ? langs.where("3", language).name : '';
 
             return lang;
         };
@@ -739,13 +747,17 @@ var App = function (_Component) {
 
         _this.getBuffer = function (file) {
             return new Promise(function (resolve) {
-                file.getBuffer(function (err, buffer) {
-                    if (!err) {
-                        resolve(buffer);
-                    } else {
-                        resolve(err);
-                    }
-                });
+                if (file.data) {
+                    resolve(file.data);
+                } else {
+                    file.getBuffer(function (err, buffer) {
+                        if (!err) {
+                            resolve(buffer);
+                        } else {
+                            resolve(err);
+                        }
+                    });
+                }
             });
         };
 
@@ -755,12 +767,20 @@ var App = function (_Component) {
                     var text = _this.getBufferAsText(buffer);
                     var src = _this.getVttURL(text);
                     var language = _this.getLanguage(text);
-                    var fileClone = _extends({}, file, {
+                    var fileClone = _this.getObjectClone(file);
+
+                    if (fileClone.data) {
+                        fileClone.data = false;
+                    }
+
+                    var newFile = _extends({}, fileClone, {
                         language: language,
                         src: src
                     });
 
-                    return fileClone;
+                    newFile.name = (newFile.name ? newFile.name : newFile.path) + language;
+
+                    return newFile;
                 } else {
                     return false;
                 }
@@ -778,6 +798,18 @@ var App = function (_Component) {
 
             return Promise.all(promises).then(function (subtitleOptions) {
                 return subtitleOptions;
+            });
+        };
+
+        _this.getAlternateSubtitles = function () {
+            var search = new _subtitleSearch2.default(),
+                title = _this.state.playMovie.title,
+                year = _this.state.playMovie.release_date;
+
+            return search.searchSubtitles(title, year).then(function (subtitles) {
+                return _this.sanitizeSubtitles(subtitles).then(function (subtitleOptions) {
+                    _this.setSubtitleOptions(subtitleOptions);
+                });
             });
         };
 
@@ -840,7 +872,11 @@ var App = function (_Component) {
                     });
 
                     _this.sanitizeSubtitles(subtitleFiles).then(function (subtitleOptions) {
-                        _this.setSubtitleOptions(subtitleOptions);
+                        if (subtitleOptions.length) {
+                            _this.setSubtitleOptions(subtitleOptions);
+                        } else {
+                            _this.getAlternateSubtitles();
+                        }
                     });
 
                     var file = filtered[0];
@@ -937,7 +973,7 @@ var App = function (_Component) {
         _this.fetchContent = function (url) {
             return new Promise(function (resolve, reject) {
                 _this.setLoadingContent(true);
-                request.get(url).then(function (response) {
+                _axios2.default.get(url).then(function (response) {
                     _this.setOffline();
                     resolve(response.data);
                 }).catch(function (err) {
@@ -956,7 +992,7 @@ var App = function (_Component) {
                 var searchResults = [];
 
                 var _loop = function _loop(u) {
-                    var url = "https://api.themoviedb.org/3/search/movie?api_key=" + _this.state.apiKey + "&region=US&language=en-US&query=" + query + "&page=" + u + "&include_adult=false&primary_release_date.lte=" + _this.getURLDate(1, true);
+                    var url = "https://api.themoviedb.org/3/search/multi?api_key=" + _this.state.apiKey + "&query=" + query + "&page=" + u + "&include_adult=false";
 
                     var promise = new Promise(function (resolve, reject) {
                         _this.fetchContent(url).then(function (response) {
@@ -980,9 +1016,7 @@ var App = function (_Component) {
                     _this.setOffline();
                     results = [].concat.apply([], results);
 
-                    if (!results.every(function (val) {
-                        return !val;
-                    })) {
+                    if (results) {
                         results = _this.sortQuery(results);
 
                         if (results.length === 0) {
@@ -1060,7 +1094,7 @@ var App = function (_Component) {
         };
 
         _this.getMovieDate = function (movie) {
-            return movie.release_date.substring(0, 4);
+            return movie.release_date ? movie.release_date.substring(0, 4) : '';
         };
 
         _this.getQualityTorrent = function (torrents) {
@@ -1070,7 +1104,7 @@ var App = function (_Component) {
             var torrent = clone.find(function (item) {
                 if (item.resolution || item.quality) {
                     if (item.resolution == quality || item.quality == quality) {
-                        if (item.title.indexOf("YIFY") > -1) {
+                        if (item.title.indexOf("YIFY") > -1 || item.title.indexOf("eztv") > -1) {
                             return item;
                         }
                     }
@@ -1088,7 +1122,7 @@ var App = function (_Component) {
             return torrent ? torrent : clone[0];
         };
 
-        _this.searchTorrent = function (movie, excludeDate) {
+        _this.searchTorrent = function (movie, show, excludeDate) {
             _this.resetVideo();
             _this.removeTorrents();
             _this.closeServer();
@@ -1097,82 +1131,88 @@ var App = function (_Component) {
                 _this.checkMagnet(movie).then(function (cleanMovie) {
                     _this.streamTorrent(cleanMovie);
                 }).catch(function (movie) {
-                    return _this.searchTorrent(movie);
+                    return _this.searchTorrent(movie, show);
                 });
             } else {
-                var title = _this.prepareMovieTitle(movie.title),
-                    date = _this.getMovieDate(movie),
-                    query = title + " " + (excludeDate ? "" : date);
+                if (_this.state.playMovie) {
+                    var title = _this.prepareMovieTitle(movie.title),
+                        date = _this.getMovieDate(movie),
+                        query = show ? movie.query : title + " " + (excludeDate ? "" : date);
 
-                _this.setPlayerStatus("Searching the entire universe for \"" + movie.title + "\"", true);
+                    _this.setPlayerStatus("Searching the entire universe for \"" + (movie.show_title || movie.title) + "\"", true);
 
-                var publicSearch = _this.publicSearch.search(["1337x", "Rarbg"], query, "Movies", 20);
+                    var publicSearch = _this.publicSearch.search(["1337x", "Rarbg"], query, show ? "TV" : "Movies", 20);
 
-                var proprietarySearch = _this.torrentSearch.searchTorrents(query);
+                    var proprietarySearch = _this.torrentSearch.searchTorrents(query, show);
 
-                Promise.all([publicSearch, proprietarySearch]).then(function (data) {
-                    data = [].concat.apply([], data);
+                    Promise.all([publicSearch, proprietarySearch]).then(function (data) {
+                        data = [].concat.apply([], data);
 
-                    if (data[0].message || typeof data[0] === "string") {
-                        _this.searchTorrent(movie, true);
-                    } else {
-                        var magnetPromises = [];
-                        for (var n = 0; n < data.length; n++) {
-                            var magnetTorrent = data[n];
-                            if (magnetTorrent) {
-                                if (magnetTorrent.desc) {
-                                    var promise = _this.torrentSearch.getMagnetFromLink(magnetTorrent);
-                                    magnetPromises.push(promise);
-                                }
-                            }
-                        }
-
-                        Promise.all(magnetPromises).then(function (results) {
-                            results = [].concat(_toConsumableArray(results), _toConsumableArray(data));
-
-                            var cleanResults = results.filter(function (torrent) {
-                                if (torrent) {
-                                    return torrent.magnet;
-                                }
-                            });
-
-                            if (cleanResults.length) {
-                                _this.getPreferredTorrents(cleanResults).then(function (torrents) {
-                                    var torrent = _this.getQualityTorrent(torrents);
-                                    if (torrent) {
-                                        if (_this.state.playMovie) {
-                                            var _movie = _this.getObjectClone(_this.state.playMovie);
-                                            _movie.preferredTorrents = torrents;
-                                            _this.setState({
-                                                playMovie: _movie
-                                            }, function () {
-                                                _this.changeCurrentMagnet(torrent.magnet);
-                                                _this.updateMovieTimeArray(_movie, true);
-                                                _this.streamTorrent(torrent);
-                                            });
-                                        }
-                                    } else {
-                                        _this.applyTimeout(1);
-                                    }
-                                });
+                        if (data[0]) {
+                            if ((data[0].message || typeof data[0] === "string") && data.length <= 2) {
+                                _this.searchTorrent(movie, show, true);
                             } else {
-                                _this.applyTimeout();
+                                var magnetPromises = [];
+                                for (var n = 0; n < data.length; n++) {
+                                    var magnetTorrent = data[n];
+                                    if (magnetTorrent) {
+                                        if (magnetTorrent.desc) {
+                                            var promise = _this.torrentSearch.getMagnetFromLink(magnetTorrent);
+                                            magnetPromises.push(promise);
+                                        }
+                                    }
+                                }
+
+                                Promise.all(magnetPromises).then(function (results) {
+                                    results = [].concat(_toConsumableArray(results), _toConsumableArray(data));
+
+                                    var cleanResults = results.filter(function (torrent) {
+                                        if (torrent) {
+                                            return torrent.magnet;
+                                        }
+                                    });
+
+                                    if (cleanResults.length) {
+                                        _this.getPreferredTorrents(cleanResults).then(function (torrents) {
+                                            var torrent = _this.getQualityTorrent(torrents);
+                                            if (torrent) {
+                                                if (_this.state.playMovie) {
+                                                    var _movie = _this.getObjectClone(_this.state.playMovie);
+                                                    _movie.preferredTorrents = torrents;
+                                                    _this.setState({
+                                                        playMovie: _movie
+                                                    }, function () {
+                                                        _this.changeCurrentMagnet(torrent.magnet);
+                                                        _this.updateMovieTimeArray(_movie, true);
+                                                        _this.streamTorrent(torrent);
+                                                    });
+                                                }
+                                            } else {
+                                                _this.applyTimeout(1);
+                                            }
+                                        });
+                                    } else {
+                                        _this.applyTimeout();
+                                    }
+                                }).catch(function (err) {
+                                    return console.log(err);
+                                });
                             }
-                        }).catch(function (err) {
-                            return console.log(err);
-                        });
-                    }
-                }).catch(function (err) {
-                    return console.log(err);
-                });
+                        } else {
+                            _this.applyTimeout(1);
+                        }
+                    }).catch(function (err) {
+                        return console.log(err);
+                    });
+                }
             }
         };
 
-        _this.playMovie = function (movie) {
+        _this.playMovie = function (movie, show) {
             movie = _this.matchMovie(movie);
             _this.initMovie(movie);
-            _this.toggleBox().then(function () {
-                _this.searchTorrent(movie);
+            _this.toggleBox(show).then(function () {
+                _this.searchTorrent(movie, show);
                 _this.addToRecentlyPlayed(movie);
             });
         };
@@ -1322,29 +1362,40 @@ var App = function (_Component) {
         _this.returnCorrectMovie = function (array, movie, index) {
             if (index) {
                 return array.findIndex(function (item) {
-                    if (movie.id) {
-                        if (item.id === movie.id) {
+                    if (movie.show_title) {
+                        if (item.show_title === movie.show_title) {
                             return true;
                         }
-                    }
-
-                    if (movie.title) {
-                        if (item.title === movie.title) {
-                            return true;
+                    } else {
+                        if (movie.id) {
+                            if (item.id === movie.id) {
+                                return true;
+                            }
+                        }
+                        if (movie.title) {
+                            if (item.title === movie.title) {
+                                return true;
+                            }
                         }
                     }
                 });
             } else {
                 return array.find(function (item) {
-                    if (movie.id) {
-                        if (item.id === movie.id) {
+                    if (movie.show_title) {
+                        if (item.show_title === movie.show_title) {
                             return true;
                         }
-                    }
+                    } else {
+                        if (movie.id) {
+                            if (item.id === movie.id) {
+                                return true;
+                            }
+                        }
 
-                    if (movie.title) {
-                        if (item.title === movie.title) {
-                            return true;
+                        if (movie.title) {
+                            if (item.title === movie.title) {
+                                return true;
+                            }
                         }
                     }
                 });
@@ -1437,16 +1488,33 @@ var App = function (_Component) {
             return array;
         };
 
+        _this.sanitizeMovie = function (movie) {
+            var item = _this.getObjectClone(movie),
+                properties = ['title', 'id', 'rg_id', 'overview', 'vote_average', 'poster_path', 'backdrop_path', 'release_date', 'isNetflix', 'isSeries', 'popularity'],
+                sanitized = {};
+
+            item.title = item.name ? item.name : item.title;
+            item.isNetflix = item.imdb_rating ? true : false;
+            item.isSeries = item.first_air_date ? true : false;
+            item.vote_average = item.imdb_rating ? item.imdb_rating : item.vote_average;
+            item.release_date = item.released_on ? item.released_on : item.first_air_date ? item.first_air_date : item.release_date;
+
+            for (var property in item) {
+                if (properties.indexOf(property) > -1) {
+                    sanitized[property] = item[property];
+                }
+            }
+
+            return sanitized;
+        };
+
         _this.extractNetflixMovies = function (response) {
             var extracted = response.substring(response.indexOf('"entities"'), response.indexOf('"meta"'));
             var netflixData = JSON.parse("{" + extracted.substring(0, extracted.length - 1) + "}}").entities.entries;
             var array = [];
 
             Object.keys(netflixData).map(function (object, index) {
-                var item = netflixData[object];
-                item.vote_average = item.imdb_rating;
-                item.release_date = item.released_on;
-
+                var item = _this.sanitizeMovie(netflixData[object]);
                 item.flixerr_data = {
                     poster_path: "https://img.reelgood.com/content/movie/" + item.rg_id + "/poster-780.jpg",
                     backdrop_path: "https://img.reelgood.com/content/movie/" + item.rg_id + "/backdrop-1280.jpg",
@@ -1463,24 +1531,30 @@ var App = function (_Component) {
 
         _this.extractMovies = function (response, data, shuffle) {
             var movies = data ? data : response.results;
+
+            var sanitized = [];
             for (var i = 0; i < movies.length; i++) {
-                var movie = movies[i];
-                movie.flixerr_data = {
-                    poster_path: "https://image.tmdb.org/t/p/w780" + movie.poster_path,
-                    backdrop_path: "https://image.tmdb.org/t/p/original" + movie.backdrop_path,
-                    blurry_poster_path: "https://image.tmdb.org/t/p/w92" + movie.poster_path,
-                    blurry_backdrop_path: "https://image.tmdb.org/t/p/w300" + movie.backdrop_path
-                };
+                var movie = _this.sanitizeMovie(movies[i]);
+                if (movie.backdrop_path) {
+                    movie.flixerr_data = {
+                        poster_path: "https://image.tmdb.org/t/p/w780" + movie.poster_path,
+                        backdrop_path: "https://image.tmdb.org/t/p/original" + movie.backdrop_path,
+                        series_backdrop_path: "https://image.tmdb.org/t/p/w780" + movie.backdrop_path,
+                        blurry_poster_path: "https://image.tmdb.org/t/p/w92" + movie.poster_path,
+                        blurry_backdrop_path: "https://image.tmdb.org/t/p/w300" + movie.backdrop_path
+                    };
+                    sanitized.push(movie);
+                }
             }
 
-            movies = shuffle ? _this.shuffleArray(movies) : movies;
+            movies = shuffle ? _this.shuffleArray(sanitized) : sanitized;
 
             return movies;
         };
 
-        _this.getMovies = function (genre, genreID) {
-            var url = genreID != 21 ? "https://api.themoviedb.org/3/discover/movie?api_key=" + _this.state.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=" + (Math.floor(Math.random() * _this.state.genrePages) + 1) + "&primary_release_date.lte=" + _this.getURLDate(1) + "&with_genres=" + genreID : "https://reelgood.com/movies/source/netflix?filter-sort=1";
-
+        _this.getMovies = function (genre, genreID, shows) {
+            var page = Math.floor(Math.random() * _this.state.genrePages) + 1;
+            var url = shows ? "https://api.themoviedb.org/3/discover/tv?api_key=" + _this.state.apiKey + "&language=en-US&sort_by=popularity.desc&page=" + page + "&timezone=America%2FNew_York&with_genres=" + genreID + "&with_original_language=en" : genreID != 21 ? "https://api.themoviedb.org/3/discover/movie?api_key=" + _this.state.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=" + page + "&primary_release_date.lte=" + _this.getURLDate(1) + "&with_genres=" + genreID : "https://reelgood.com/movies/source/netflix?filter-sort=1";
             return new Promise(function (resolve, reject) {
                 _this.fetchContent(url).then(function (response) {
                     var genreComplete = {
@@ -1514,7 +1588,7 @@ var App = function (_Component) {
 
         _this.chooseRandom = function (array, limit) {
             var results = [],
-                previousItem = {};
+                clonedArray = _this.getClone(array);
 
             if (array) {
                 if (array.length < limit) {
@@ -1522,18 +1596,13 @@ var App = function (_Component) {
                 }
 
                 for (var i = 0; i < limit; i++) {
-                    var item = array[Math.floor(Math.random() * array.length)];
-                    if (previousItem.title) {
-                        while (previousItem.title == item.title) {
-                            item = array[Math.floor(Math.random() * array.length)];
-                        }
-                    }
-                    previousItem = item;
+                    var n = Math.floor(Math.random() * clonedArray.length - 1);
+                    var item = clonedArray.splice(n, 1);
                     results.push(item);
                 }
             }
 
-            return results;
+            return [].concat.apply([], results);
         };
 
         _this.getRecommended = function (url) {
@@ -1541,7 +1610,7 @@ var App = function (_Component) {
                 _this.fetchContent(url).then(function (response) {
                     resolve(response.results.slice(0, 5));
                 }).catch(function (err) {
-                    return reject(err);
+                    return resolve(err);
                 });
             });
         };
@@ -1556,13 +1625,25 @@ var App = function (_Component) {
                 var pages = [1, 2, 3];
                 if (collection) {
                     if (collection.length) {
-                        for (var j = 0; j <= collection.length; j++) {
-                            var movie = collection[j],
-                                page = _this.chooseRandom(pages, 1);
-                            if (movie) {
-                                var _url = "https://api.themoviedb.org/3/movie/" + movie.id + "/recommendations?api_key=" + _this.state.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=" + page + "&primary_release_date.lte=" + _this.getURLDate(1);
-                                var promise = _this.getRecommended(_url);
-                                promises.push(promise);
+                        if (!_this.gettingSuggested) {
+                            _this.gettingSuggested = true;
+                            for (var j = 0; j <= collection.length; j++) {
+                                var movie = collection[j],
+                                    page = _this.chooseRandom(pages, 1),
+                                    _url = '';
+
+                                if (movie) {
+                                    if (movie.isSeries) {
+                                        _url = "https://api.themoviedb.org/3/tv/" + movie.id + "/recommendations?api_key=" + _this.state.apiKey + "&region=US&language=en-US&sort_by=popularity.desc";
+                                    } else if (movie.id) {
+                                        _url = "https://api.themoviedb.org/3/movie/" + movie.id + "/recommendations?api_key=" + _this.state.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=" + page + "&primary_release_date.lte=" + _this.getURLDate(1);
+                                    }
+
+                                    if (_url) {
+                                        var promise = _this.getRecommended(_url);
+                                        promises.push(promise);
+                                    }
+                                }
                             }
                         }
 
@@ -1575,6 +1656,7 @@ var App = function (_Component) {
                             }
 
                             clean = _this.extractMovies(false, clean, true);
+                            _this.gettingSuggested = false;
                             resolve(clean);
                         }).catch(function (err) {
                             return reject(err);
@@ -1617,6 +1699,10 @@ var App = function (_Component) {
         };
 
         _this.addToFavorites = function (movie) {
+            if (movie.show) {
+                movie = movie.show;
+            }
+
             var clone = _this.getClone(_this.state.favorites);
             clone.push(movie);
             _this.setState({
@@ -1627,6 +1713,10 @@ var App = function (_Component) {
         };
 
         _this.removeFromFavorites = function (movie) {
+            if (movie.show) {
+                movie = movie.show;
+            }
+
             var clone = _this.getClone(_this.state.favorites);
             var index = _this.returnCorrectMovie(clone, movie, true);
 
@@ -1640,6 +1730,9 @@ var App = function (_Component) {
 
         _this.addToRecentlyPlayed = function (movie) {
             var clone = _this.getClone(_this.state.recentlyPlayed);
+            if (movie.show) {
+                movie = movie.show;
+            }
             if (!_this.isRecent(movie)) {
                 if (clone.length > 20) {
                     clone.splice(-1, 1);
@@ -1668,30 +1761,27 @@ var App = function (_Component) {
             _this.setState({ movies: movies });
         };
 
-        _this.loadMovieCategories = function () {
+        _this.setShows = function (shows) {
+            _this.setState({ shows: shows });
+        };
+
+        _this.loadCategories = function (shows) {
             var movieGenres = require('./movie-genres');
-            movieGenres = movieGenres.getCategories();
+            movieGenres = shows ? movieGenres.getTVCategories() : movieGenres.getCategories();
 
             var promiseArray = [];
 
-            var _loop2 = function _loop2(j) {
-                var promise = new Promise(function (resolve, reject) {
-                    _this.getMovies(movieGenres[j].name, movieGenres[j].id).then(function (genreComplete) {
-                        resolve(genreComplete);
-                    }).catch(function (err) {
-                        return console.log(err);
-                    });
-                });
-
-                promiseArray.push(promise);
-            };
-
             for (var j = 0; j < movieGenres.length; j++) {
-                _loop2(j);
+                var promise = _this.getMovies(movieGenres[j].name, movieGenres[j].id, shows);
+                promiseArray.push(promise);
             }
 
             Promise.all(promiseArray).then(function (data) {
-                _this.setMovies(data);
+                if (shows) {
+                    _this.setShows(data);
+                } else {
+                    _this.setMovies(data);
+                }
             }).catch(function () {
                 return _this.setOffline(true);
             });
@@ -1716,6 +1806,7 @@ var App = function (_Component) {
         _this.updateMenu = function (active) {
             _this.closeMenu();
             _this.closeSearch();
+            _this.setOffline();
             if (active != undefined) {
                 _this.setState({ active: active });
             }
@@ -1888,7 +1979,10 @@ var App = function (_Component) {
                 _this.loadFeatured();
             }
             if (!_this.state.movies.length) {
-                _this.loadMovieCategories();
+                _this.loadCategories();
+            }
+            if (!_this.state.shows.length) {
+                _this.loadCategories(true);
             }
         };
 
@@ -1916,6 +2010,7 @@ var App = function (_Component) {
         _this.qualityTimeout = false;
         _this.streamTimeout = false;
         _this.fileLoadedTimeout = false;
+        _this.gettingSuggested = false;
 
         _this.state = {
             apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
@@ -1941,6 +2036,7 @@ var App = function (_Component) {
             magnetArray: [],
             featured: [],
             movies: [],
+            shows: [],
             backupIsOpen: false,
             videoIndex: false,
             genreInfo: {
@@ -1994,7 +2090,6 @@ var App = function (_Component) {
                 return console.log(err);
             });
             this.loadFeatured();
-            this.loadMovieCategories();
             this.startWebTorrent();
             this.requireTorrent();
             window.addEventListener("online", this.handleConnectionChange);
@@ -2014,6 +2109,7 @@ var App = function (_Component) {
             var movieBackDrop = this.state.showBox ? _react2.default.createElement("div", { className: "movie-container-bg", onClick: this.closeBackdrop }) : "";
 
             var movieModal = this.state.showBox ? _react2.default.createElement(_movieModal2.default, {
+                apiKey: this.state.apiKey,
                 movie: this.state.movieCurrent,
                 favorites: this.state.favorites,
                 playMovie: this.playMovie,
@@ -2176,10 +2272,11 @@ var App = function (_Component) {
                     searchContent: this.state.searchContent,
                     loadingContent: this.state.loadingContent,
                     setHeader: this.setHeaderBackground,
-                    loadMovieCategories: this.loadMovieCategories,
+                    loadCategories: this.loadCategories,
                     loadFeatured: this.loadFeatured,
                     updateSuggested: this.updateSuggested,
                     movies: this.state.movies,
+                    shows: this.state.shows,
                     suggested: this.state.suggested,
                     favorites: this.state.favorites,
                     recentlyPlayed: this.state.recentlyPlayed,

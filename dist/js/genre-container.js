@@ -100,7 +100,7 @@ var GenreContainer = function (_Component) {
                 scrollVal = container.scrollLeft;
 
             var viewportW = container.offsetWidth - 50,
-                boxW = 230,
+                boxW = _this.itemWidth,
                 viewItems = Math.ceil(viewportW / boxW) - 1,
                 containerScrollWidth = boxW * n - viewportW - 30;
 
@@ -141,7 +141,7 @@ var GenreContainer = function (_Component) {
         _this.handleResize = function () {
             if (_this.movieListRef.current) {
                 if (_this.props.genreInfo.movies) {
-                    if (_this.props.genreInfo.movies.length * 220 > _this.movieListRef.current.offsetWidth) {
+                    if (_this.props.genreInfo.movies.length * _this.itemWidth > _this.movieListRef.current.offsetWidth) {
                         _this.setState({ showArrows: true });
 
                         if (_this.movieListRef.current.scrollLeft + _this.movieListRef.current.offsetWidth < _this.movieListRef.current.scrollWidth - 10) {
@@ -154,6 +154,10 @@ var GenreContainer = function (_Component) {
                     }
                 }
             }
+        };
+
+        _this.setItemWidth = function () {
+            _this.itemWidth = _this.props.shows ? 340 : 230;
         };
 
         _this.handleOpenGenre = function () {
@@ -187,6 +191,7 @@ var GenreContainer = function (_Component) {
         value: function componentDidMount() {
             this.handleResize();
             this.getExploreName();
+            this.setItemWidth();
             window.addEventListener("resize", this.handleResize);
         }
     }, {
@@ -201,11 +206,12 @@ var GenreContainer = function (_Component) {
 
             var movies = this.props.genreInfo.movies.slice(0, 20).map(function (movie, index) {
                 return _react2.default.createElement(_movieItem2.default, {
+                    shows: _this2.props.shows,
                     movie: movie,
                     openBox: _this2.props.openBox,
                     key: movie.title + index + 'genre' });
             });
-            var n = this.props.genreInfo.movies.length ? 470 : 100;
+            var n = this.props.shows ? 340 : this.props.genreInfo.movies.length ? 470 : 100;
 
             return _react2.default.createElement(
                 _reactLazyLoad2.default,
@@ -251,7 +257,7 @@ var GenreContainer = function (_Component) {
                                     _react2.default.createElement(
                                         "div",
                                         null,
-                                        "Explore all " + this.state.exploreName + " " + (this.state.hideMovies ? '' : 'movies')
+                                        "Explore all " + this.state.exploreName + " " + (this.state.hideMovies ? '' : this.props.shows ? 'shows' : 'movies')
                                     ),
                                     _react2.default.createElement("i", { className: "mdi mdi-black mdi-arrow-right" })
                                 )
@@ -259,7 +265,7 @@ var GenreContainer = function (_Component) {
                         ),
                         this.state.showArrows ? _react2.default.createElement(
                             "div",
-                            { className: "movie-scroll-container" },
+                            { className: "movie-scroll-container", style: { height: n - 100 } },
                             _react2.default.createElement(
                                 _Fade2.default,
                                 { duration: 350, when: this.state.movieScrollLeft, distance: "10%", left: true },

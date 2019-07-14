@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = require("react");
@@ -45,7 +47,7 @@ var MovieItem = function (_Component) {
         _this.loadImage = function () {
             if (!_this.unMounting) {
                 _this.setState({
-                    backdrop: "" + (_this.props.fallback ? _this.props.movie.flixerr_data.backdrop_path : _this.props.movie.flixerr_data.poster_path)
+                    backdrop: "" + (_this.props.shows ? _this.props.movie.flixerr_data.series_backdrop_path : _this.props.fallback ? _this.props.movie.flixerr_data.backdrop_path : _this.props.movie.flixerr_data.poster_path)
                 });
             }
         };
@@ -79,7 +81,7 @@ var MovieItem = function (_Component) {
         };
 
         _this.handleMovieClick = function () {
-            var movie = _this.props.movie;
+            var movie = _extends({}, _this.props.movie);
             movie.averageColor = _this.state.averageColor;
             _this.props.openBox(movie);
         };
@@ -187,7 +189,7 @@ var MovieItem = function (_Component) {
                     _react2.default.createElement("div", { className: "movie-item-bg" }),
                     _react2.default.createElement("img", {
                         className: "movie-item-blurred",
-                        src: this.props.fallback ? this.props.movie.flixerr_data.blurry_backdrop_path : this.props.movie.flixerr_data.blurry_poster_path,
+                        src: this.props.fallback || this.props.shows ? this.props.movie.flixerr_data.blurry_backdrop_path : this.props.movie.flixerr_data.blurry_poster_path,
                         onLoad: this.handleImage }),
                     " ",
                     this.state.backdrop ? _react2.default.createElement("img", {

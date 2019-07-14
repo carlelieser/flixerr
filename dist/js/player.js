@@ -403,7 +403,7 @@ var Player = function (_Component) {
                         _react2.default.createElement(
                             "div",
                             null,
-                            this.props.movie.title
+                            this.props.movie.show_title || this.props.movie.title
                         ),
                         _react2.default.createElement("i", {
                             className: "open-backup mdi mdi-light mdi-sort-variant",

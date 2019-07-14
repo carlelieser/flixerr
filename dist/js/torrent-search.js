@@ -20,15 +20,28 @@ var TorrentSearch = function TorrentSearch() {
 
     var providers = [{
         name: "The Pirate Bay",
-        url: "https://thepiratebay3.org/index.php?video=on&category=0&page=0&orderby=99&q=",
+        url: "https://thepiratebay3.org/index.php?q=",
         queryFunction: function queryFunction(query) {
-            return encodeURI(query);
+            return encodeURI(query) + "&video=on&category=0&page=0&orderby=99";
         }
     }, {
         name: "YTS",
         url: "https://yts.lt/movie/",
         queryFunction: function queryFunction(query) {
             return query.replace(/[^A-Za-z0-9]/g, '-');
+        }
+    }, {
+        name: "EZTV",
+        url: "https://eztv.yt/search/",
+        forShows: true,
+        queryFunction: function queryFunction(query) {
+            return encodeURI(query);
+        }
+    }, {
+        name: "1337x",
+        url: "https://www.1377x.to/search/",
+        queryFunction: function queryFunction(query) {
+            return encodeURI(query) + "/1/";
         }
     }];
 
@@ -103,14 +116,16 @@ var TorrentSearch = function TorrentSearch() {
         });
     };
 
-    var searchTorrents = function searchTorrents(query) {
+    var searchTorrents = function searchTorrents(query, show) {
         return new Promise(function (resolve, reject) {
             var searchPromises = [];
             for (var j = 0; j < providers.length; j++) {
                 var provider = providers[j];
                 var url = "" + provider.url + provider.queryFunction(query);
-                var promise = searchProvider(url);
-                searchPromises.push(promise);
+                if (show && provider.forShows || !show && !provider.forShows) {
+                    var promise = searchProvider(url);
+                    searchPromises.push(promise);
+                }
             }
 
             Promise.all(searchPromises).then(function (results) {
