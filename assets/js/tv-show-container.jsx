@@ -16,6 +16,10 @@ class TVShowContainer extends Component {
                     .props
                     .loadCategories(true);
             }
+        } else {
+            this
+                .props
+                .loadCategories(true);
         }
     };
 
