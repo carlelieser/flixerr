@@ -65,7 +65,7 @@ var AccountContainer = function (_Component) {
                         action: _this.props.handleAccountCreation
                     },
                     secondary: {
-                        text: 'Login',
+                        text: 'Already have an account? Login',
                         action: _this.props.openAccount
                     }
                 },
@@ -77,7 +77,7 @@ var AccountContainer = function (_Component) {
                         action: _this.props.handleAccountSignin
                     },
                     secondary: {
-                        text: 'Sign Up',
+                        text: 'New user? Sign Up',
                         action: _this.props.openAccountCreation
                     }
                 }
