@@ -875,12 +875,16 @@ class App extends Component {
     }
 
     sanitizeSubtitles = (arrayOfSubtitles) => {
-        let promises = [];
+        let promises = [],
+            sanitized = [];
 
         for (let i = 0; i < arrayOfSubtitles.length; i++) {
             let fileObject = arrayOfSubtitles[i];
-            let promise = this.getFileComplete(fileObject);
-            promises.push(promise);
+            if(sanitized.indexOf(fileObject.path) === -1){
+                let promise = this.getFileComplete(fileObject);
+                promises.push(promise);
+                sanitized.push(fileObject.path);
+            }
         }
 
         return Promise
@@ -890,7 +894,7 @@ class App extends Component {
             });
     }
 
-    getAlternateSubtitles = () => {
+    getSubtitles = () => {
         let search = new SubtitleSearch(),
             title = this.state.playMovie.title,
             year = this.state.playMovie.release_date;
@@ -971,27 +975,7 @@ class App extends Component {
                     return b.length - a.length;
                 });
 
-                let subtitleFiles = torrent
-                    .files
-                    .filter((file) => {
-                        let extension = file
-                            .name
-                            .substring(file.name.lastIndexOf(".") + 1, file.name.length);
-
-                        if (extension == "srt") {
-                            return file;
-                        }
-                    });
-
-                this
-                    .sanitizeSubtitles(subtitleFiles)
-                    .then((subtitleOptions) => {
-                        if (subtitleOptions.length) {
-                            this.setSubtitleOptions(subtitleOptions);
-                        } else {
-                            this.getAlternateSubtitles();
-                        }
-                    });
+                this.getSubtitles();
 
                 let file = filtered[0];
                 let fileIndex = torrent
