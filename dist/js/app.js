@@ -788,12 +788,16 @@ var App = function (_Component) {
         };
 
         _this.sanitizeSubtitles = function (arrayOfSubtitles) {
-            var promises = [];
+            var promises = [],
+                sanitized = [];
 
             for (var i = 0; i < arrayOfSubtitles.length; i++) {
                 var fileObject = arrayOfSubtitles[i];
-                var promise = _this.getFileComplete(fileObject);
-                promises.push(promise);
+                if (sanitized.indexOf(fileObject.path) === -1) {
+                    var promise = _this.getFileComplete(fileObject);
+                    promises.push(promise);
+                    sanitized.push(fileObject.path);
+                }
             }
 
             return Promise.all(promises).then(function (subtitleOptions) {
@@ -801,7 +805,7 @@ var App = function (_Component) {
             });
         };
 
-        _this.getAlternateSubtitles = function () {
+        _this.getSubtitles = function () {
             var search = new _subtitleSearch2.default(),
                 title = _this.state.playMovie.title,
                 year = _this.state.playMovie.release_date;
@@ -863,21 +867,7 @@ var App = function (_Component) {
                         return b.length - a.length;
                     });
 
-                    var subtitleFiles = torrent.files.filter(function (file) {
-                        var extension = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length);
-
-                        if (extension == "srt") {
-                            return file;
-                        }
-                    });
-
-                    _this.sanitizeSubtitles(subtitleFiles).then(function (subtitleOptions) {
-                        if (subtitleOptions.length) {
-                            _this.setSubtitleOptions(subtitleOptions);
-                        } else {
-                            _this.getAlternateSubtitles();
-                        }
-                    });
+                    _this.getSubtitles();
 
                     var file = filtered[0];
                     var fileIndex = torrent.files.findIndex(function (item) {
