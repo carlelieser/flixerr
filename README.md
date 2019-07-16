@@ -8,7 +8,7 @@ The best free movie torrent streaming app.
 ## Note: TV Shows is still heavily in BETA phase.
 
 <p align="center">
-<img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/screenshot.png?raw=true=" height="800">
+<img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/screenshot.png?raw=true=">
 </p>
 
 ### Installation
