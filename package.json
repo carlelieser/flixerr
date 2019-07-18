@@ -3,18 +3,40 @@
     "version": "1.5.0",
     "description": "A movie torrent streaming service.",
     "main": "main.js",
+    "build": {
+        "appId": "com.flixerr.app",
+        "productName": "Flixerr",
+        "directories": {
+            "output": "./build"
+        },
+        "mac": {
+            "target": ["dmg"],
+            "category": "public.app-category.entertainment",
+            "icon": "./assets/imgs/icon.icns"
+        },
+        "win": {
+            "target": ["nsis"],
+            "icon": "./assets/imgs/icon.ico"
+        },
+        "nsis": {
+            "deleteAppDataOnUninstall": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "Flixerr",
+            "artifactName": "flixerr.setup.${version}.${ext}"
+        },
+        "linux": {
+            "target": ["deb"],
+            "category": "video"
+        }
+    },
     "scripts": {
         "start": "electron .",
         "build": "babel ./assets/js --out-dir dist/js",
-        "package-win": "electron-packager . Flixerr --platform=win32 --arch=x64 --asar --prune --icon=./assets/imgs/icon.ico --out=./build/ --overwrite",
-        "package-darwin": "electron-packager . Flixerr --darwin-x64 --asar --prune --icon=./assets/imgs/icon.icns --out=./build/ --overwrite",
-        "package-linux": "electron-packager . Flixerr --platform=linux --arch=x64 --asar --prune --icon=./assets/imgs/icon.png --out=./build/ --overwrite",
-        "create-installer-windows": "node build.js",
-        "create-installer-mac": "electron-installer-dmg ./build/Flixerr-darwin-x64/Flixerr.app Flixerr --out=./build --background=./assets/imgs/installer-bg.png --icon=./assets/imgs/external-drive.icns --overwrite",
-        "create-installer-linux": "electron-installer-debian --src ./build/Flixerr-linux-x64/ --dest ./build/installers/ --arch amd64",
-        "do-everything": "npm run build && npm run package-win && npm run package-darwin && npm run package-linux && npm run create-installer-mac && npm run create-installer-linux && npm run create-installer-windows"
+        "pack": "electron-builder --dir -mwl",
+        "dist": "electron-builder -mwl"
     },
-    "author": "Flixerr",
+    "author": "Flixerr <ceo@flixerr.co>",
     "devDependencies": {
         "babel-cli": "^6.26.0",
         "babel-core": "^6.26.3",
@@ -22,10 +44,7 @@
         "babel-preset-react": "^6.24.1",
         "babel-preset-stage-0": "^6.24.1",
         "electron": "^5.0.2",
-        "electron-installer-dmg": "^2.0.0",
-        "electron-packager": "^12.2.0",
-        "electron-installer-debian": "^2.0.0",
-        "electron-winstaller": "^3.0.4"
+        "electron-builder": "^21.0.15"
     },
     "dependencies": {
         "axios": "^0.19.0",
