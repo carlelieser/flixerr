@@ -70,7 +70,7 @@ var SubtitleSearch = function SubtitleSearch() {
             return download(subLink).then(function (data) {
                 var decompress = require('decompress');
 
-                return decompress(data, 'subtitles').then(function (files) {
+                return decompress(data).then(function (files) {
                     var srt = files.filter(function (file) {
                         return file.path.indexOf('.srt') > -1 && file.path.indexOf('MACOSX') === -1;
                     });
@@ -92,7 +92,6 @@ var SubtitleSearch = function SubtitleSearch() {
         }
 
         return Promise.all(promises).then(function (data) {
-            removeSubtitlesFromDir();
             var merged = [].concat.apply([], data);
             return merged;
         });
@@ -115,19 +114,6 @@ var SubtitleSearch = function SubtitleSearch() {
         var imdb = $(movie[0]).find('a')[0].attribs.href;
 
         return imdb;
-    };
-
-    var removeSubtitlesFromDir = function removeSubtitlesFromDir() {
-        var fs = require('fs-extra');
-
-        var app = require('electron').remote.app,
-            folder = app.getAppPath() + "/subtitles";
-
-        fs.remove(folder).then(function () {
-            console.log('Removed subtitles');
-        }).catch(function (err) {
-            console.log(err);
-        });
     };
 
     var searchSubtitles = function searchSubtitles(movieName, movieYear) {

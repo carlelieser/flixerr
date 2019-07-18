@@ -69,7 +69,7 @@ let SubtitleSearch = function () {
                 return download(subLink).then((data) => {
                     let decompress = require('decompress');
 
-                    return decompress(data, 'subtitles').then((files) => {
+                    return decompress(data).then((files) => {
                         let srt = files.filter((file) => {
                             return file
                                 .path
@@ -97,7 +97,6 @@ let SubtitleSearch = function () {
         return Promise
             .all(promises)
             .then((data) => {
-                removeSubtitlesFromDir();
                 let merged = []
                     .concat
                     .apply([], data);
@@ -129,22 +128,6 @@ let SubtitleSearch = function () {
         let imdb = $(movie[0]).find('a')[0].attribs.href;
 
         return imdb;
-    }
-
-    let removeSubtitlesFromDir = () => {
-        let fs = require('fs-extra');
-
-        let app = require('electron').remote.app,
-            folder = `${app.getAppPath()}/subtitles`;
-
-        fs
-            .remove(folder)
-            .then(() => {
-                console.log('Removed subtitles');
-            })
-            .catch((err) => {
-                console.log(err);
-            })
     }
 
     let searchSubtitles = (movieName, movieYear) => {
