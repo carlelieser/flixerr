@@ -3,7 +3,7 @@
 </p>
 
 # Flixerr
-The best free movie torrent streaming app.
+The best free movie & tv series torrent streaming app.
 
 ## Note: TV Shows is still heavily in BETA phase.
 
