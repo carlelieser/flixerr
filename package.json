@@ -12,6 +12,8 @@
         "mac": {
             "target": ["dmg"],
             "hardenedRuntime": true,
+            "entitlements": "./build/entitlements.mac.plist",
+            "entitlementsInherit": "./build/entitlements.mac.plist",
             "category": "public.app-category.entertainment",
             "icon": "./assets/imgs/icon.icns"
         },
@@ -32,7 +34,8 @@
         "linux": {
             "target": ["deb"],
             "category": "video"
-        }
+        },
+        "afterSign": "./build/notarize.js"
     },
     "scripts": {
         "start": "electron .",
@@ -48,7 +51,8 @@
         "babel-preset-react": "^6.24.1",
         "babel-preset-stage-0": "^6.24.1",
         "electron": "^5.0.2",
-        "electron-builder": "^21.0.15"
+        "electron-builder": "^21.0.15",
+        "electron-notarize": "^0.1.1"
     },
     "dependencies": {
         "axios": "^0.19.0",
