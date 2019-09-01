@@ -1,6 +1,6 @@
 {
     "name": "flixerr",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "description": "A movie torrent streaming service.",
     "main": "main.js",
     "build": {
@@ -10,7 +10,9 @@
             "output": "./build"
         },
         "mac": {
-            "target": ["dmg"],
+            "target": [
+                "dmg"
+            ],
             "hardenedRuntime": true,
             "entitlements": "./build/entitlements.mac.plist",
             "entitlementsInherit": "./build/entitlements.mac.plist",
@@ -21,7 +23,9 @@
             "artifactName": "${name}.installer.${ext}"
         },
         "win": {
-            "target": ["nsis"],
+            "target": [
+                "nsis"
+            ],
             "icon": "./assets/imgs/icon.ico"
         },
         "nsis": {
@@ -32,7 +36,9 @@
             "artifactName": "flixerr.setup.${version}.${ext}"
         },
         "linux": {
-            "target": ["deb"],
+            "target": [
+                "deb"
+            ],
             "category": "video"
         },
         "afterSign": "./build/notarize.js"
