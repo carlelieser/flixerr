@@ -22,8 +22,7 @@ class Genre extends Component {
             this.props.apiKey}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${
             this
                 .state
-                .page}&release_date.gte=${new Date()
-                .getFullYear() - 5}&release_date.lte=${new Date().getFullYear() - 1}&with_genres=${this.props.genreInfo.genreID}`;
+                .page}&release_date.lte=${this.props.getURLDate(1)}&with_genres=${this.props.genreInfo.genreID}`;
 
             this
                 .props
