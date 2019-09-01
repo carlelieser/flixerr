@@ -918,16 +918,18 @@ var App = function (_Component) {
 
             results = results.filter(function (movie) {
                 var releaseDate = movie.release_date;
-                var year = Number(releaseDate.substring(0, 4));
-                var month = Number(releaseDate.substring(6, 7));
+                if (releaseDate) {
+                    var year = Number(releaseDate.substring(0, 4));
+                    var month = Number(releaseDate.substring(6, 7));
 
-                var currentDate = new Date();
-                currentDate = {
-                    year: currentDate.getFullYear(),
-                    month: currentDate.getMonth() + 1
-                };
+                    var currentDate = new Date();
+                    currentDate = {
+                        year: currentDate.getFullYear(),
+                        month: currentDate.getMonth() + 1
+                    };
 
-                return movie.backdrop_path !== null && year <= currentDate.year && (year == currentDate.year ? month < currentDate.month - 1 : true) && movie.popularity > 2 && movie.vote_average > 4;
+                    return movie.backdrop_path !== null && year <= currentDate.year && (year == currentDate.year ? month < currentDate.month - 1 : true) && movie.popularity > 2 && movie.vote_average > 4;
+                }
             });
 
             return results;
@@ -1018,7 +1020,7 @@ var App = function (_Component) {
                         _this.searchEmpty(query);
                     }
                 }).catch(function (err) {
-                    return _this.setOffline(true);
+                    console.log(err);
                 });
             }
         };
@@ -1443,7 +1445,7 @@ var App = function (_Component) {
         };
 
         _this.getFeatured = function () {
-            var url = "https://api.themoviedb.org/3/discover/movie?api_key=" + _this.state.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&primary_release_date.gte=" + _this.getURLDate(10, true) + "&primary_release_date.lte=" + _this.getURLDate(1, true);
+            var url = "https://api.themoviedb.org/3/discover/movie?api_key=" + _this.state.apiKey + "&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&release_date.lte=" + _this.getURLDate(1);
             return new Promise(function (resolve, reject) {
                 _this.fetchContent(url).then(function (response) {
                     resolve(response);
@@ -2151,6 +2153,7 @@ var App = function (_Component) {
                 seekValue: this.state.seekValue }) : "";
 
             var fullGenreContainer = this.state.showGenre ? _react2.default.createElement(_genre2.default, {
+                getURLDate: this.getURLDate,
                 extractMovies: this.extractMovies,
                 genreInfo: this.state.genreInfo,
                 favorites: this.state.favorites,
