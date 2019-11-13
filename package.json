@@ -1,6 +1,6 @@
 {
     "name": "flixerr",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "description": "A movie torrent streaming service.",
     "main": "main.js",
     "build": {
@@ -77,6 +77,7 @@
         "get-json": "^1.0.1",
         "https-proxy-agent": "^2.2.1",
         "langs": "^2.0.0",
+        "movie-trailer": "^2.0.5",
         "parse-torrent-name": "^0.5.4",
         "pluralize": "^8.0.0",
         "react": "^16.8.6",

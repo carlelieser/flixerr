@@ -326,7 +326,7 @@ var Player = function (_Component) {
                 {
                     className: "movie-player " + (this.state.showOverlay ? "" : this.props.openBackup ? "" : this.state.showSubtitles ? "" : this.props.playerStatus ? this.props.playerStatus.status ? "" : "movie-hide" : "movie-hide"),
                     style: {
-                        backgroundImage: "" + (this.props.loading ? this.props.error ? "none" : "url(assets/imgs/loading.apng)" : "none")
+                        backgroundImage: "" + (this.props.loading ? this.props.error ? "none" : "url(assets/imgs/loading.svg)" : "none")
                     },
                     onMouseMove: this.mouseMove },
                 this.state.videoBuffering ? _react2.default.createElement("div", { className: "video-buffer-container" }) : "",

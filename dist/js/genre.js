@@ -184,7 +184,7 @@ var Genre = function (_Component) {
                         style: {
                             marginLeft: this.state.movies.length ? "-20px" : "",
                             backgroundSize: !this.state.processing && !this.state.movies.length ? "40%" : "5%",
-                            backgroundImage: this.state.processing && this.state.movies.length ? "" : this.state.processing && !this.state.movies.length ? "url(./assets/imgs/loading.apng)" : !this.state.processing && !this.state.movies.length ? "" : ""
+                            backgroundImage: this.state.processing && this.state.movies.length ? "" : this.state.processing && !this.state.movies.length ? "url(./assets/imgs/loading.svg)" : !this.state.processing && !this.state.movies.length ? "" : ""
                         } },
                     !this.state.processing && !this.state.movies.length ? this.getEmptyState() : movies
                 )

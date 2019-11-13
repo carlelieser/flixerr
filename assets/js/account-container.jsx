@@ -20,7 +20,7 @@ class AccountContainer extends Component {
                         action: this.props.handleAccountCreation
                     },
                     secondary: {
-                        text: 'Already have an account? Login',
+                        text: 'Login',
                         action: this.props.openAccount
                     }
                 },
@@ -32,7 +32,7 @@ class AccountContainer extends Component {
                         action: this.props.handleAccountSignin
                     },
                     secondary: {
-                        text: 'New user? Sign Up',
+                        text: 'Sign Up',
                         action: this.props.openAccountCreation
                     }
                 }

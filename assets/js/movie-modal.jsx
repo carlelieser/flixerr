@@ -11,6 +11,7 @@ class MovieModal extends Component {
         super(props);
 
         this.state = {
+            trailer: false,
             seasons: [],
             showSeasons: false,
             loading: false
@@ -35,6 +36,34 @@ class MovieModal extends Component {
 
     setSeasons = (seasons) => {
         this.setState({seasons});
+    }
+
+    setTrailer = (trailer) => {
+        this.setState({trailer});
+    }
+
+    getTrailer = () => {
+        let movieTrailer = require('movie-trailer'),
+            name = this.props.movie.title,
+            releaseDate = this
+                .props
+                .movie
+                .release_date
+                .substring(0, 4);
+
+        movieTrailer(name, releaseDate).then((url) => {
+            this.setTrailer(url);
+        }).catch((err) => {
+            this.setTrailer();
+        })
+    }
+
+    handleViewTrailer = () => {
+        let {trailer} = this.state;
+
+        this
+            .props
+            .setTrailer(trailer);
     }
 
     handlePlayMovie = () => {
@@ -133,7 +162,7 @@ class MovieModal extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (this.props.movie === nextProps.movie && this.props.favorites === nextProps.favorites && nextState.seasons === this.state.seasons && nextState.showSeasons === this.state.showSeasons && nextState.loading === this.state.loading) {
+        if (this.props.movie === nextProps.movie && this.props.favorites === nextProps.favorites && nextState.seasons === this.state.seasons && nextState.showSeasons === this.state.showSeasons && nextState.loading === this.state.loading && this.state.trailer === nextState.trailer) {
             return false;
         } else {
             return true;
@@ -141,6 +170,7 @@ class MovieModal extends Component {
     }
 
     componentDidMount() {
+        this.getTrailer();
         this.getSeasons();
     }
 
@@ -183,7 +213,6 @@ class MovieModal extends Component {
                 backgroundColor: averageColor.hex,
                 height: modalHeight
             }}>
-
                 <Fade
                     mountOnEnter
                     unmountOnExit
@@ -238,7 +267,11 @@ class MovieModal extends Component {
                                 .isFavorite(movie)
                                 ? "mdi-heart"
                                 : "mdi-heart-outline"}`}
-                                onClick={this.handleFavorites}/>
+                                onClick={this.handleFavorites}/> {this.state.trailer
+                                ? <Fade mountOnEnter unmountOnExit distance="5%" bottom>
+                                        <div className="movie-modal-view-trailer" onClick={this.handleViewTrailer}>View Trailer</div>
+                                    </Fade>
+                                : ''}
                         </div>
                         <div className='movie-modal-title'>
                             {movie.title}
@@ -256,11 +289,13 @@ class MovieModal extends Component {
 }
                     </div>
                 </Fade>
-                <div
-                    className='movie-modal-image'
-                    style={{
-                    backgroundImage: `url(${movie.flixerr_data.blurry_backdrop_path})`
-                }}/>
+                <div className='movie-modal-image-container'>
+                    <div
+                        className='movie-modal-image'
+                        style={{
+                        backgroundImage: `url(${movie.flixerr_data.blurry_backdrop_path})`
+                    }}></div>
+                </div>
                 <div
                     className='movie-gradient'
                     style={{

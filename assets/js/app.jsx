@@ -14,6 +14,7 @@ import Player from "./player";
 import Genre from "./genre";
 import Header from "./header";
 import Content from "./content";
+import Trailer from "./trailer";
 
 import TorrentSearch from "./torrent-search";
 import SubtitleSearch from "./subtitle-search";
@@ -33,6 +34,7 @@ class App extends Component {
         this.state = {
             apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
             willClose: false,
+            trailer: false,
             readyToClose: false,
             loginError: false,
             showIntro: false,
@@ -93,6 +95,10 @@ class App extends Component {
             seekValue: 0,
             colorStop: 0
         };
+    }
+
+    setTrailer = (trailer) => {
+        this.setState({trailer});
     }
 
     setSubtitleOptions = (subtitleOptions) => {
@@ -410,6 +416,9 @@ class App extends Component {
                     if (snapshot) {
                         this
                             .setBucketData(snapshot)
+                            .then(() => {
+                                this.setLoadingContent();
+                            })
                             .catch((err) => {
                                 this.resetData();
                             });
@@ -493,7 +502,7 @@ class App extends Component {
                         }, (error) => {
                             setTimeout(() => {
                                 this.setState({appLoading: false});
-                            }, 2500);
+                            }, 1000);
                             resolve();
                         });
                     }
@@ -1075,7 +1084,7 @@ class App extends Component {
     };
 
     setOffline = (isOffline) => {
-        this.setLoadingContent();
+        this.setLoadingContent(false);
         this.setState({isOffline});
     };
 
@@ -1086,16 +1095,16 @@ class App extends Component {
     fetchContent = (url) => {
         return new Promise((resolve, reject) => {
             this.setLoadingContent(true);
-            request
-                .get(url)
-                .then((response) => {
-                    this.setOffline();
-                    resolve(response.data);
-                })
-                .catch((err) => {
-                    this.setLoadingContent(false);
-                    reject(err);
-                });
+            setTimeout(() => {
+                request
+                    .get(url)
+                    .then((response) => {
+                        resolve(response.data);
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            }, 500);
         });
     };
 
@@ -1255,7 +1264,6 @@ class App extends Component {
         this.resetVideo();
         this.removeTorrents();
         this.closeServer();
-
         if (movie.magnet) {
             this
                 .checkMagnet(movie)
@@ -1652,6 +1660,7 @@ class App extends Component {
         this
             .getFeatured()
             .then((results) => {
+                this.setOffline();
                 let featured = this.extractMovies(results, false, true);
                 this.setFeatured(featured);
             })
@@ -1924,14 +1933,17 @@ class App extends Component {
             .getSuggested()
             .then((suggested) => {
                 this.setState({
-                    suggested
+                    suggested,
+                    loadingContent: false
                 }, () => {
                     if (this.databaseRef) {
                         this.setBucket();
                     }
                 });
             })
-            .catch((err) => console.log(err));
+            .catch((err) => {
+                this.setLoadingContent(false);
+            });
     };
 
     getClone = (array) => {
@@ -2023,6 +2035,7 @@ class App extends Component {
         Promise
             .all(promiseArray)
             .then((data) => {
+                this.setOffline();
                 if (shows) {
                     this.setShows(data);
                 } else {
@@ -2316,7 +2329,8 @@ class App extends Component {
                 playMovie={this.playMovie}
                 isFavorite={this.isFavorite}
                 addToFavorites={this.addToFavorites}
-                removeFromFavorites={this.removeFromFavorites}/>)
+                removeFromFavorites={this.removeFromFavorites}
+                setTrailer={this.setTrailer}/>)
             : ("");
 
         let playerModal = this.state.playMovie
@@ -2379,112 +2393,115 @@ class App extends Component {
                 closeGenre={this.closeGenre}/>)
             : ("");
 
-        let loadingContainer = this.state.appLoading
-            ? (
-                <div className="loading-container">
-                    <Fade when={this.state.logoIsLoaded} distance="10%" bottom>
-                        <div className="logo"/>
-                    </Fade>
-                </div>
-            )
-            : ("");
-
-        return (
+        let loadingContainer = (
             <div
-                className={`app-container ${process.platform === "win32"
-                ? "windows-compensate"
-                : ""}`}
-                onClick={this.closeMenu}>
-                {process.platform === "darwin"
-                    ? (<div
-                        className={"draggable " + (this.state.playMovie
-                        ? "invisible"
-                        : "")}/>)
-                    : ("")}
-                <CSSTransitionGroup
-                    transitionName="player-anim"
-                    transitionEnterTimeout={250}
-                    transitionLeaveTimeout={250}>
-                    {this.state.account || this.state.create
-                        ? (<AccountContainer
-                            account={this.state.account}
-                            closeAccount={this.closeAccount}
-                            handleAccountSignin={this.handleAccountSignin}
-                            handleAccountCreation={this.handleAccountCreation}
-                            handleInput={this.handleInput}
-                            loginError={this.state.loginError}
-                            openAccount={this.openAccount}
-                            openAccountCreation={this.openAccountCreation}/>)
-                        : ("")}
-                </CSSTransitionGroup>
-                <CSSTransitionGroup
-                    transitionName="loading-anim"
-                    transitionEnterTimeout={0}
-                    transitionLeaveTimeout={250}>
-                    {loadingContainer}
-                </CSSTransitionGroup>
-                <CSSTransitionGroup
-                    transitionName="genreContainer-anim"
-                    transitionEnterTimeout={250}
-                    transitionLeaveTimeout={250}>
-                    {fullGenreContainer}
-                </CSSTransitionGroup>
-                <CSSTransitionGroup
-                    transitionName="player-anim"
-                    transitionEnterTimeout={250}
-                    transitionLeaveTimeout={250}>
-                    {playerModal}
-                </CSSTransitionGroup>
-                <CSSTransitionGroup
-                    transitionName="movie-box-anim"
-                    transitionEnterTimeout={250}
-                    transitionLeaveTimeout={250}>
-                    {movieModal}
-                </CSSTransitionGroup>
-                <CSSTransitionGroup
-                    transitionName="box-anim"
-                    transitionEnterTimeout={250}
-                    transitionLeaveTimeout={250}>
-                    {movieBackDrop}
-                </CSSTransitionGroup>
-                <Header
-                    quality={this.state.quality}
-                    setQuality={this.setQuality}
-                    subtitle={this.state.active}
-                    menuActive={this.state.menuActive}
-                    toggleMenu={this.toggleMenu}
-                    background={this.state.headerBg}
-                    closeSearch={this.closeSearch}
-                    searchContent={this.state.searchContent}
-                    searchMovies={this.searchMovies}
-                    inputValue={this.state.inputValue}
-                    setInputValue={this.setInputValue}
-                    user={this.state.user}/>
-                <CSSTransitionGroup
-                    transitionName="menu-anim"
-                    transitionEnterTimeout={250}
-                    transitionLeaveTimeout={250}>
-                    {menu}
-                </CSSTransitionGroup>
-                <Content
-                    active={this.state.active}
-                    offline={this.state.isOffline}
-                    searchContent={this.state.searchContent}
-                    loadingContent={this.state.loadingContent}
-                    setHeader={this.setHeaderBackground}
-                    loadCategories={this.loadCategories}
-                    loadFeatured={this.loadFeatured}
-                    updateSuggested={this.updateSuggested}
-                    movies={this.state.movies}
-                    shows={this.state.shows}
-                    suggested={this.state.suggested}
-                    favorites={this.state.favorites}
-                    recentlyPlayed={this.state.recentlyPlayed}
-                    featured={this.state.featured}
-                    toggleGenre={this.toggleGenre}
-                    openBox={this.openBox}/>
+                className={`loading-container ${this.state.appLoading
+                ? ''
+                : 'pointer-events'}`}>
+                <Fade when={this.state.logoIsLoaded} distance="10%" bottom>
+                    <div className="logo"/>
+                </Fade>
             </div>
         );
+
+        return (
+            <div className="app-wrapper">
+                <Fade distance="5%" bottom opposite when={this.state.appLoading}>
+                    {loadingContainer}
+                </Fade>
+                {this.state.appLoading
+                    ? ''
+                    : <div
+                        className={`app-container ${process.platform === "win32"
+                        ? "windows-compensate"
+                        : ""}`}
+                        onClick={this.closeMenu}>
+                        {process.platform === "darwin"
+                            ? (<div
+                                className={"draggable " + (this.state.playMovie
+                                ? "invisible"
+                                : "")}/>)
+                            : ("")}
+                        <CSSTransitionGroup
+                            transitionName="player-anim"
+                            transitionEnterTimeout={250}
+                            transitionLeaveTimeout={250}>
+                            {this.state.account || this.state.create
+                                ? (<AccountContainer
+                                    account={this.state.account}
+                                    closeAccount={this.closeAccount}
+                                    handleAccountSignin={this.handleAccountSignin}
+                                    handleAccountCreation={this.handleAccountCreation}
+                                    handleInput={this.handleInput}
+                                    loginError={this.state.loginError}
+                                    openAccount={this.openAccount}
+                                    openAccountCreation={this.openAccountCreation}/>)
+                                : ("")}
+                        </CSSTransitionGroup>
+                        <Trailer url={this.state.trailer} setTrailer={this.setTrailer}/>
+                        <CSSTransitionGroup
+                            transitionName="genreContainer-anim"
+                            transitionEnterTimeout={250}
+                            transitionLeaveTimeout={250}>
+                            {fullGenreContainer}
+                        </CSSTransitionGroup>
+                        <CSSTransitionGroup
+                            transitionName="player-anim"
+                            transitionEnterTimeout={250}
+                            transitionLeaveTimeout={250}>
+                            {playerModal}
+                        </CSSTransitionGroup>
+                        <CSSTransitionGroup
+                            transitionName="movie-box-anim"
+                            transitionEnterTimeout={250}
+                            transitionLeaveTimeout={250}>
+                            {movieModal}
+                        </CSSTransitionGroup>
+                        <CSSTransitionGroup
+                            transitionName="box-anim"
+                            transitionEnterTimeout={250}
+                            transitionLeaveTimeout={250}>
+                            {movieBackDrop}
+                        </CSSTransitionGroup>
+                        <Header
+                            quality={this.state.quality}
+                            setQuality={this.setQuality}
+                            subtitle={this.state.active}
+                            menuActive={this.state.menuActive}
+                            toggleMenu={this.toggleMenu}
+                            background={this.state.headerBg}
+                            closeSearch={this.closeSearch}
+                            searchContent={this.state.searchContent}
+                            searchMovies={this.searchMovies}
+                            inputValue={this.state.inputValue}
+                            setInputValue={this.setInputValue}
+                            user={this.state.user}/>
+                        <CSSTransitionGroup
+                            transitionName="menu-anim"
+                            transitionEnterTimeout={250}
+                            transitionLeaveTimeout={250}>
+                            {menu}
+                        </CSSTransitionGroup>
+                        <Content
+                            active={this.state.active}
+                            offline={this.state.isOffline}
+                            searchContent={this.state.searchContent}
+                            loadingContent={this.state.loadingContent}
+                            setHeader={this.setHeaderBackground}
+                            loadCategories={this.loadCategories}
+                            loadFeatured={this.loadFeatured}
+                            updateSuggested={this.updateSuggested}
+                            movies={this.state.movies}
+                            shows={this.state.shows}
+                            suggested={this.state.suggested}
+                            favorites={this.state.favorites}
+                            recentlyPlayed={this.state.recentlyPlayed}
+                            featured={this.state.featured}
+                            toggleGenre={this.toggleGenre}
+                            openBox={this.openBox}/>
+                    </div>}
+            </div>
+        )
     }
 }
 

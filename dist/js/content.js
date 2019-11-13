@@ -96,7 +96,7 @@ var Content = function (_Component) {
     _createClass(Content, [{
         key: "shouldComponentUpdate",
         value: function shouldComponentUpdate(nextProps, nextState) {
-            if (nextProps.active !== this.props.active || nextProps.offline !== this.props.offline || nextProps.searchContent !== this.props.searchContent) {
+            if (nextProps.active !== this.props.active || nextProps.offline !== this.props.offline || nextProps.searchContent !== this.props.searchContent || nextProps.loadingContent !== this.props.loadingContent) {
                 return true;
             } else {
                 if (this.props.active === "Featured" && nextProps.featured !== this.props.featured) {
@@ -125,7 +125,7 @@ var Content = function (_Component) {
                     className: "content-container",
                     style: {
                         display: this.props.active == "Featured" ? "flex" : "block",
-                        backgroundImage: this.props.loadingContent ? "url(./assets/imgs/loading.apng)" : ""
+                        backgroundImage: this.props.loadingContent ? "url(./assets/imgs/loading.svg)" : ""
                     } },
                 this.props.loadingContent ? "" : this.props.offline ? offlineContainer : this.props.searchContent ? searchContainer : activeContainer
             );

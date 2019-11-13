@@ -64,6 +64,29 @@ var MovieModal = function (_Component) {
             _this.setState({ seasons: seasons });
         };
 
+        _this.setTrailer = function (trailer) {
+            _this.setState({ trailer: trailer });
+        };
+
+        _this.getTrailer = function () {
+            var movieTrailer = require('movie-trailer'),
+                name = _this.props.movie.title,
+                releaseDate = _this.props.movie.release_date.substring(0, 4);
+
+            movieTrailer(name, releaseDate).then(function (url) {
+                _this.setTrailer(url);
+            }).catch(function (err) {
+                _this.setTrailer();
+            });
+        };
+
+        _this.handleViewTrailer = function () {
+            var trailer = _this.state.trailer;
+
+
+            _this.props.setTrailer(trailer);
+        };
+
         _this.handlePlayMovie = function () {
             _this.props.playMovie(_this.props.movie);
         };
@@ -142,6 +165,7 @@ var MovieModal = function (_Component) {
         };
 
         _this.state = {
+            trailer: false,
             seasons: [],
             showSeasons: false,
             loading: false
@@ -152,7 +176,7 @@ var MovieModal = function (_Component) {
     _createClass(MovieModal, [{
         key: "shouldComponentUpdate",
         value: function shouldComponentUpdate(nextProps, nextState) {
-            if (this.props.movie === nextProps.movie && this.props.favorites === nextProps.favorites && nextState.seasons === this.state.seasons && nextState.showSeasons === this.state.showSeasons && nextState.loading === this.state.loading) {
+            if (this.props.movie === nextProps.movie && this.props.favorites === nextProps.favorites && nextState.seasons === this.state.seasons && nextState.showSeasons === this.state.showSeasons && nextState.loading === this.state.loading && this.state.trailer === nextState.trailer) {
                 return false;
             } else {
                 return true;
@@ -161,6 +185,7 @@ var MovieModal = function (_Component) {
     }, {
         key: "componentDidMount",
         value: function componentDidMount() {
+            this.getTrailer();
             this.getSeasons();
         }
     }, {
@@ -263,7 +288,17 @@ var MovieModal = function (_Component) {
                             ),
                             _react2.default.createElement("i", {
                                 className: "mdi " + isLightClass + " " + (this.props.isFavorite(movie) ? "mdi-heart" : "mdi-heart-outline"),
-                                onClick: this.handleFavorites })
+                                onClick: this.handleFavorites }),
+                            " ",
+                            this.state.trailer ? _react2.default.createElement(
+                                _Fade2.default,
+                                { mountOnEnter: true, unmountOnExit: true, distance: "5%", bottom: true },
+                                _react2.default.createElement(
+                                    "div",
+                                    { className: "movie-modal-view-trailer", onClick: this.handleViewTrailer },
+                                    "View Trailer"
+                                )
+                            ) : ''
                         ),
                         _react2.default.createElement(
                             "div",
@@ -291,11 +326,15 @@ var MovieModal = function (_Component) {
                         )
                     )
                 ),
-                _react2.default.createElement("div", {
-                    className: "movie-modal-image",
-                    style: {
-                        backgroundImage: "url(" + movie.flixerr_data.blurry_backdrop_path + ")"
-                    } }),
+                _react2.default.createElement(
+                    "div",
+                    { className: "movie-modal-image-container" },
+                    _react2.default.createElement("div", {
+                        className: "movie-modal-image",
+                        style: {
+                            backgroundImage: "url(" + movie.flixerr_data.blurry_backdrop_path + ")"
+                        } })
+                ),
                 _react2.default.createElement("div", {
                     className: "movie-gradient",
                     style: {

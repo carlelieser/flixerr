@@ -60,6 +60,10 @@ var _content = require("./content");
 
 var _content2 = _interopRequireDefault(_content);
 
+var _trailer = require("./trailer");
+
+var _trailer2 = _interopRequireDefault(_trailer);
+
 var _torrentSearch = require("./torrent-search");
 
 var _torrentSearch2 = _interopRequireDefault(_torrentSearch);
@@ -91,6 +95,10 @@ var App = function (_Component) {
         _classCallCheck(this, App);
 
         var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
+
+        _this.setTrailer = function (trailer) {
+            _this.setState({ trailer: trailer });
+        };
 
         _this.setSubtitleOptions = function (subtitleOptions) {
             _this.setState({ subtitleOptions: subtitleOptions });
@@ -375,7 +383,9 @@ var App = function (_Component) {
             if (_this.databaseRef) {
                 _this.databaseRef.once("value", function (snapshot) {
                     if (snapshot) {
-                        _this.setBucketData(snapshot).catch(function (err) {
+                        _this.setBucketData(snapshot).then(function () {
+                            _this.setLoadingContent();
+                        }).catch(function (err) {
                             _this.resetData();
                         });
                     }
@@ -444,7 +454,7 @@ var App = function (_Component) {
                             }, function (error) {
                                 setTimeout(function () {
                                     _this.setState({ appLoading: false });
-                                }, 2500);
+                                }, 1000);
                                 resolve();
                             });
                         }
@@ -954,7 +964,7 @@ var App = function (_Component) {
         };
 
         _this.setOffline = function (isOffline) {
-            _this.setLoadingContent();
+            _this.setLoadingContent(false);
             _this.setState({ isOffline: isOffline });
         };
 
@@ -965,13 +975,13 @@ var App = function (_Component) {
         _this.fetchContent = function (url) {
             return new Promise(function (resolve, reject) {
                 _this.setLoadingContent(true);
-                _axios2.default.get(url).then(function (response) {
-                    _this.setOffline();
-                    resolve(response.data);
-                }).catch(function (err) {
-                    _this.setLoadingContent(false);
-                    reject(err);
-                });
+                setTimeout(function () {
+                    _axios2.default.get(url).then(function (response) {
+                        resolve(response.data);
+                    }).catch(function (err) {
+                        reject(err);
+                    });
+                }, 500);
             });
         };
 
@@ -1020,7 +1030,7 @@ var App = function (_Component) {
                         _this.searchEmpty(query);
                     }
                 }).catch(function (err) {
-                    console.log(err);
+                    return _this.setOffline(true);
                 });
             }
         };
@@ -1118,7 +1128,6 @@ var App = function (_Component) {
             _this.resetVideo();
             _this.removeTorrents();
             _this.closeServer();
-
             if (movie.magnet) {
                 _this.checkMagnet(movie).then(function (cleanMovie) {
                     _this.streamTorrent(cleanMovie);
@@ -1457,6 +1466,7 @@ var App = function (_Component) {
 
         _this.loadFeatured = function () {
             _this.getFeatured().then(function (results) {
+                _this.setOffline();
                 var featured = _this.extractMovies(results, false, true);
                 _this.setFeatured(featured);
             }).catch(function (err) {
@@ -1675,14 +1685,15 @@ var App = function (_Component) {
         _this.updateSuggested = function () {
             _this.getSuggested().then(function (suggested) {
                 _this.setState({
-                    suggested: suggested
+                    suggested: suggested,
+                    loadingContent: false
                 }, function () {
                     if (_this.databaseRef) {
                         _this.setBucket();
                     }
                 });
             }).catch(function (err) {
-                return console.log(err);
+                _this.setLoadingContent(false);
             });
         };
 
@@ -1769,6 +1780,7 @@ var App = function (_Component) {
             }
 
             Promise.all(promiseArray).then(function (data) {
+                _this.setOffline();
                 if (shows) {
                     _this.setShows(data);
                 } else {
@@ -2007,6 +2019,7 @@ var App = function (_Component) {
         _this.state = {
             apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
             willClose: false,
+            trailer: false,
             readyToClose: false,
             loginError: false,
             showIntro: false,
@@ -2107,7 +2120,8 @@ var App = function (_Component) {
                 playMovie: this.playMovie,
                 isFavorite: this.isFavorite,
                 addToFavorites: this.addToFavorites,
-                removeFromFavorites: this.removeFromFavorites }) : "";
+                removeFromFavorites: this.removeFromFavorites,
+                setTrailer: this.setTrailer }) : "";
 
             var playerModal = this.state.playMovie ? _react2.default.createElement(_player2.default, {
                 subtitleOptions: this.state.subtitleOptions,
@@ -2165,117 +2179,120 @@ var App = function (_Component) {
                 setOffline: this.setOffline,
                 closeGenre: this.closeGenre }) : "";
 
-            var loadingContainer = this.state.appLoading ? _react2.default.createElement(
+            var loadingContainer = _react2.default.createElement(
                 "div",
-                { className: "loading-container" },
+                {
+                    className: "loading-container " + (this.state.appLoading ? '' : 'pointer-events') },
                 _react2.default.createElement(
                     _Fade2.default,
                     { when: this.state.logoIsLoaded, distance: "10%", bottom: true },
                     _react2.default.createElement("div", { className: "logo" })
                 )
-            ) : "";
+            );
 
             return _react2.default.createElement(
                 "div",
-                {
-                    className: "app-container " + (process.platform === "win32" ? "windows-compensate" : ""),
-                    onClick: this.closeMenu },
-                process.platform === "darwin" ? _react2.default.createElement("div", {
-                    className: "draggable " + (this.state.playMovie ? "invisible" : "") }) : "",
+                { className: "app-wrapper" },
                 _react2.default.createElement(
-                    _reactTransitionGroup.CSSTransitionGroup,
-                    {
-                        transitionName: "player-anim",
-                        transitionEnterTimeout: 250,
-                        transitionLeaveTimeout: 250 },
-                    this.state.account || this.state.create ? _react2.default.createElement(_accountContainer2.default, {
-                        account: this.state.account,
-                        closeAccount: this.closeAccount,
-                        handleAccountSignin: this.handleAccountSignin,
-                        handleAccountCreation: this.handleAccountCreation,
-                        handleInput: this.handleInput,
-                        loginError: this.state.loginError,
-                        openAccount: this.openAccount,
-                        openAccountCreation: this.openAccountCreation }) : ""
-                ),
-                _react2.default.createElement(
-                    _reactTransitionGroup.CSSTransitionGroup,
-                    {
-                        transitionName: "loading-anim",
-                        transitionEnterTimeout: 0,
-                        transitionLeaveTimeout: 250 },
+                    _Fade2.default,
+                    { distance: "5%", bottom: true, opposite: true, when: this.state.appLoading },
                     loadingContainer
                 ),
-                _react2.default.createElement(
-                    _reactTransitionGroup.CSSTransitionGroup,
+                this.state.appLoading ? '' : _react2.default.createElement(
+                    "div",
                     {
-                        transitionName: "genreContainer-anim",
-                        transitionEnterTimeout: 250,
-                        transitionLeaveTimeout: 250 },
-                    fullGenreContainer
-                ),
-                _react2.default.createElement(
-                    _reactTransitionGroup.CSSTransitionGroup,
-                    {
-                        transitionName: "player-anim",
-                        transitionEnterTimeout: 250,
-                        transitionLeaveTimeout: 250 },
-                    playerModal
-                ),
-                _react2.default.createElement(
-                    _reactTransitionGroup.CSSTransitionGroup,
-                    {
-                        transitionName: "movie-box-anim",
-                        transitionEnterTimeout: 250,
-                        transitionLeaveTimeout: 250 },
-                    movieModal
-                ),
-                _react2.default.createElement(
-                    _reactTransitionGroup.CSSTransitionGroup,
-                    {
-                        transitionName: "box-anim",
-                        transitionEnterTimeout: 250,
-                        transitionLeaveTimeout: 250 },
-                    movieBackDrop
-                ),
-                _react2.default.createElement(_header2.default, {
-                    quality: this.state.quality,
-                    setQuality: this.setQuality,
-                    subtitle: this.state.active,
-                    menuActive: this.state.menuActive,
-                    toggleMenu: this.toggleMenu,
-                    background: this.state.headerBg,
-                    closeSearch: this.closeSearch,
-                    searchContent: this.state.searchContent,
-                    searchMovies: this.searchMovies,
-                    inputValue: this.state.inputValue,
-                    setInputValue: this.setInputValue,
-                    user: this.state.user }),
-                _react2.default.createElement(
-                    _reactTransitionGroup.CSSTransitionGroup,
-                    {
-                        transitionName: "menu-anim",
-                        transitionEnterTimeout: 250,
-                        transitionLeaveTimeout: 250 },
-                    menu
-                ),
-                _react2.default.createElement(_content2.default, {
-                    active: this.state.active,
-                    offline: this.state.isOffline,
-                    searchContent: this.state.searchContent,
-                    loadingContent: this.state.loadingContent,
-                    setHeader: this.setHeaderBackground,
-                    loadCategories: this.loadCategories,
-                    loadFeatured: this.loadFeatured,
-                    updateSuggested: this.updateSuggested,
-                    movies: this.state.movies,
-                    shows: this.state.shows,
-                    suggested: this.state.suggested,
-                    favorites: this.state.favorites,
-                    recentlyPlayed: this.state.recentlyPlayed,
-                    featured: this.state.featured,
-                    toggleGenre: this.toggleGenre,
-                    openBox: this.openBox })
+                        className: "app-container " + (process.platform === "win32" ? "windows-compensate" : ""),
+                        onClick: this.closeMenu },
+                    process.platform === "darwin" ? _react2.default.createElement("div", {
+                        className: "draggable " + (this.state.playMovie ? "invisible" : "") }) : "",
+                    _react2.default.createElement(
+                        _reactTransitionGroup.CSSTransitionGroup,
+                        {
+                            transitionName: "player-anim",
+                            transitionEnterTimeout: 250,
+                            transitionLeaveTimeout: 250 },
+                        this.state.account || this.state.create ? _react2.default.createElement(_accountContainer2.default, {
+                            account: this.state.account,
+                            closeAccount: this.closeAccount,
+                            handleAccountSignin: this.handleAccountSignin,
+                            handleAccountCreation: this.handleAccountCreation,
+                            handleInput: this.handleInput,
+                            loginError: this.state.loginError,
+                            openAccount: this.openAccount,
+                            openAccountCreation: this.openAccountCreation }) : ""
+                    ),
+                    _react2.default.createElement(_trailer2.default, { url: this.state.trailer, setTrailer: this.setTrailer }),
+                    _react2.default.createElement(
+                        _reactTransitionGroup.CSSTransitionGroup,
+                        {
+                            transitionName: "genreContainer-anim",
+                            transitionEnterTimeout: 250,
+                            transitionLeaveTimeout: 250 },
+                        fullGenreContainer
+                    ),
+                    _react2.default.createElement(
+                        _reactTransitionGroup.CSSTransitionGroup,
+                        {
+                            transitionName: "player-anim",
+                            transitionEnterTimeout: 250,
+                            transitionLeaveTimeout: 250 },
+                        playerModal
+                    ),
+                    _react2.default.createElement(
+                        _reactTransitionGroup.CSSTransitionGroup,
+                        {
+                            transitionName: "movie-box-anim",
+                            transitionEnterTimeout: 250,
+                            transitionLeaveTimeout: 250 },
+                        movieModal
+                    ),
+                    _react2.default.createElement(
+                        _reactTransitionGroup.CSSTransitionGroup,
+                        {
+                            transitionName: "box-anim",
+                            transitionEnterTimeout: 250,
+                            transitionLeaveTimeout: 250 },
+                        movieBackDrop
+                    ),
+                    _react2.default.createElement(_header2.default, {
+                        quality: this.state.quality,
+                        setQuality: this.setQuality,
+                        subtitle: this.state.active,
+                        menuActive: this.state.menuActive,
+                        toggleMenu: this.toggleMenu,
+                        background: this.state.headerBg,
+                        closeSearch: this.closeSearch,
+                        searchContent: this.state.searchContent,
+                        searchMovies: this.searchMovies,
+                        inputValue: this.state.inputValue,
+                        setInputValue: this.setInputValue,
+                        user: this.state.user }),
+                    _react2.default.createElement(
+                        _reactTransitionGroup.CSSTransitionGroup,
+                        {
+                            transitionName: "menu-anim",
+                            transitionEnterTimeout: 250,
+                            transitionLeaveTimeout: 250 },
+                        menu
+                    ),
+                    _react2.default.createElement(_content2.default, {
+                        active: this.state.active,
+                        offline: this.state.isOffline,
+                        searchContent: this.state.searchContent,
+                        loadingContent: this.state.loadingContent,
+                        setHeader: this.setHeaderBackground,
+                        loadCategories: this.loadCategories,
+                        loadFeatured: this.loadFeatured,
+                        updateSuggested: this.updateSuggested,
+                        movies: this.state.movies,
+                        shows: this.state.shows,
+                        suggested: this.state.suggested,
+                        favorites: this.state.favorites,
+                        recentlyPlayed: this.state.recentlyPlayed,
+                        featured: this.state.featured,
+                        toggleGenre: this.toggleGenre,
+                        openBox: this.openBox })
+                )
             );
         }
     }]);

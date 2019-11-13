@@ -47,14 +47,56 @@ html {
     border-bottom-color: transparent;
 }
 
+.app-wrapper > .loading-container {
+    z-index: 999999999;
+}
+
 .app-container {
+    z-index: 999;
+}
+
+.pointer-events {
+    pointer-events: none;
+}
+
+.trailer-container {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    background-color: rgba(0,0,0,0.61);
+    position: fixed;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.trailer-container > .iframe-container {
+    width: 80%;
+    height: 80%;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 20px 20px -10px rgba(0,0,0,0.1);
+    background-color: #000;
+    margin-top: 20px;
+}
+
+.trailer-container > .iframe-container > iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.app-container,
+.app-wrapper {
     width: 100%;
     height: 100%;
     top: 0;
     left: 0;
     position: absolute;
     overflow-x: hidden;
-    animation: fadeIn 0.5s cubic-bezier(0.215, 0.610, 0.355, 1.000);
 }
 
 .app-container::-webkit-scrollbar {
@@ -273,13 +315,11 @@ html {
     z-index: 99;
     will-change: transform;
 }
-
-.app-menu>div:first-child{
+.app-menu > div:first-child {
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
 }
-
-.app-menu>div:last-child{
+.app-menu > div:last-child {
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
 }
@@ -375,20 +415,20 @@ html {
     position: relative;
     font-family: 'Avenir', sans-serif;
     z-index: 100;
+    margin-top: 20px;
 }
 
 .account-form > .account-title {
     font-size: 28px;
-    margin-top: 30px;
-    margin-bottom: 5px;
+    margin-top: 20px;
     text-transform: capitalize;
     color: rgba(0, 0, 0, 0.81);
 }
 
 .account-form > .account-desc {
     font-size: 14px;
-    margin-bottom: 10px;
-    color: rgba(0, 0, 0, 0.61);
+    margin-top:10px;
+    color: rgba(0, 0, 0, 0.51);
     max-width: 280px;
     text-align: center;
 }
@@ -399,6 +439,7 @@ html {
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: 999px;
     margin-top: 30px;
+    margin-bottom: 30px;
 }
 
 .account-form > input {
@@ -453,7 +494,6 @@ html {
     justify-content: center;
     font-family: sans-serif;
     font-size: 14px;
-    letter-spacing: 1.2px;
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
     box-shadow: 0 10px 20px -4px rgba(51, 92, 226, 0.41);
 }
@@ -463,23 +503,19 @@ html {
 }
 
 .account-form > .account-secondary {
-    width: 100%;
-    background-color: transparent;
-    box-shadow: none;
+    background-color: rgba(0,0,0,0.1);
     color: rgba(0,0,0,0.61);
-    letter-spacing: normal;
+    box-shadow: 0 10px 20px -4px rgba(0,0,0,0.1);
+    margin-top:0;
 }
 .account-form > .account-secondary:hover {
-    color: rgba(0,0,0,0.81);
+    background-color: rgba(0,0,0,0.2);
 }
 
 .account-close {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin-top: 25px;
-    margin-right: 40px;
-    z-index: 100;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    opacity: 0.61;
 }
 
 .empty-state-container {
@@ -630,7 +666,6 @@ html {
     border-radius: 4px;
     box-shadow: 0 6px 40px 0 rgba(0, 0, 0, 0.31);
     z-index: 800;
-    overflow: hidden;
     cursor: default;
     will-change: transform;
     display: flex;
@@ -639,16 +674,28 @@ html {
     flex-direction: column;
 }
 
-.movie-modal > .movie-modal-image {
-    width: 120%;
+.movie-modal > .movie-modal-image-container {
+    width: 100%;
     height: 265px;
     top: 0;
-    margin-top: -8px;
+    position: absolute;
+    z-index: 0;
+    overflow: hidden;
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+}
+
+.movie-modal > .movie-modal-image-container > .movie-modal-image {
+    width: 120%;
+    height: 100%;
     filter: blur(10px);
     background-size: cover;
     background-repeat: no-repeat;
     position: absolute;
-    z-index: 0;
+    margin-top: -8px;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .movie-modal > .movie-gradient {
@@ -664,7 +711,7 @@ html {
     width: 100%;
     height: 100%;
     background-size: 40px;
-    background-image: url("../imgs/loading-seasons.apng");
+    background-image: url("../imgs/loading.svg");
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -692,6 +739,16 @@ html {
 }
 .light-modal > .seasons-container > .season > .episode > .episode-info > .episode-desc {
     color: rgba(0,0,0,0.71);
+}
+
+.light-modal > .movie-modal-info > .movie-metadata > .movie-modal-view-trailer {
+    color: rgba(0,0,0,0.71);
+    background-color: rgba(0, 0, 0, 0.21);
+}
+
+.dark-modal > .movie-modal-info > .movie-metadata > .movie-modal-view-trailer {
+    color: rgba(255, 255, 255, 0.91);
+    background-color: rgba(255, 255, 255, 0.21);
 }
 
 .dark-modal > .seasons-container > .season > .episode > .episode-info > .episode-title {
@@ -868,6 +925,7 @@ html {
 }
 
 .movie-modal > .movie-modal-info > .movie-modal-poster-info > .movie-modal-poster {
+    min-width: 150px;
     width: 150px;
     height: 227px;
     min-height: 227px;
@@ -877,6 +935,19 @@ html {
     background-color: #000;
     background-position: center;
     box-shadow: 0 18px 20px -13px rgba(0, 0, 0, 0.61);
+}
+
+.movie-modal > .movie-modal-info > .movie-metadata > .movie-modal-view-trailer {
+    width: 100px;
+    height: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    line-height: 20px;
+    border-radius: 9999px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
 }
 
 .open-series {
@@ -931,6 +1002,8 @@ html {
 
 .movie-modal > .movie-modal-info > .movie-metadata {
     margin-top: 20px;
+    display: flex;
+    align-items: center;
 }
 
 .movie-modal > .movie-modal-info > .movie-metadata > *,
@@ -1028,6 +1101,7 @@ html {
     transform: translate(-15%, -1%);
     transition: 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
     border-radius: 999px;
+    pointer-events: none;
 }
 .movie-modal > .movie-modal-info > .movie-modal-play:hover:before,
 .open-series:hover:before {
@@ -1100,7 +1174,7 @@ html {
     height: 20px;
     background-size: 20px;
     background-repeat: no-repeat;
-    background-image: url('../imgs/loading-subtitles.apng');
+    background-image: url('../imgs/loading.svg');
     background-position: center;
 }
 
@@ -1399,7 +1473,7 @@ video::-webkit-media-text-track-display {
     position: absolute;
     z-index: 800;
     background-color: rgba(0, 0, 0, 0.6);
-    background-image: url('../imgs/loading.apng');
+    background-image: url('../imgs/loading.svg');
     background-repeat: no-repeat;
     background-position: center;
     background-size: 60px;
@@ -1659,7 +1733,7 @@ input[type=range]::-webkit-slider-thumb:hover {
     height: 240px;
     background-size: cover;
     background-repeat: no-repeat;
-    background-image: url('../imgs/icon.png');
+    background-image: url('../imgs/icon.svg');
     will-change: transform;
 }
 

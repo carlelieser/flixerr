@@ -165,7 +165,7 @@ class Genre extends Component {
                     backgroundImage: this.state.processing && this.state.movies.length
                         ? ""
                         : this.state.processing && !this.state.movies.length
-                            ? "url(./assets/imgs/loading.apng)"
+                            ? "url(./assets/imgs/loading.svg)"
                             : !this.state.processing && !this.state.movies.length
                                 ? ""
                                 : ""

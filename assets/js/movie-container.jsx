@@ -38,12 +38,6 @@ class MovieContainer extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (this.props.movies) {
-            if (!this.props.movies.length) {
-                this.getMovies();
-            }
-        }
-
         if (prevProps.movies !== this.props.movies) {
             this.setHeader();
         }

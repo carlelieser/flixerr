@@ -46,7 +46,7 @@ class Content extends Component {
     };
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.active !== this.props.active || nextProps.offline !== this.props.offline || nextProps.searchContent !== this.props.searchContent) {
+        if (nextProps.active !== this.props.active || nextProps.offline !== this.props.offline || nextProps.searchContent !== this.props.searchContent || nextProps.loadingContent !== this.props.loadingContent) {
             return true;
         } else {
             if (this.props.active === "Featured" && (nextProps.featured !== this.props.featured)) {
@@ -76,7 +76,7 @@ class Content extends Component {
                     ? "flex"
                     : "block",
                 backgroundImage: this.props.loadingContent
-                    ? "url(./assets/imgs/loading.apng)"
+                    ? "url(./assets/imgs/loading.svg)"
                     : ""
             }}>
                 {this.props.loadingContent

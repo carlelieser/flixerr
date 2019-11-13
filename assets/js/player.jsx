@@ -370,7 +370,7 @@ class Player extends Component {
                 backgroundImage: `${this.props.loading
                     ? this.props.error
                         ? "none"
-                        : "url(assets/imgs/loading.apng)" : "none"}`
+                        : "url(assets/imgs/loading.svg)" : "none"}`
             }}
                 onMouseMove={this.mouseMove}>
                 {this.state.videoBuffering
