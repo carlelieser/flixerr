@@ -8,6 +8,8 @@ yarn-error.log*
 # Compiled js folder
 dist/
 
+notarize.js
+
 # Runtime data
 pids
 *.pid

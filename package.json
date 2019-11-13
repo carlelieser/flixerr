@@ -44,7 +44,7 @@
       ],
       "category": "video"
     },
-    "afterSign": "./build/notarize.js"
+    "afterSign": "./notarize.js"
   },
   "scripts": {
     "start": "electron .",
