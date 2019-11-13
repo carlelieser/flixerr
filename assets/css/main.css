@@ -8,6 +8,7 @@ html {
 
 * {
     user-select: none;
+    -webkit-font-smoothing: antialiased;
 }
 
 .movie-player > .bottom-bar-container > .bottom-bar > span,
@@ -75,12 +76,13 @@ html {
 
 .trailer-container > .iframe-container {
     width: 80%;
+    max-width: 800px;
     height: 80%;
+    max-height: 500px;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 20px 20px -10px rgba(0,0,0,0.1);
     background-color: #000;
-    margin-top: 20px;
 }
 
 .trailer-container > .iframe-container > iframe {
@@ -782,10 +784,6 @@ html {
 .movie-modal > .seasons-container > .close-seasons:hover {
     box-shadow: 0 10px 20px -6px rgba(0,0,0,0.51);
     transform: rotate(180deg);
-}
-
-.movie-modal > .seasons-container > .close-seasons > i {
-    margin-top: 5px;
 }
 
 .close-dark {

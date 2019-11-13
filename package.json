@@ -1,93 +1,97 @@
 {
-    "name": "flixerr",
-    "version": "1.5.2",
-    "description": "A movie torrent streaming service.",
-    "main": "main.js",
-    "build": {
-        "appId": "com.flixerr.app",
-        "productName": "Flixerr",
-        "directories": {
-            "output": "./build"
-        },
-        "mac": {
-            "target": [
-                "dmg"
-            ],
-            "hardenedRuntime": true,
-            "entitlements": "./build/entitlements.mac.plist",
-            "entitlementsInherit": "./build/entitlements.mac.plist",
-            "category": "public.app-category.entertainment",
-            "icon": "./assets/imgs/icon.icns"
-        },
-        "dmg": {
-            "artifactName": "${name}.installer.${ext}"
-        },
-        "win": {
-            "target": [
-                "nsis"
-            ],
-            "icon": "./assets/imgs/icon.ico"
-        },
-        "nsis": {
-            "deleteAppDataOnUninstall": true,
-            "createDesktopShortcut": true,
-            "createStartMenuShortcut": true,
-            "shortcutName": "Flixerr",
-            "artifactName": "flixerr.setup.${version}.${ext}"
-        },
-        "linux": {
-            "target": [
-                "deb"
-            ],
-            "category": "video"
-        },
-        "afterSign": "./build/notarize.js"
+  "name": "flixerr",
+  "version": "1.5.2",
+  "description": "A movie torrent streaming service.",
+  "main": "main.js",
+  "build": {
+    "appId": "com.flixerr.app",
+    "productName": "Flixerr",
+    "directories": {
+      "output": "./build"
     },
-    "scripts": {
-        "start": "electron .",
-        "build": "babel ./assets/js --out-dir dist/js",
-        "pack": "electron-builder --dir -mwl",
-        "dist": "electron-builder -mwl"
+    "publish": {
+      "provider": "github"
     },
-    "author": "Flixerr <ceo@flixerr.co>",
-    "devDependencies": {
-        "babel-cli": "^6.26.0",
-        "babel-core": "^6.26.3",
-        "babel-preset-env": "^1.7.0",
-        "babel-preset-react": "^6.24.1",
-        "babel-preset-stage-0": "^6.24.1",
-        "electron": "^5.0.2",
-        "electron-builder": "^21.0.15",
-        "electron-notarize": "^0.1.1"
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "hardenedRuntime": true,
+      "entitlements": "./build/entitlements.mac.plist",
+      "entitlementsInherit": "./build/entitlements.mac.plist",
+      "category": "public.app-category.entertainment",
+      "icon": "./assets/imgs/icon.icns"
     },
-    "dependencies": {
-        "axios": "^0.19.0",
-        "babel-register": "^6.26.0",
-        "cheerio": "^1.0.0-rc.3",
-        "decompress": "^4.2.0",
-        "download": "^7.1.0",
-        "electron-json-storage": "^4.1.6",
-        "electron-squirrel-startup": "^1.0.0",
-        "electron-titlebar": "0.0.3",
-        "electron-window-state": "^5.0.3",
-        "fast-average-color": "^5.1.0",
-        "firebase": "^6.0.2",
-        "franc-min": "^4.1.0",
-        "fs-extra": "^8.1.0",
-        "get-json": "^1.0.1",
-        "https-proxy-agent": "^2.2.1",
-        "langs": "^2.0.0",
-        "movie-trailer": "^2.0.5",
-        "parse-torrent-name": "^0.5.4",
-        "pluralize": "^8.0.0",
-        "react": "^16.8.6",
-        "react-dom": "^16.8.6",
-        "react-lazy-load": "^3.0.13",
-        "react-reveal": "^1.2.2",
-        "react-transition-group": "^1.2.1",
-        "torrent-search-api": "^2.0.8",
-        "uniqid": "^4.1.1",
-        "webtorrent": "^0.103.1",
-        "webtorrent-health": "^1.1.2"
-    }
+    "dmg": {
+      "artifactName": "${name}.installer.${ext}"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "./assets/imgs/icon.ico"
+    },
+    "nsis": {
+      "deleteAppDataOnUninstall": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Flixerr",
+      "artifactName": "flixerr.setup.${version}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "deb"
+      ],
+      "category": "video"
+    },
+    "afterSign": "./build/notarize.js"
+  },
+  "scripts": {
+    "start": "electron .",
+    "build": "babel ./assets/js --out-dir dist/js",
+    "pack": "electron-builder --dir -mwl",
+    "dist": "electron-builder -mwl"
+  },
+  "author": "Flixerr <ceo@flixerr.co>",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "electron": "^5.0.2",
+    "electron-builder": "^21.0.15",
+    "electron-notarize": "^0.1.1"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "babel-register": "^6.26.0",
+    "cheerio": "^1.0.0-rc.3",
+    "decompress": "^4.2.0",
+    "download": "^7.1.0",
+    "electron-json-storage": "^4.1.6",
+    "electron-squirrel-startup": "^1.0.0",
+    "electron-titlebar": "0.0.3",
+    "electron-updater": "^4.2.0",
+    "electron-window-state": "^5.0.3",
+    "fast-average-color": "^5.1.0",
+    "firebase": "^6.0.2",
+    "franc-min": "^4.1.0",
+    "fs-extra": "^8.1.0",
+    "get-json": "^1.0.1",
+    "https-proxy-agent": "^2.2.1",
+    "langs": "^2.0.0",
+    "movie-trailer": "^2.0.5",
+    "parse-torrent-name": "^0.5.4",
+    "pluralize": "^8.0.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-lazy-load": "^3.0.13",
+    "react-reveal": "^1.2.2",
+    "react-transition-group": "^1.2.1",
+    "torrent-search-api": "^2.0.8",
+    "uniqid": "^4.1.1",
+    "webtorrent": "^0.103.1",
+    "webtorrent-health": "^1.1.2"
+  }
 }
