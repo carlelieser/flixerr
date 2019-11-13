@@ -1092,8 +1092,9 @@ class App extends Component {
         this.setState({loadingContent});
     };
 
-    fetchContent = (url) => {
+    fetchContent = (url, noThrottle) => {
         return new Promise((resolve, reject) => {
+            let ms = noThrottle ? 0 : 500;
             this.setLoadingContent(true);
             setTimeout(() => {
                 request
@@ -1104,7 +1105,7 @@ class App extends Component {
                     .catch((err) => {
                         reject(err);
                     });
-            }, 500);
+            }, ms);
         });
     };
 

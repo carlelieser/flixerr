@@ -26,7 +26,7 @@ class Genre extends Component {
 
             this
                 .props
-                .fetchContent(url)
+                .fetchContent(url, true)
                 .then((response) => {
                     this
                         .props
