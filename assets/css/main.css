@@ -429,7 +429,7 @@ html {
 
 .account-form > .account-desc {
     font-size: 14px;
-    margin-top:10px;
+    margin-top: 10px;
     color: rgba(0, 0, 0, 0.51);
     max-width: 280px;
     text-align: center;
@@ -508,7 +508,7 @@ html {
     background-color: rgba(0,0,0,0.1);
     color: rgba(0,0,0,0.61);
     box-shadow: 0 10px 20px -4px rgba(0,0,0,0.1);
-    margin-top:0;
+    margin-top: 0;
 }
 .account-form > .account-secondary:hover {
     background-color: rgba(0,0,0,0.2);
@@ -1974,7 +1974,7 @@ input[type=range]::-webkit-slider-thumb:hover {
     height: auto;
     margin-top: 130px;
     display: block;
-    overflow-y: hidden;
+    overflow: hidden;
     white-space: nowrap;
     padding-right: 20px;
     padding-bottom: 40px;
