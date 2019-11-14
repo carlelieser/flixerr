@@ -50,7 +50,8 @@
     "start": "electron .",
     "build": "babel ./assets/js --out-dir dist/js",
     "pack": "electron-builder --dir -mwl",
-    "dist": "electron-builder -mwl"
+    "dist": "electron-builder -mwl",
+    "publish": "npm run build && npm run dist"
   },
   "author": "Flixerr <ceo@flixerr.co>",
   "devDependencies": {
