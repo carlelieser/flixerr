@@ -14,11 +14,9 @@
     },
     "mac": {
       "target": [
-        "dmg"
+        "zip"
       ],
       "hardenedRuntime": true,
-      "entitlements": "./build/entitlements.mac.plist",
-      "entitlementsInherit": "./build/entitlements.mac.plist",
       "category": "public.app-category.entertainment",
       "icon": "./assets/imgs/icon.icns"
     },
@@ -48,10 +46,12 @@
   },
   "scripts": {
     "start": "electron .",
-    "build": "babel ./assets/js --out-dir dist/js",
-    "pack": "electron-builder --dir -mwl",
-    "dist": "electron-builder -mwl",
-    "publish": "npm run build && npm run dist"
+    "compile": "babel ./assets/js --out-dir dist/js",
+    "build": "electron-builder --dir",
+    "build-all": "electron-builder --dir -mwl",
+    "pack": "electron-builder",
+    "pack-all": "electron-builder -mwl",
+    "publish": "npm run compile && npm run pack-all"
   },
   "author": "Flixerr <ceo@flixerr.co>",
   "devDependencies": {
@@ -61,7 +61,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "electron": "^5.0.2",
-    "electron-builder": "^21.0.15",
+    "electron-builder": "^21.2.0",
     "electron-notarize": "^0.1.1"
   },
   "dependencies": {
