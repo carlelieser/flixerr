@@ -8,7 +8,9 @@ const windowStateKeeper = require('electron-window-state');
 const path = require('path')
 const { autoUpdater } = require("electron-updater");
 
-let mainWindow
+let mainWindow;
+
+process.FLIXERR_DEVELOP = false;
 
 function createWindow() {
 
@@ -126,9 +128,9 @@ function createWindow() {
 
     mainWindow.loadFile(path.join(__dirname, 'index.html'))
 
-    // mainWindow
-    //     .webContents
-    //     .openDevTools();
+	if(process.FLIXERR_DEVELOP){
+		mainWindow.webContents.openDevTools();
+	}
 
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
