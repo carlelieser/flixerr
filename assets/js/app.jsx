@@ -803,20 +803,6 @@ class App extends Component {
         }, 100);
     };
 
-    getLanguage = (text) => {
-        let franc = require('franc-min');
-        let langs = require('langs');
-
-        let language = franc(text);
-        let lang = language
-            ? langs
-                .where("3", language)
-                .name
-            : '';
-
-        return lang;
-    }
-
     toVTT = (string) => {
         return string
             .replace(/\{\\([ibu])\}/g, '</$1>')
@@ -828,7 +814,7 @@ class App extends Component {
     }
 
     getBufferAsText = (buffer) => {
-        let utf8 = new TextDecoder().decode(buffer);
+        let utf8 = buffer.toString();
         return utf8;
     }
 
@@ -861,25 +847,19 @@ class App extends Component {
             .getBuffer(file)
             .then((buffer) => {
                 if (typeof buffer === 'object') {
-                    let text = this.getBufferAsText(buffer);
-                    let src = this.getVttURL(text);
-                    let language = this.getLanguage(text);
-                    let fileClone = this.getObjectClone(file);
+					let text = this.getBufferAsText(buffer);
+					let src = this.getVttURL(text);
+					let fileClone = this.getObjectClone(file);
 
                     if (fileClone.data) {
                         fileClone.data = false;
-                    }
-
+					}
+					
                     let newFile = {
                         ...fileClone,
-                        language,
                         src
-                    }
-
-                    newFile.name = (newFile.name
-                        ? newFile.name
-                        : newFile.path) + language;
-
+					}
+					
                     return newFile;
                 } else {
                     return false;
@@ -888,16 +868,12 @@ class App extends Component {
     }
 
     sanitizeSubtitles = (arrayOfSubtitles) => {
-        let promises = [],
-            sanitized = [];
+        let promises = [];
 
         for (let i = 0; i < arrayOfSubtitles.length; i++) {
             let fileObject = arrayOfSubtitles[i];
-            if (sanitized.indexOf(fileObject.path) === -1) {
-                let promise = this.getFileComplete(fileObject);
-                promises.push(promise);
-                sanitized.push(fileObject.path);
-            }
+            let promise = this.getFileComplete(fileObject);
+			promises.push(promise);
         }
 
         return Promise
