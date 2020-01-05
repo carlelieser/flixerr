@@ -20,6 +20,9 @@ import TorrentSearch from "./torrent-search";
 import SubtitleSearch from "./subtitle-search";
 import {default as request} from "axios";
 
+let accurateInterval = require("accurate-interval");
+let detector = require("charset-detector");
+
 class App extends Component {
     constructor(props) {
         super(props);
@@ -661,8 +664,8 @@ class App extends Component {
 
     applyTimeout = (type) => {
         let message;
-        clearInterval(this.fileStart)
-        clearInterval(this.fileLoadedTimeout);
+        this.clearAccurateInterval(this.fileStart)
+        this.clearAccurateInterval(this.fileLoadedTimeout);
 
         this.setDownloadPercent();
         this.setDownloadSpeed();
@@ -762,7 +765,7 @@ class App extends Component {
 
             torrent.critical(startPiece, lastPieceToDownload);
 
-            this.fileStart = setInterval(() => {
+            this.fileStart = accurateInterval(() => {
                 let percent = Math.floor((file.downloaded / lengthToDownload) * 100);
                 let speed = Math.floor(this.state.client.downloadSpeed / 1000);
 
@@ -770,13 +773,13 @@ class App extends Component {
                     this.setDownloadSpeed(0);
                     this.setDownloadPercent();
                     clearTimeout(this.streamTimeout);
-                    clearInterval(this.fileStart);
+                    this.clearAccurateInterval(this.fileStart);
                     resolve();
                 } else {
                     this.setDownloadSpeed(speed);
                     this.setDownloadPercent(percent);
                 }
-            }, 100);
+            }, 100, {aligned: true, immediate: true});
         });
     };
 
@@ -789,18 +792,24 @@ class App extends Component {
         }, ms
             ? ms
             : 15000);
-    };
+	};
+	
+	clearAccurateInterval = (interval) => {
+		if(interval){
+			interval.clear();
+		}
+	}
 
     setFileLoadedTimeout = () => {
-        clearInterval(this.fileLoadedTimeout);
-        this.fileLoadedTimeout = setInterval(() => {
+        this.clearAccurateInterval(this.fileLoadedTimeout);
+        this.fileLoadedTimeout = accurateInterval(() => {
             let file = this.state.client.torrents[0].files[this.state.videoIndex];
 
             if (file && file.downloaded !== file.length) {
                 let loaded = (file.downloaded / file.length) * 100;
                 this.setFileLoaded(loaded);
             }
-        }, 100);
+        }, 100, {immediate: true, immediate: true});
     };
 
     toVTT = (string) => {
@@ -816,12 +825,12 @@ class App extends Component {
     getBufferAsText = (buffer) => {
         let utf8 = buffer.toString();
         return utf8;
-    }
+	}
 
     getVttURL = (bufferText) => {
-        let text = this.toVTT(bufferText);
+		let text = this.toVTT(bufferText);
         let vttString = 'WEBVTT FILE\r\n\r\n';
-        let blobText = vttString.concat(text);
+		let blobText = vttString.concat(text);
         let blob = new Blob([blobText], {type: 'text/vtt'});
         return URL.createObjectURL(blob);
     }
@@ -913,7 +922,7 @@ class App extends Component {
         this.resetVideo();
         this.changeCurrentMagnet(magnet);
 
-        clearInterval(this.fileStart);
+        this.clearAccurateInterval(this.fileStart);
 
         this.setStreamTimeout();
 
@@ -1361,8 +1370,8 @@ class App extends Component {
     destroyClient = (backUp) => {
         return new Promise((resolve, reject) => {
             clearTimeout(this.streamTimeout);
-            clearInterval(this.fileStart);
-            clearInterval(this.fileLoadedTimeout);
+            this.clearAccurateInterval(this.fileStart);
+            this.clearAccurateInterval(this.fileLoadedTimeout);
 
             if (this.state.client) {
                 let playMovie = backUp
