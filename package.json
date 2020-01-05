@@ -1,6 +1,6 @@
 {
   "name": "flixerr",
-  "version": "1.5.2",
+  "version": "1.5.4",
   "description": "A movie torrent streaming service.",
   "main": "main.js",
   "build": {
@@ -65,6 +65,7 @@
     "electron-notarize": "^0.1.1"
   },
   "dependencies": {
+    "accurate-interval": "^1.0.9",
     "axios": "^0.19.0",
     "babel-register": "^6.26.0",
     "cheerio": "^1.0.0-rc.3",
