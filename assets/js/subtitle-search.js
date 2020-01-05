@@ -13,7 +13,7 @@ let SubtitleSearch = function () {
         }
     }
 
-    let langs = ['English', 'Spanish', 'Italian', 'German'];
+    let langs = ['Arabic', 'English', 'Spanish', 'Italian', 'German'];
 
     let getSubsFromElements = (html) => {
         let $ = cheerio.load(html);
@@ -64,19 +64,48 @@ let SubtitleSearch = function () {
                 let body = response.data;
                 let $ = cheerio.load(body);
 
-                let subLink = $('.download-subtitle').attr('href');
+				let subLink = $('.download-subtitle').attr('href');
+				let lang = $(".movie-main-info")
+					.children(".row")
+					.children(".col-xs-10")
+					.children(".list-group")
+					.children(".list-group-item")
+					.first()
+					.children("span")
+					.first()
+					.text()
+					.trim();
 
                 return download(subLink).then((data) => {
-                    let decompress = require('decompress');
+					let decompress = require('decompress');
+					let detect = require('charset-detector');
 
                     return decompress(data).then((files) => {
-                        let srt = files.filter((file) => {
+						let encoding = require('encoding');
+                        let srt = files.find((file) => {
                             return file
                                 .path
                                 .indexOf('.srt') > -1 && file
                                 .path
                                 .indexOf('MACOSX') === -1;
-                        });
+						});
+						
+						if(srt){
+							let data = srt.data;
+							let charset = detect(data)[0].charsetName;
+							let converted = encoding.convert(
+								data,
+								"utf-8",
+								charset
+							);
+							
+							let file = {
+								data: converted,
+								name: `${lang}.srt`,
+								lang
+							}
+							return file;
+						}
 
                         return srt;
                     })
@@ -88,7 +117,7 @@ let SubtitleSearch = function () {
         let subs = getSubsFromElements(html),
             promises = [];
 
-        for (let i = 0; i < subs.length; i++) {
+        for (let i = subs.length - 1; i >= 0; i--) {
             let sub = subs[i];
             let promise = downloadSubtitle(sub.url);
             promises.push(promise);
@@ -97,10 +126,7 @@ let SubtitleSearch = function () {
         return Promise
             .all(promises)
             .then((data) => {
-                let merged = []
-                    .concat
-                    .apply([], data);
-                return merged;
+                return data;
             });
     }
 

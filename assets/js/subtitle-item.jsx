@@ -29,7 +29,7 @@ class SubtitleItem extends Component {
                 ? 'active-subtitle'
                 : ''}`}
                 onClick={this.handleSubtitle}>
-                <div className="subtitle-language">{this.props.item.language}</div>
+                <div className="subtitle-language">{this.props.item.lang}</div>
                 {this.props.active
                     ? <i className="mdi mdi-checkbox-blank-circle mdi-light"/>
                     : ''}
