@@ -2,7 +2,7 @@ import React, {Component} from "react";
 
 import {CSSTransitionGroup} from "react-transition-group";
 import Fade from "react-reveal/Fade";
-
+import PictureInPictureAltIcon from '@material-ui/icons/PictureInPictureAlt';
 import SubtitleItem from "./subtitle-item";
 import BackupTorrents from "./backup-torrent-container";
 
@@ -22,6 +22,7 @@ class Player extends Component {
         this.state = {
             fullScreen: false,
             timer: false,
+            pip : false,
             showOverlay: true,
             showSubtitles: false,
             videoBuffering: false,
@@ -71,6 +72,25 @@ class Player extends Component {
                 .setFullScreen(this.state.fullScreen);
         });
     };
+
+    PictureInPicture = () => {
+        this.setState({
+            pip: !this.state.pip
+        }, () => {
+            this
+                        .videoElement
+                        .current
+                        .requestPictureInPicture()
+        });
+
+        if (this.state.pip == true) {
+                this.setState({
+                    pip : !this.state.pip
+                }, () => {
+                    document.exitPictureInPicture()
+                })
+        }
+    }
 
     handleVideoPlayback = (toggle, play) => {
         if (this.videoElement.current) {
@@ -155,6 +175,7 @@ class Player extends Component {
     };
 
     closeClient = () => {
+        this.PictureInPicture()
         this
             .props
             .removeClient(this.props.currentTime);
@@ -485,6 +506,8 @@ class Player extends Component {
                         <i
                             className="mdi mdi-light mdi-fullscreen mdi-36px fullscreen-btn"
                             onClick={this.fullScreen}/>
+                        
+                        <PictureInPictureAltIcon className="pip-btn" onClick={this.PictureInPicture} />
                     </div>
                 </div>
                 {this.props.showIntro

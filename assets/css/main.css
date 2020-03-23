@@ -1167,6 +1167,13 @@ html {
     justify-content: center;
 }
 
+.movie-player > .bottom-bar-container > .bottom-bar > .pip-btn {
+    margin-right: 40px;
+    color: white;
+    font-size: 30px;
+    margin-top: 5px;
+}
+
 .subtitle-container > div > .subtitle-loading {
     width: 20px;
     height: 20px;
