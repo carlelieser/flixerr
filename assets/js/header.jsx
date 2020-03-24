@@ -30,7 +30,7 @@ class Header extends Component {
     }
 
     handleQualityControl = () => {
-        if (this.props.quality == "HD") {
+        if (this.props.videoQuality == "HD") {
             this
                 .props
                 .setQuality("FULL HD");
@@ -75,7 +75,7 @@ class Header extends Component {
     };
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.quality === this.props.quality && nextProps.background === this.props.background && nextProps.inputValue === this.props.inputValue && nextProps.searchContent === this.props.searchContent && nextProps.user === this.props.user && nextProps.subtitle === this.props.subtitle && nextState.active === this.state.active) {
+        if (nextProps.videoQuality === this.props.videoQuality && nextProps.background === this.props.background && nextProps.inputValue === this.props.inputValue && nextProps.searchContent === this.props.searchContent && nextProps.user === this.props.user && nextProps.subtitle === this.props.subtitle && nextState.active === this.state.active) {
             return false;
         } else {
             return true;
@@ -145,14 +145,14 @@ class Header extends Component {
                             : ("")}
                     </div>
                     <div
-                        className={`quality ${this.props.quality == "HD"
+                        className={`quality ${this.props.videoQuality == "HD"
                         ? "hd-active"
                         : "full-active"}`}>
                         <span>HD</span>
                         <div className='quality-control-container'>
                             <input
                                 readOnly
-                                checked={this.props.quality == "FULL HD"
+                                checked={this.props.videoQuality == "FULL HD"
                                 ? true
                                 : false}
                                 type='checkbox'

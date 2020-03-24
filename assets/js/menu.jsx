@@ -18,8 +18,7 @@ class Menu extends Component {
                     icon: 'filmstrip'
                 }, {
                     name: 'TV Shows',
-					icon: 'youtube-tv',
-					beta: true
+					icon: 'youtube-tv'
                 }, {
                     name: 'Collection',
                     icon: 'library'

@@ -46,7 +46,7 @@ class Content extends Component {
     };
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.active !== this.props.active || nextProps.offline !== this.props.offline || nextProps.searchContent !== this.props.searchContent || nextProps.loadingContent !== this.props.loadingContent) {
+        if (nextProps.active !== this.props.active || nextProps.offline !== this.props.offline || nextProps.searchContent !== this.props.searchContent || nextProps.isLoading !== this.props.isLoading) {
             return true;
         } else {
             if (this.props.active === "Featured" && (nextProps.featured !== this.props.featured)) {
@@ -75,11 +75,11 @@ class Content extends Component {
                 display: this.props.active == "Featured"
                     ? "flex"
                     : "block",
-                backgroundImage: this.props.loadingContent
+                backgroundImage: this.props.isLoading
                     ? "url(./assets/imgs/loading.svg)"
                     : ""
             }}>
-                {this.props.loadingContent
+                {this.props.isLoading
                     ? ""
                     : this.props.offline
                         ? offlineContainer

@@ -1,6 +1,6 @@
 {
   "name": "flixerr",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "A movie torrent streaming service.",
   "main": "main.js",
   "build": {
@@ -83,7 +83,7 @@
     "franc-min": "^4.1.0",
     "fs-extra": "^8.1.0",
     "get-json": "^1.0.1",
-    "https-proxy-agent": "^2.2.1",
+    "https-proxy-agent": "^2.2.4",
     "langs": "^2.0.0",
     "movie-trailer": "^2.0.5",
     "parse-torrent-name": "^0.5.4",
@@ -95,7 +95,7 @@
     "react-transition-group": "^1.2.1",
     "torrent-search-api": "^2.0.8",
     "uniqid": "^4.1.1",
-    "webtorrent": "^0.103.1",
+    "webtorrent": "^0.107.17",
     "webtorrent-health": "^1.1.2"
   }
 }

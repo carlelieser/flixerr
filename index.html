@@ -16,11 +16,14 @@
         <div id="app"></div>
 
         <script>
+			let {remote} = require('electron');
+			let isDeveloping = remote.getGlobal('flixerrDevelop');
+			
             process.env.UV_THREADPOOL_SIZE = 128;
             process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 			process.env.NODE_ENV = 'production';
 
-			if(process.FLIXERR_DEVELOP){
+			if(isDeveloping){
 				require('babel-register');
             	require('./assets/js/main');
 			}else{
