@@ -41,8 +41,7 @@
         "deb"
       ],
       "category": "video"
-    },
-    "afterSign": "./notarize.js"
+    }
   },
   "scripts": {
     "start": "electron .",
