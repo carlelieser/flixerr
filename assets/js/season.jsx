@@ -15,7 +15,7 @@ class Season extends Component {
     handleStreamEpisode = (episode) => {
         this
             .props
-            .playMovie(episode, true);
+            .playMovie(episode);
     }
 
     toggleCollapse = () => {

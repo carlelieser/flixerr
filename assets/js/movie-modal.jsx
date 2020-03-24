@@ -111,7 +111,7 @@ class MovieModal extends Component {
                         newEpisode.title = `${clonedMovie.title} / ${newEpisode.name}`;
                         newEpisode.episode_number_formatted = this.formatNumber(newEpisode.episode_number);
                         newEpisode.query = `${clonedMovie.title} S${season.season_number_formatted}E${newEpisode.episode_number_formatted}`;
-                        newEpisode.show = clonedMovie;
+						newEpisode.show = clonedMovie;
                         flixerrEpisodes.push(newEpisode);
                     }
 
@@ -139,7 +139,7 @@ class MovieModal extends Component {
                 .then((data) => {
                     let seasons = data.seasons;
                     let seasonData = [];
-                    for (let i = 0; i < seasons.length; i++) {
+                    for (let i = seasons.length - 1; i >= 0; i--) {
                         let season = seasons[i];
                         season.season_number_formatted = this.formatNumber(season.season_number);
                         if (season.season_number) {
@@ -151,9 +151,6 @@ class MovieModal extends Component {
                     return Promise
                         .all(seasonData)
                         .then((response) => {
-                            response.sort((a, b) => {
-                                return b.name - a.name;
-                            });
                             this.setLoading();
                             this.setSeasons(response);
                         });
@@ -186,8 +183,8 @@ class MovieModal extends Component {
             averageColor = movie.averageColor,
             modalHeight = movie
                 ? 500 + movie.overview.length / 4 + movie.title.length / 2
-                : 500;
-
+				: 500;
+				
         let seasons = this
             .state
             .seasons
@@ -203,7 +200,8 @@ class MovieModal extends Component {
                 }
             });
 
-        let showInfo = !this.state.showSeasons;
+		let showInfo = !this.state.showSeasons;
+		console.log(movie);
         return (
             <div
                 className={`movie-modal ${isLight

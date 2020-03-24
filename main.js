@@ -10,7 +10,7 @@ const { autoUpdater } = require("electron-updater");
 
 let mainWindow;
 
-process.FLIXERR_DEVELOP = false;
+global.flixerrDevelop = false;
 
 function createWindow() {
 
@@ -128,7 +128,7 @@ function createWindow() {
 
     mainWindow.loadFile(path.join(__dirname, 'index.html'))
 
-	if(process.FLIXERR_DEVELOP){
+	if(global.flixerrDevelop){
 		mainWindow.webContents.openDevTools();
 	}
 

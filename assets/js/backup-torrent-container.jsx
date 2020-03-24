@@ -47,7 +47,7 @@ class BackupTorrents extends Component {
                 .torrents
                 .map((torrent) => {
                     let title = torrent.title;
-                    let videoQuality = torrent.resolution || torrent.quality;
+                    let videoQuality = torrent.resolution || torrent.videoQuality;
 
                     return (<Torrent
                         key={uniqid()}

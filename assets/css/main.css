@@ -384,8 +384,8 @@ html {
     top: 0;
     left: 0;
     position: fixed;
-    background-color: #5e11f1;
-    background-image: url('../imgs/account-bg.png');
+    background-color: #F2F2F2;
+    background-image: url('../imgs/account-bg.svg');
     background-size: cover;
     z-index: 998;
     display: flex;
@@ -412,12 +412,11 @@ html {
     background-color: #FFF;
     padding: 40px;
     border-radius: 20px;
-    box-shadow: 0 20px 20px -12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     position: relative;
     font-family: 'Avenir', sans-serif;
     z-index: 100;
-    margin-top: 20px;
 }
 
 .account-form > .account-title {
@@ -494,20 +493,18 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: sans-serif;
-    font-size: 14px;
+	font-family: 'Avenir', sans-serif;
+	font-weight: bold;
+    font-size: 16px;
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    box-shadow: 0 10px 20px -4px rgba(51, 92, 226, 0.41);
 }
 .account-form > .account-submit:not(.account-secondary):hover {
     background-color: rgb(240, 40, 157);
-    box-shadow: 0 10px 20px -4px rgba(240, 40, 157, 0.41);
 }
 
 .account-form > .account-secondary {
     background-color: rgba(0,0,0,0.1);
-    color: rgba(0,0,0,0.61);
-    box-shadow: 0 10px 20px -4px rgba(0,0,0,0.1);
+    color: rgba(0,0,0,0.81);
     margin-top: 0;
 }
 .account-form > .account-secondary:hover {
@@ -515,8 +512,8 @@ html {
 }
 
 .account-close {
-    margin-top: 10px;
-    margin-bottom: 10px;
+	margin-bottom: 10px;
+	font-size: 1.25em;
     opacity: 0.61;
 }
 
@@ -1717,7 +1714,7 @@ input[type=range]::-webkit-slider-thumb:hover {
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #4026de;
+    background-color: #f5f5f5;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1993,7 +1990,7 @@ input[type=range]::-webkit-slider-thumb:hover {
     left: 0;
     position: fixed;
     z-index: 500;
-    background: linear-gradient(#d9a9c2 0%, #cebaa0 100%);
+    background: #f2f2f2;
     padding: 110px 80px 80px;
     box-sizing: border-box;
     overflow-x: hidden;
@@ -2014,13 +2011,14 @@ input[type=range]::-webkit-slider-thumb:hover {
     left: 0;
     margin-top: 40px;
     position: fixed;
-    background-color: rgb(217, 171, 192);
+    background-color: #FFF;
     z-index: 100;
     transition: all 0.25s cubic-bezier(0.215, 0.610, 0.355, 1.000);
     opacity: 0;
 }
 
 .paginated-genre-results > .genre-name {
+	color: rgba(0,0,0,0.81);
     font-family: 'Avenir';
     font-size: 70px;
     font-weight: bold;
