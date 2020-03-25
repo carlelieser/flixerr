@@ -15,6 +15,7 @@ import Genre from "./genre";
 import Header from "./header";
 import Content from "./content";
 import Trailer from "./trailer";
+import DarkModeToggle from "./dark-mode-toggle";
 
 import TorrentSearch from "./torrent-search";
 import SubtitleSearch from "./subtitle-search";
@@ -27,13 +28,13 @@ class App extends Component {
 
 		this.fileIndex = false;
 		this.fileStart = false;
-		this.qualityTimeout = false;
 		this.streamTimeout = false;
 		this.fileLoadedTimeout = false;
 		this.gettingSuggested = false;
 
 		this.state = {
 			apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
+			darkMode: false,
 			willClose: false,
 			trailer: false,
 			readyToClose: false,
@@ -136,10 +137,7 @@ class App extends Component {
 				videoQuality
 			},
 			() => {
-				clearTimeout(this.qualityTimeout);
-				this.qualityTimeout = setTimeout(() => {
-					this.setStorage();
-				}, 250);
+				this.setStorage();
 			}
 		);
 	};
@@ -468,7 +466,8 @@ class App extends Component {
 				favorites: this.state.favorites,
 				recentlyPlayed: this.state.recentlyPlayed,
 				movieTimeArray: this.state.movieTimeArray,
-				videoQuality: this.state.videoQuality
+				videoQuality: this.state.videoQuality,
+				darkMode: this.state.darkMode
 			},
 			error => {
 				if (error) {
@@ -500,6 +499,30 @@ class App extends Component {
 		return data;
 	};
 
+	setPropertyOrDefault = (prop, def) => {
+		return prop ? prop : def;
+	};
+
+	setStateFromStorage = (storage, callback) => {
+		this.setState({
+			favorites: this.setPropertyOrDefault(storage.favorites, []),
+			recentlyPlayed: this.setPropertyOrDefault(
+				storage.recentlyPlayed,
+				[]
+			),
+			movieTimeArray: this.setPropertyOrDefault(
+				storage.movieTimeArray,
+				[]
+			),
+			videoQuality: this.setPropertyOrDefault(storage.videoQuality, "HD"),
+			darkMode: this.setPropertyOrDefault(storage.darkMode, false)
+		}, () => {
+			if(callback){
+				callback();
+			}
+		});
+	};
+
 	getStorage = () => {
 		return new Promise((resolve, reject) => {
 			storage.get("collection", (error, data) => {
@@ -508,26 +531,12 @@ class App extends Component {
 				} else {
 					if (data) {
 						data = this.checkData(data);
-						this.setState(
-							{
-								favorites: data.favorites ? data.favorites : [],
-								recentlyPlayed: data.recentlyPlayed
-									? data.recentlyPlayed
-									: [],
-								movieTimeArray: data.movieTimeArray
-									? data.movieTimeArray
-									: [],
-								videoQuality: data.videoQuality
-									? data.videoQuality
-									: "HD"
-							},
-							error => {
-								setTimeout(() => {
-									this.setState({ appLoading: false });
-								}, 1000);
-								resolve();
-							}
-						);
+						this.setStateFromStorage(data, () => {
+							setTimeout(() => {
+								this.setState({ appLoading: false });
+							}, 1000);
+							resolve();
+						});
 					}
 				}
 			});
@@ -2613,11 +2622,25 @@ class App extends Component {
 		return "";
 	};
 
-	componentDidMount() {
-		this.loadLogo();
+	toggleDarkMode = () => {
+		this.setState(prevState => {
+			return {
+				darkMode: !prevState.darkMode
+			};
+		}, () => {
+			this.setStorage();
+		});
+	};
+
+	getSettings = () => {
 		this.getStorage()
 			.then(() => this.getUserCredentials())
 			.catch(err => console.log(err));
+	};
+
+	componentDidMount() {
+		this.loadLogo();
+		this.getSettings();
 		this.loadFeatured();
 		this.startWebTorrent();
 		this.requireTorrent();
@@ -2634,6 +2657,7 @@ class App extends Component {
 			colorStop,
 			create,
 			currentTime,
+			darkMode,
 			downloadPercent,
 			downloadSpeed,
 			error,
@@ -2781,6 +2805,15 @@ class App extends Component {
 			</div>
 		);
 
+		let darkElem = this.showElementBasedOnValue(
+			darkMode,
+			<link
+				type="text/css"
+				rel="stylesheet"
+				href="./assets/css/dark-mode.css"
+			/>
+		);
+
 		return (
 			<div className="app-wrapper">
 				<Fade distance="5%" bottom opposite when={appLoading}>
@@ -2797,6 +2830,10 @@ class App extends Component {
 						}`}
 						onClick={this.closeMenu}
 					>
+						<DarkModeToggle
+							darkMode={darkMode}
+							toggleDarkMode={this.toggleDarkMode}
+						/>
 						{process.platform === "darwin" ? (
 							<div
 								className={
@@ -2903,6 +2940,7 @@ class App extends Component {
 						/>
 					</div>
 				)}
+				{darkElem}
 			</div>
 		);
 	}

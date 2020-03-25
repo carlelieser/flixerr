@@ -39,7 +39,7 @@ function createWindow() {
         .webContents
         .session
         .webRequest
-        .onHeadersReceived({}, (details, callback) => {
+        .onHeadersReceived((details, callback) => {
             if (details.responseHeaders['x-frame-options']) {
                 delete details.responseHeaders['x-frame-options'];
             }
