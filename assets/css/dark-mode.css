@@ -58,8 +58,14 @@ html {
 	background-color: rgba(255, 255, 255, 0.1) !important;
 }
 .paginated-genre-results > .genre-name,
-.app-menu > div {
+.search-container > .search-title,
+.app-menu > div,
+.empty-state-container > .empty-state-info > .title {
 	color: rgba(255, 255, 255, 0.81) !important;
+}
+
+.empty-state-container > .empty-state-info > .desc {
+	color: rgba(255, 255, 255, 0.71) !important;
 }
 
 .close-genre-on {

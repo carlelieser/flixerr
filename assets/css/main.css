@@ -2366,18 +2366,37 @@ input[type="range"]::-webkit-slider-thumb:hover {
 	right: 0;
 	margin: 2em;
 	box-shadow: 0px;
-	background-color: #1d1e29;
 	border-radius: 100%;
-	box-shadow: 0px 5px 20px -5px rgba(0,0,0,0.1);
-	transition: all .2s ease-in-out;
+	box-shadow: 0px 5px 10px -5px rgba(0, 0, 0, 0.1);
+	transition: all 0.2s ease-in-out;
 	z-index: 999;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
-.dark-mode-toggle.dark-mode-toggle-light{
-	background-color: rgb(240, 240, 240) !important;
+.dark-mode-toggle.dark-mode-toggle-light {
+	background-color: #f2f2f2;
+}
+
+.dark-mode-toggle.dark-mode-toggle-dark {
+	background-color: #1d1e29;
+}
+
+.dark-mode-toggle.dark-mode-toggle-light:hover {
+	background-color: #1d1e29;
+}
+
+.dark-mode-toggle.dark-mode-toggle-dark:hover {
+	background-color: #f2f2f2;
+}
+
+.dark-mode-toggle.dark-mode-toggle-light:hover i:before {
+	color: #f2f2f2;
+}
+
+.dark-mode-toggle.dark-mode-toggle-dark:hover i:before {
+	color: #1d1e29;
 }
 
 @font-face {

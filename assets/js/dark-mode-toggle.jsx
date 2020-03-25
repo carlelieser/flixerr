@@ -8,7 +8,7 @@ class DarkModeToggle extends Component {
 	render() {
 		let { toggleDarkMode, darkMode } = this.props;
 		let darkModeToggleClass = `dark-mode-toggle ${
-			darkMode ? "dark-mode-toggle-light" : ""
+			darkMode ? "dark-mode-toggle-light" : "dark-mode-toggle-dark"
 		}`;
 		let iconClass = `mdi mdi-24px ${darkMode ? "mdi-dark" : "mdi-light"} mdi-brightness-${
 			darkMode ? "5" : "2"

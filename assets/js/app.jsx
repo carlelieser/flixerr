@@ -30,7 +30,7 @@ class App extends Component {
 		this.fileStart = false;
 		this.streamTimeout = false;
 		this.fileLoadedTimeout = false;
-		this.gettingSuggested = false;
+		this.qualityTimeout = false;
 
 		this.state = {
 			apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
@@ -137,7 +137,10 @@ class App extends Component {
 				videoQuality
 			},
 			() => {
-				this.setStorage();
+				clearTimeout(this.qualityTimeout);
+				this.qualityTimeout = setTimeout(() => {
+					this.setStorage("videoQuality");
+				}, 250);
 			}
 		);
 	};
@@ -269,7 +272,7 @@ class App extends Component {
 		}
 	};
 
-	setBucket = () => {
+	setBucket = key => {
 		if (this.state.user.email) {
 			let data = {
 				recentlyPlayed: this.cleanMovieArrays(
@@ -279,18 +282,23 @@ class App extends Component {
 					this.state.movieTimeArray
 				),
 				favorites: this.cleanMovieArrays(this.state.favorites),
-				videoQuality: this.state.videoQuality
-					? this.state.videoQuality
-					: "HD"
+				videoQuality: this.setPropertyOrDefault(
+					this.state.videoQuality,
+					"HD"
+				),
+				darkMode: this.setPropertyOrDefault(this.state.darkMode, false)
 			};
 
-			this.databaseRef.set(data, err => {
-				if (err) {
-					console.log(err);
-				} else {
-					this.setCloseReady();
-					console.log("Data set!");
-				}
+			if (key) {
+				data = {
+					[key]: data[key]
+				};
+				console.log(data);
+			}
+
+			this.databaseRef.update(data, err => {
+				console.log("Data set!");
+				this.setCloseReady();
 			});
 		}
 	};
@@ -361,7 +369,8 @@ class App extends Component {
 			"favorites",
 			"recentlyPlayed",
 			"movieTimeArray",
-			"videoQuality"
+			"videoQuality",
+			"darkMode"
 		];
 		return new Promise((resolve, reject) => {
 			let newState = {};
@@ -419,6 +428,7 @@ class App extends Component {
 			if (data) {
 				this.setDiff(data).then(() => resolve());
 			} else {
+				this.resetData();
 				reject();
 			}
 		});
@@ -427,22 +437,6 @@ class App extends Component {
 	listenToBucket = () => {
 		if (this.databaseRef) {
 			this.databaseRef.on("value", this.setBucketData);
-		}
-	};
-
-	getBucket = () => {
-		if (this.databaseRef) {
-			this.databaseRef.once("value", snapshot => {
-				if (snapshot) {
-					this.setBucketData(snapshot)
-						.then(() => {
-							this.setLoadingContent();
-						})
-						.catch(err => {
-							this.resetData();
-						});
-				}
-			});
 		}
 	};
 
@@ -459,7 +453,8 @@ class App extends Component {
 		}
 	};
 
-	setStorage = () => {
+	setStorage = key => {
+		console.log("Setting storage", this.state.videoQuality);
 		storage.set(
 			"collection",
 			{
@@ -473,9 +468,10 @@ class App extends Component {
 				if (error) {
 					throw error;
 				}
+
 				if (firebase.auth().currentUser) {
 					this.setEverything = false;
-					this.setBucket();
+					this.setBucket(key);
 				} else {
 					this.setCloseReady();
 				}
@@ -504,23 +500,29 @@ class App extends Component {
 	};
 
 	setStateFromStorage = (storage, callback) => {
-		this.setState({
-			favorites: this.setPropertyOrDefault(storage.favorites, []),
-			recentlyPlayed: this.setPropertyOrDefault(
-				storage.recentlyPlayed,
-				[]
-			),
-			movieTimeArray: this.setPropertyOrDefault(
-				storage.movieTimeArray,
-				[]
-			),
-			videoQuality: this.setPropertyOrDefault(storage.videoQuality, "HD"),
-			darkMode: this.setPropertyOrDefault(storage.darkMode, false)
-		}, () => {
-			if(callback){
-				callback();
+		this.setState(
+			{
+				favorites: this.setPropertyOrDefault(storage.favorites, []),
+				recentlyPlayed: this.setPropertyOrDefault(
+					storage.recentlyPlayed,
+					[]
+				),
+				movieTimeArray: this.setPropertyOrDefault(
+					storage.movieTimeArray,
+					[]
+				),
+				videoQuality: this.setPropertyOrDefault(
+					storage.videoQuality,
+					"HD"
+				),
+				darkMode: this.setPropertyOrDefault(storage.darkMode, false)
+			},
+			() => {
+				if (callback) {
+					callback();
+				}
 			}
-		});
+		);
 	};
 
 	getStorage = () => {
@@ -1120,10 +1122,13 @@ class App extends Component {
 		this.setState({ isLoading });
 	};
 
-	fetchContent = (url, noThrottle, finishLoading) => {
+	fetchContent = (url, noThrottle, finishLoading, hideLoading) => {
 		return new Promise((resolve, reject) => {
 			let ms = noThrottle ? 0 : 500;
-			this.setLoadingContent(true);
+			if (!hideLoading) {
+				this.setLoadingContent(true);
+			}
+
 			setTimeout(() => {
 				request
 					.get(url)
@@ -1172,7 +1177,7 @@ class App extends Component {
 			Promise.all(searchResults)
 				.then(results => {
 					this.setOffline();
-					results = [].concat.apply([], results);
+					results = this.mergeArrayofArrays(results);
 
 					if (results) {
 						results = this.sortQuery(results);
@@ -1310,9 +1315,8 @@ class App extends Component {
 
 	getMovieTypeData = movie => {
 		let isSeries = this.isSeries(movie);
-
 		return {
-			id: isSeries ? movie.show.id : movie.id,
+			id: isSeries ? (movie.id ? movie.id : movie.show.id) : movie.id,
 			urlParams: {
 				type: isSeries ? "tv" : "movie",
 				appendToResponse: isSeries
@@ -1324,7 +1328,6 @@ class App extends Component {
 
 	extractIDFromData = (movie, data) => {
 		let isSeries = this.isSeries(movie);
-		console.log(isSeries);
 		return isSeries ? data.external_ids.imdb_id : data.imdb_id;
 	};
 
@@ -1464,6 +1467,10 @@ class App extends Component {
 			.catch(movie => this.searchTorrent(movie));
 	};
 
+	mergeArrayofArrays = arr => {
+		return [].concat.apply([], arr);
+	};
+
 	searchTorrent = (movie, excludeDate) => {
 		let isSeries = this.isSeries(movie);
 		this.resetVideo();
@@ -1515,7 +1522,7 @@ class App extends Component {
 
 						Promise.all([publicSearch, proprietarySearch])
 							.then(data => {
-								data = [].concat.apply([], data);
+								data = this.mergeArrayofArrays(data);
 
 								if (data[0]) {
 									if (
@@ -1676,19 +1683,21 @@ class App extends Component {
 	setMovieTimeArray = newArray => {
 		this.setState(
 			prevState => {
-				if (
+				let canSetTime =
 					prevState.movieTimeArray !== this.state.movieTimeArray ||
-					newArray
-				) {
+					newArray;
+
+				if (canSetTime) {
 					return {
-						movieTimeArray: newArray
-							? newArray
-							: this.state.movieTimeArray
+						movieTimeArray: this.setPropertyOrDefault(
+							newArray,
+							this.state.movieTimeArray
+						)
 					};
 				}
 			},
 			() => {
-				this.setStorage();
+				this.setStorage("movieTimeArray");
 			}
 		);
 	};
@@ -2139,12 +2148,12 @@ class App extends Component {
 			}
 		}
 
-		return [].concat.apply([], results);
+		return this.mergeArrayofArrays(results);
 	};
 
 	getRecommended = url => {
 		return new Promise((resolve, reject) => {
-			this.fetchContent(url)
+			this.fetchContent(url, false, false, true)
 				.then(response => {
 					resolve(response.results.slice(0, 5));
 				})
@@ -2152,67 +2161,87 @@ class App extends Component {
 		});
 	};
 
+	existsAndHasData = arr => {
+		if (arr) {
+			if (arr.length) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	getCollection = data => {
+		let favorites = this.chooseRandom(
+				data ? data.favorites : this.state.favorites,
+				5
+			),
+			recents = this.chooseRandom(
+				data ? data.recentlyPlayed : this.state.recentlyPlayed,
+				5
+			),
+			collection = favorites.concat(recents);
+
+		return collection;
+	};
+
+	getRandom = (min, max) => {
+		return Math.random() * (max - min) + min;
+	};
+
+	getRecommendedURL = movie => {
+		let isSeries = this.isSeries(movie),
+			movieData = this.getMovieTypeData(movie),
+			page = this.getRandom(1, 3);
+
+		let url = `https://api.themoviedb.org/3/${movieData.urlParams.type}/${
+			movie.id
+		}/recommendations?api_key=${
+			this.state.apiKey
+		}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}${
+			isSeries ? "" : `&primary_release_date.lte=${this.getDateforURL(1)}`
+		}`;
+
+		console.log(url);
+		return url;
+	};
+
+	getArrayElements = (arr, n) => {
+		if (arr) {
+			if (arr.length > n) {
+				arr = arr.slice(0, n);
+				return arr;
+			}
+		}
+
+		return arr;
+	};
+
 	getSuggested = data => {
 		return new Promise((resolve, reject) => {
-			let favorites = this.chooseRandom(
-					data ? data.favorites : this.state.favorites,
-					5
-				),
-				recents = this.chooseRandom(
-					data ? data.recentlyPlayed : this.state.recentlyPlayed,
-					5
-				),
-				collection = favorites.concat(recents);
+			let collection = this.getCollection(data);
 
 			let promises = [];
-			let pages = [1, 2, 3];
-			if (collection) {
-				if (collection.length) {
-					if (!this.gettingSuggested) {
-						this.gettingSuggested = true;
-						for (let j = 0; j <= collection.length; j++) {
-							let movie = collection[j],
-								page = this.chooseRandom(pages, 1),
-								url = "";
+			if (this.existsAndHasData(collection)) {
+				for (let j = 0; j < collection.length - 1; j++) {
+					let movie = collection[j];
+					if (movie) {
+						let url = this.getRecommendedURL(movie);
+						let promise = this.getRecommended(url);
 
-							if (movie) {
-								if (movie.isSeries) {
-									url = `https://api.themoviedb.org/3/tv/${movie.id}/recommendations?api_key=${this.state.apiKey}&region=US&language=en-US&sort_by=popularity.desc`;
-								} else if (movie.id) {
-									url = `https://api.themoviedb.org/3/movie/${
-										movie.id
-									}/recommendations?api_key=${
-										this.state.apiKey
-									}&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&primary_release_date.lte=${this.getDateforURL(
-										1
-									)}`;
-								}
-
-								if (url) {
-									let promise = this.getRecommended(url);
-									promises.push(promise);
-								}
-							}
-						}
+						promises.push(promise);
 					}
-
-					Promise.all(promises)
-						.then(suggested => {
-							let finalSuggested = [].concat.apply([], suggested);
-
-							let clean = this.stripDuplicateMovies(
-								finalSuggested
-							);
-							if (clean.length > 20) {
-								clean = clean.slice(0, 20);
-							}
-
-							clean = this.extractMovies(false, clean, true);
-							this.gettingSuggested = false;
-							resolve(clean);
-						})
-						.catch(err => reject(err));
 				}
+
+				Promise.all(promises)
+					.then(suggested => {
+						let merged = this.mergeArrayofArrays(suggested),
+							stripped = this.stripDuplicateMovies(merged),
+							reduced = this.getArrayElements(stripped, 20),
+							clean = this.extractMovies(false, reduced, true);
+
+						resolve(clean);
+					})
+					.catch(err => reject(err));
 			}
 		});
 	};
@@ -2267,7 +2296,7 @@ class App extends Component {
 				favorites: clone
 			},
 			() => {
-				this.setStorage();
+				this.setStorage("favorites");
 			}
 		);
 	};
@@ -2286,7 +2315,7 @@ class App extends Component {
 				favorites: clone
 			},
 			() => {
-				this.setStorage();
+				this.setStorage("favorites");
 			}
 		);
 	};
@@ -2307,7 +2336,7 @@ class App extends Component {
 					recentlyPlayed: clone
 				},
 				() => {
-					this.setStorage();
+					this.setStorage("recentlyPlayed");
 				}
 			);
 		} else {
@@ -2320,7 +2349,7 @@ class App extends Component {
 					recentlyPlayed: clone
 				},
 				() => {
-					this.setStorage();
+					this.setStorage("recentlyPlayed");
 				}
 			);
 		}
@@ -2452,7 +2481,7 @@ class App extends Component {
 					if (this.state.user == user) {
 						this.setEverything = true;
 						this.createDataBase();
-						this.getBucket();
+						// this.getBucket();
 						this.listenToBucket();
 					}
 					this.setUserCredentials();
@@ -2623,13 +2652,16 @@ class App extends Component {
 	};
 
 	toggleDarkMode = () => {
-		this.setState(prevState => {
-			return {
-				darkMode: !prevState.darkMode
-			};
-		}, () => {
-			this.setStorage();
-		});
+		this.setState(
+			prevState => {
+				return {
+					darkMode: !prevState.darkMode
+				};
+			},
+			() => {
+				this.setStorage("darkMode");
+			}
+		);
 	};
 
 	getSettings = () => {

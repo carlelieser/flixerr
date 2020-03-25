@@ -60,12 +60,13 @@ class Collection extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.suggested !== this.props.suggested) {
+			this.checkSuggested();
             this.setHeader();
         }
     }
 
     componentDidMount() {
-        this.checkSuggested();
+		this.checkSuggested();
         this.setHeader();
     }
 
