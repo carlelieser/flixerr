@@ -1,0 +1,94 @@
+.app-header {
+	background-color: #443757 !important;
+}
+
+.app-header > .app-header-bg,
+.app-header > .app-header-bg-real {
+	background: #515151 !important;
+}
+
+.app-header > .app-header-bg > .app-header-title {
+	color: rgba(0, 0, 0, 0.41) !important;
+}
+
+.app-header > .app-header-bg > .app-header-title,
+.quality > span {
+	font-weight: bold;
+}
+
+.genre-container > .movie-scroll-container > .movie-scroll::before {
+	background-color: #676767 !important;
+}
+
+.genre-container > .movie-scroll-container > .movie-scroll {
+	background-color: #000 !important;
+}
+
+.app-header > .app-header-bg > .app-header-subtitle,
+.app-header > .app-header-bg > i,
+.app-menu-button.mdi-light:before {
+	color: #212121 !important;
+}
+
+.app-header > .app-header-bg > .search-bar-container,
+.quality-control-label,
+.content-container,
+.genre-container > .movie-genre,
+.search-content > .search-title,
+.paginated-genre-results,
+.account-container,
+body,
+html {
+	background-color: #212121 !important;
+}
+
+.account-container {
+	background-image: url("../imgs/account-bg-dark.svg") !important;
+}
+
+.app-menu > div {
+	background-color: #212121;
+}
+
+.paginated-genre-results > .genre-bar {
+	background-color: #111 !important;
+}
+
+.paginated-genre-results > .close-genre {
+	background-color: rgba(255, 255, 255, 0.1) !important;
+}
+.paginated-genre-results > .genre-name,
+.app-menu > div {
+	color: rgba(255, 255, 255, 0.81) !important;
+}
+
+.close-genre-on {
+	color: #fff !important;
+}
+
+.quality-control-label:before {
+	background: #808080 !important;
+}
+
+.app-header > .app-header-bg > .search-bar-container > i,
+.app-header > .app-header-bg > .search-bar-container > input {
+	color: #fff !important;
+}
+
+.quality-control-checkbox:checked + .quality-control-label {
+	background-color: #c5c5c5 !important;
+}
+
+.quality > span {
+	color: rgba(0, 0, 0, 0.71) !important;
+}
+
+.hd-active > span:first-child,
+.full-active > span:last-child {
+	color: #000 !important;
+}
+
+.genre-container > .movie-genre,
+.search-content > .search-title {
+	color: #757575 !important;
+}
