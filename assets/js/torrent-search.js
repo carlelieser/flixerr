@@ -41,6 +41,20 @@ let TorrentSearch = function() {
 		}
 	];
 
+	let getPuppetContent = async page => {
+		let frame = page.frames()[1];
+		let body = "";
+		try {
+			body = frame
+				? await frame.content()
+				: await page.mainFrame().content();
+		} catch (err) {
+			console.log(err);
+		}
+
+		return body;
+	};
+
 	let searchProvider = async url => {
 		let browser = await puppeteer.launch({
 			args: [
@@ -54,11 +68,9 @@ let TorrentSearch = function() {
 		});
 		let page = await browser.newPage();
 		await page.goto(url, { waitUntil: "networkidle2" });
-		let frame = page.frames()[1];
-		let body = frame
-			? await frame.content()
-			: await page.mainFrame().content();
+		let body = await getPuppetContent(page);
 		let torrents = await handleTorrents(body);
+		await browser.close();
 
 		return torrents;
 	};
@@ -96,6 +108,7 @@ let TorrentSearch = function() {
 				}
 				Promise.all(magnetPromises)
 					.then(torrents => {
+						console.log(torrents);
 						resolve(torrents);
 					})
 					.catch(err => resolve(err));
@@ -147,7 +160,7 @@ let TorrentSearch = function() {
 		$("a").each((index, element) => {
 			let link = $(element).attr("href");
 			let isMagnet = isMagnetLink(link);
-			if(isMagnet){
+			if (isMagnet) {
 				magnetLinks.push(link);
 			}
 		});
