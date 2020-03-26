@@ -454,7 +454,7 @@ class App extends Component {
 	};
 
 	setStorage = key => {
-		console.log("Setting storage", this.state.videoQuality);
+		console.log("Setting storage", key);
 		storage.set(
 			"collection",
 			{
@@ -1508,20 +1508,26 @@ class App extends Component {
 					.catch(err => {
 						console.log(err);
 						let movieData = this.getMovieTypeData(movie);
-						let publicSearch = this.publicSearch.search(
-							["1337x", "Rarbg"],
-							query,
-							movieData.urlParams.type,
-							20
-						);
+						let publicSearch = this.publicSearch
+							.search(
+								["1337x", "Rarbg"],
+								query,
+								movieData.urlParams.type,
+								20
+							)
+							.catch(err => {
+								console.log(err);
+							});
 
-						let proprietarySearch = this.torrentSearch.searchTorrents(
-							query,
-							isSeries
-						);
+						let proprietarySearch = this.torrentSearch
+							.searchTorrents(query, isSeries)
+							.catch(err => {
+								console.log(err);
+							});
 
 						Promise.all([publicSearch, proprietarySearch])
 							.then(data => {
+								console.log(data);
 								data = this.mergeArrayofArrays(data);
 
 								if (data[0]) {
