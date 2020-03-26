@@ -5,6 +5,8 @@
 # Flixerr
 The best free movie & tv series torrent streaming app.
 
+### Now with dark mode and PiP view!
+
 <p align="center">
 <img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/screenshot.png?raw=true=">
 </p>
