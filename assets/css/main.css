@@ -351,7 +351,7 @@ html {
 	background-color: #fff;
 }
 .app-menu > div:hover {
-	background-color: rgb(99, 53, 183);
+	background-color: #6335b7;
 	color: #fff !important;
 }
 
@@ -363,7 +363,7 @@ html {
 	align-items: center;
 	justify-content: center;
 	margin-left: 20px;
-	background-color: rgb(99, 53, 183);
+	background-color: #6335b7;
 	border-radius: 9999px;
 	color: #fff;
 	font-size: 10px;

@@ -27,7 +27,7 @@
 .app-header > .app-header-bg > .app-header-subtitle,
 .app-header > .app-header-bg > i,
 .app-menu-button.mdi-light:before {
-	color: #212121 !important;
+	color: #121212 !important;
 }
 
 .app-header > .app-header-bg > .search-bar-container,
@@ -35,11 +35,14 @@
 .content-container,
 .genre-container > .movie-genre,
 .search-content > .search-title,
-.paginated-genre-results,
 .account-container,
 body,
 html {
-	background-color: #212121 !important;
+	background-color: #121212 !important;
+}
+
+.paginated-genre-results{
+	background-color: #1b1b1b !important;
 }
 
 .account-container {
@@ -47,7 +50,7 @@ html {
 }
 
 .app-menu > div {
-	background-color: #212121;
+	background-color: #121212;
 }
 
 .paginated-genre-results > .genre-bar {
@@ -61,11 +64,11 @@ html {
 .search-container > .search-title,
 .app-menu > div,
 .empty-state-container > .empty-state-info > .title {
-	color: rgba(255, 255, 255, 0.81) !important;
+	color: rgba(255, 255, 255, 0.87) !important;
 }
 
 .empty-state-container > .empty-state-info > .desc {
-	color: rgba(255, 255, 255, 0.71) !important;
+	color: rgba(255, 255, 255, 0.60) !important;
 }
 
 .close-genre-on {
@@ -97,4 +100,21 @@ html {
 .genre-container > .movie-genre,
 .search-content > .search-title {
 	color: #757575 !important;
+}
+
+.app-menu > div:hover {
+	background-color: #764dc2;
+	color: #fff !important;
+}
+
+.app-menu > div > .beta-tag {
+	background-color: #764dc2;
+}
+.app-menu > div:hover .beta-tag {
+	background-color: #fff;
+	color: #764dc2;
+}
+
+.app-menu > .menu-active {
+	color: #764dc2 !important;
 }
