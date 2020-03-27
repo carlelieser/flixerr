@@ -60,7 +60,7 @@ class Player extends Component {
 		this.setState(
 			prevState => {
 				return {
-					fullscreen: !prevState.fullscreen
+					fullScreen: !prevState.fullScreen
 				};
 			},
 			() => {
