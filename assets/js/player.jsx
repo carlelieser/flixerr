@@ -56,7 +56,7 @@ class Player extends Component {
 		}
 	};
 
-	toggleFullScreen = () => {
+	toggleFullscreen = () => {
 		this.setState(
 			prevState => {
 				return {
@@ -116,7 +116,7 @@ class Player extends Component {
 			this.toggleVideoPlayback();
 		} else if (e.keyCode == 27) {
 			if (this.state.fullScreen) {
-				this.toggleFullScreen();
+				this.toggleFullscreen();
 			} else {
 				this.closeClient();
 			}
