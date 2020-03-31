@@ -56,7 +56,9 @@ let TorrentSearch = function() {
 	};
 
 	let searchProvider = async url => {
+		let path = puppeteer.executablePath().replace('app.asar', 'app.asar.unpacked');
 		let browser = await puppeteer.launch({
+			executablePath: path,
 			args: [
 				"--no-sandbox",
 				"--disable-setuid-sandbox",
@@ -64,7 +66,8 @@ let TorrentSearch = function() {
 				"--disable-accelerated-2d-canvas",
 				"--disable-gpu",
 				"--window-size=1920x1080"
-			]
+			],
+			ignoreDefaultArgs: ["--disable-extensions"]
 		});
 		let page = await browser.newPage();
 		await page.goto(url, { waitUntil: "networkidle2" });
