@@ -20,26 +20,29 @@ import DarkModeToggle from "./dark-mode-toggle";
 import TorrentSearch from "./torrent-search";
 import SubtitleSearch from "./subtitle-search";
 import { default as request } from "axios";
+import VideoStream from "./video-stream";
 
 let accurateInterval = require("accurate-interval");
 class App extends Component {
 	constructor(props) {
 		super(props);
 
-		this.fileIndex = false;
 		this.fileStart = false;
 		this.streamTimeout = false;
 		this.fileLoadedTimeout = false;
 		this.qualityTimeout = false;
+		this.introTimeout = false;
 
 		this.state = {
 			apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
 			darkMode: false,
+			readyToStream: false,
 			willClose: false,
 			trailer: false,
 			readyToClose: false,
 			loginError: false,
 			showIntro: false,
+			currentVideoStream: false,
 			account: true,
 			create: false,
 			inputEmail: "",
@@ -119,16 +122,17 @@ class App extends Component {
 	};
 
 	toggleIntro = showIntro => {
-		this.setState(
-			{
-				showIntro
-			},
-			() => {
-				if (!showIntro) {
-					this.setVideoIndex(this.fileIndex);
+		return new Promise((resolve, reject) => {
+			this.setState(
+				{
+					showIntro
+				},
+				() => {
+					clearTimeout(this.introTimeout);
+					this.introTimeout = setTimeout(resolve, 6000);
 				}
-			}
-		);
+			);
+		});
 	};
 
 	setQuality = videoQuality => {
@@ -639,8 +643,11 @@ class App extends Component {
 	handleVideo = e => {
 		let video = e.currentTarget;
 		if (video.duration) {
-			let value = (100 / video.duration) * video.currentTime;
-			let time = this.formatTime(video.duration - video.currentTime);
+			let value = this.state.live
+					? 100
+					: (100 / video.duration) * video.currentTime,
+				formatted = video.duration - video.currentTime;
+			let time = this.state.live ? "LIVE" : this.formatTime(formatted);
 			let colorStop = this.state.seekValue / 100;
 
 			this.setColorStop(colorStop);
@@ -951,6 +958,11 @@ class App extends Component {
 			});
 	};
 
+	getFileExtension = file => {
+		let { name } = file;
+		return name.substring(name.lastIndexOf(".") + 1, name.length);
+	};
+
 	streamTorrent = movie => {
 		let magnet = movie.magnet;
 
@@ -1003,10 +1015,7 @@ class App extends Component {
 				];
 
 				let filtered = torrent.files.filter(file => {
-					let extension = file.name.substring(
-						file.name.lastIndexOf(".") + 1,
-						file.name.length
-					);
+					let extension = this.getFileExtension(file);
 
 					if (videoFormats.indexOf(extension) > -1) {
 						return file;
@@ -1034,22 +1043,40 @@ class App extends Component {
 					file.select();
 
 					this.closeServer();
-
-					this.server = torrent.createServer();
-					this.server.listen("8888");
+					this.server = new VideoStream(torrent, file);
+					this.server.setCallback(this.refreshVideoStream);
+					this.setLive(this.server.shouldBeStreamed());
 
 					this.fetchFirstPieces(torrent, file).then(() => {
-						this.setStreamTimeout(35000);
-						this.toggleIntro(true);
+						this.setStreamTimeout(60000);
 						this.setPlayerStatus("Logging into the OASIS", true);
-						this.setMovieTime();
-						this.fileIndex = fileIndex;
+						this.toggleIntro(true).then(() => {
+							this.setMovieTime();
+							this.setVideoIndex(fileIndex);
+							this.setReadyToStream(true);
+						});
 					});
 				}
 			});
 		} else {
 			this.destroyClient();
 		}
+	};
+
+	setLive = live => {
+		this.setState({ live });
+	};
+
+	setReadyToStream = readyToStream => {
+		this.setState({ readyToStream });
+	};
+
+	refreshVideoStream = () => {
+		this.setState({ currentVideoStream: true }, () => {
+			this.setState({ currentVideoStream: false }, () => {
+				this.setState({ currentVideoStream: true });
+			});
+		});
 	};
 
 	resetSearch = () => {
@@ -1211,23 +1238,6 @@ class App extends Component {
 			.toLowerCase();
 	};
 
-	checkMagnet = movie => {
-		return new Promise((resolve, reject) => {
-			let magnet = movie.magnet.toUpperCase();
-			if (
-				magnet.match(
-					/^(?!.*(HDTS|HDTC|HD\.TS|HD\.TC|HD\-TS|HD\-TC|CAM))/g
-				)
-			) {
-				resolve(movie);
-			} else {
-				movie.magnet = false;
-				console.log("Previous magnet link was of low videoQuality.");
-				reject(movie);
-			}
-		});
-	};
-
 	promiseTimeout = (ms, promise) => {
 		let timeout = new Promise((resolve, reject) => {
 			let id = setTimeout(() => {
@@ -1264,7 +1274,7 @@ class App extends Component {
 
 	closeServer = () => {
 		if (this.server) {
-			this.server.close();
+			this.server.destroy();
 		}
 	};
 
@@ -1316,9 +1326,11 @@ class App extends Component {
 	getMovieTypeData = movie => {
 		let isSeries = this.isSeries(movie);
 		return {
-			id: isSeries ? (movie.id ? movie.id : movie.show.id) : movie.id,
+			id: isSeries ? (movie.show ? movie.show.id : movie.id) : movie.id,
 			urlParams: {
 				type: isSeries ? "tv" : "movie",
+				season: isSeries ? movie.season_number : false,
+				episode: isSeries ? movie.episode_number : false,
 				appendToResponse: isSeries
 					? "&append_to_response=external_ids"
 					: ""
@@ -1459,26 +1471,19 @@ class App extends Component {
 		return movie.title;
 	};
 
-	checkAndStreamMovie = movie => {
-		this.checkMagnet(movie)
-			.then(cleanMovie => {
-				this.streamTorrent(cleanMovie);
-			})
-			.catch(movie => this.searchTorrent(movie));
-	};
-
 	mergeArrayofArrays = arr => {
 		return [].concat.apply([], arr);
 	};
 
 	searchTorrent = (movie, excludeDate) => {
-		let isSeries = this.isSeries(movie);
+		let isSeries = this.isSeries(movie),
+			hasMagnet = this.hasMagnet(movie);
 		this.resetVideo();
 		this.removeTorrents();
 		this.closeServer();
 
-		if (this.hasMagnet(movie)) {
-			this.checkAndStreamMovie(movie);
+		if (hasMagnet) {
+			this.streamTorrent(movie);
 		} else {
 			let currentMovie = this.getCurrentMovie();
 			if (currentMovie) {
@@ -1650,6 +1655,8 @@ class App extends Component {
 					{
 						currentMovie: movie,
 						startTime: backUp ? this.state.startTime : false,
+						readyToStream: false,
+						currentVideoStream: false,
 						videoIndex: false,
 						videoElement: false,
 						downloadPercent: false,
@@ -2772,6 +2779,8 @@ class App extends Component {
 			<Player
 				subtitleOptions={subtitleOptions}
 				fileLoaded={fileLoaded}
+				currentVideoStream={this.state.currentVideoStream}
+				readyToStream={this.state.readyToStream}
 				setFileLoaded={this.setFileLoaded}
 				setWillClose={this.setWillClose}
 				readyToClose={readyToClose}
