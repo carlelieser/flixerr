@@ -256,7 +256,9 @@ class Player extends Component {
 
 	componentDidUpdate(prevProps, prevState) {
 		if (prevProps.startTime !== this.props.startTime) {
-			this.videoElement.current.currentTime = this.props.startTime;
+			if (this.videoElement.current) {
+				this.videoElement.current.currentTime = this.props.startTime;
+			}
 		}
 
 		if (prevState.subtitleData !== this.state.subtitleData) {
@@ -314,7 +316,11 @@ class Player extends Component {
 		let backupContainer = this.props.openBackup ? (
 			<BackupTorrents
 				movie={this.props.movie}
-				currentTime={this.videoElement.current.currentTime}
+				currentTime={
+					this.videoElement.current
+						? this.videoElement.current.currentTime
+						: 0
+				}
 				updateMovieTime={this.props.updateMovieTime}
 				torrents={this.props.movie.preferredTorrents}
 				getCurrentMagnet={this.props.getCurrentMagnet}
@@ -531,18 +537,22 @@ class Player extends Component {
 				) : (
 					<div></div>
 				)}
-				<video
-					autoPlay
-					type="video/mp4"
-					onTimeUpdate={this.handleUpdate}
-					onWaiting={this.handleBuffer}
-					src={
-						Number.isInteger(this.props.videoIndex)
-							? `http://localhost:8888/${this.props.videoIndex}`
-							: ""
-					}
-					ref={this.videoElement}
-				/>
+				{this.props.readyToStream ? (
+					<video
+						autoPlay
+						type="video/mp4"
+						onTimeUpdate={this.handleUpdate}
+						onWaiting={this.handleBuffer}
+						src={`http://localhost:8000/${
+							this.props.currentVideoStream
+								? ""
+								: this.props.videoIndex
+						}`}
+						ref={this.videoElement}
+					/>
+				) : (
+					""
+				)}
 			</div>
 		);
 	}

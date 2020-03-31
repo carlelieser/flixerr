@@ -35,7 +35,7 @@ class Episode extends Component {
 							""
 						) : (
 							<i
-								className={`mdi ${this.props.isLightClass} mdi-image mdi-36px`}
+								className={`mdi ${this.props.iconClass} mdi-image mdi-36px`}
 							/>
 						)}
 						{!still_path ? (

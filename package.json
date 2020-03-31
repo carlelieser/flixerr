@@ -1,6 +1,6 @@
 {
 	"name": "flixerr",
-	"version": "1.5.7",
+	"version": "1.5.8",
 	"description": "A movie torrent streaming service.",
 	"main": "main.js",
 	"build": {
@@ -65,6 +65,7 @@
 		"electron-notarize": "^0.1.1"
 	},
 	"dependencies": {
+		"@ffmpeg-installer/ffmpeg": "^1.0.20",
 		"accurate-interval": "^1.0.9",
 		"axios": "^0.19.2",
 		"babel-register": "^6.26.0",
@@ -79,6 +80,7 @@
 		"electron-window-state": "^5.0.3",
 		"encoding": "^0.1.12",
 		"fast-average-color": "^5.2.1",
+		"ffmpeg": "0.0.4",
 		"firebase": "^6.6.2",
 		"franc-min": "^4.1.1",
 		"fs-extra": "^8.1.0",
