@@ -46,8 +46,17 @@ class VideoStream {
 		this.file = file;
 	};
 
+	handleExit = code => {
+		if (code) {
+			console.log({ code: code, message: err });
+		} else {
+			console.log(null, { success: true, message: err });
+		}
+	};
+
 	setEvents = () => {
 		let ffmpeg = this.ffmpeg;
+		ffmpeg.on("exit", this.handleExit);
 
 		ffmpeg.stderr.on("data", data => {
 			let output = data.toString();
@@ -58,9 +67,7 @@ class VideoStream {
 			console.log("File has been converted successfully!");
 		});
 
-		ffmpeg.stderr.on("exit", () => {
-			console.log("Child has exited.");
-		});
+		ffmpeg.stderr.on("exit", this.handleExit);
 
 		ffmpeg.stderr.on("close", () => {
 			console.log("Conversion exiting.");
@@ -68,7 +75,7 @@ class VideoStream {
 	};
 
 	spawnFFmpeg = () => {
-		let ffmpegPath = this.ffmpegInstaller.path;
+		let ffmpegPath = this.ffmpegInstaller.path.replace('app.asar', 'app.asar.unpacked');
 		let spawn = this.childProcessor.spawn;
 		this.ffmpeg = spawn(ffmpegPath, [
 			"-i",
@@ -99,7 +106,7 @@ class VideoStream {
 		original.pipe(this.ffmpeg.stdin);
 		this.ffmpeg.stdout.pipe(res);
 
-		if (callback) {
+		if (this.callback) {
 			this.callback();
 		}
 	};

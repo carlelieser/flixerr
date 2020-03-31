@@ -56,15 +56,15 @@
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
 		"babel-core": "^6.26.3",
-		"babel-preset-env": "^1.7.0",
-		"babel-preset-react": "^6.24.1",
-		"babel-preset-stage-0": "^6.24.1",
 		"electron": "^5.0.13",
 		"electron-builder": "^21.2.0",
 		"electron-notarize": "^0.1.1"
 	},
 	"dependencies": {
 		"babel-polyfill": "^6.26.0",
+		"babel-preset-env": "^1.7.0",
+		"babel-preset-react": "^6.24.1",
+		"babel-preset-stage-0": "^6.24.1",
 		"@ffmpeg-installer/ffmpeg": "^1.0.20",
 		"accurate-interval": "^1.0.9",
 		"axios": "^0.19.2",
