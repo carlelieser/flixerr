@@ -7,6 +7,8 @@ The best free movie & tv series torrent streaming app.
 
 ### Now with dark mode and PiP view!
 
+### Join us at <a href="https://discord.gg/vQPuPjS"> Discord </a>
+
 <p align="center">
 <img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/new-mac-mockup.png?raw=true=">
 </p>
