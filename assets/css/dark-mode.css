@@ -1,33 +1,33 @@
 .app-header {
-	background-color: #443757 !important;
+    background-color: #443757 !important;
 }
 
 .app-header > .app-header-bg,
 .app-header > .app-header-bg-real {
-	background: #515151 !important;
+    background: #515151 !important;
 }
 
 .app-header > .app-header-bg > .app-header-title {
-	color: rgba(0, 0, 0, 0.41) !important;
+    color: rgba(0, 0, 0, 0.41) !important;
 }
 
 .app-header > .app-header-bg > .app-header-title,
 .quality > span {
-	font-weight: bold;
+    font-weight: bold;
 }
 
 .genre-container > .movie-scroll-container > .movie-scroll::before {
-	background-color: #676767 !important;
+    background-color: #676767 !important;
 }
 
 .genre-container > .movie-scroll-container > .movie-scroll {
-	background-color: #000 !important;
+    background-color: #000 !important;
 }
 
 .app-header > .app-header-bg > .app-header-subtitle,
 .app-header > .app-header-bg > i,
 .app-menu-button.mdi-light:before {
-	color: #121212 !important;
+    color: #121212 !important;
 }
 
 .app-header > .app-header-bg > .search-bar-container,
@@ -38,83 +38,85 @@
 .account-container,
 body,
 html {
-	background-color: #121212 !important;
+    background-color: #121212 !important;
 }
 
-.paginated-genre-results{
-	background-color: #1b1b1b !important;
+.paginated-genre-results {
+    background-color: #1b1b1b !important;
 }
 
 .account-container {
-	background-image: url("../imgs/account-bg-dark.svg") !important;
+    background-image: url('../imgs/account-bg-dark.svg') !important;
 }
 
 .app-menu > div {
-	background-color: #121212;
+    background-color: #121212;
 }
 
 .paginated-genre-results > .genre-bar {
-	background-color: #111 !important;
+    background-color: #111 !important;
 }
 
 .paginated-genre-results > .close-genre {
-	background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
 }
+
 .paginated-genre-results > .genre-name,
 .search-container > .search-title,
+.search-container > .search-results,
 .app-menu > div,
 .empty-state-container > .empty-state-info > .title {
-	color: rgba(255, 255, 255, 0.87) !important;
+    color: rgba(255, 255, 255, 0.87) !important;
 }
 
 .empty-state-container > .empty-state-info > .desc {
-	color: rgba(255, 255, 255, 0.60) !important;
+    color: rgba(255, 255, 255, 0.6) !important;
 }
 
 .close-genre-on {
-	color: #fff !important;
+    color: #fff !important;
 }
 
 .quality-control-label:before {
-	background: #808080 !important;
+    background: #808080 !important;
 }
 
 .app-header > .app-header-bg > .search-bar-container > i,
 .app-header > .app-header-bg > .search-bar-container > input {
-	color: #fff !important;
+    color: #fff !important;
 }
 
 .quality-control-checkbox:checked + .quality-control-label {
-	background-color: #c5c5c5 !important;
+    background-color: #c5c5c5 !important;
 }
 
 .quality > span {
-	color: rgba(0, 0, 0, 0.71) !important;
+    color: rgba(0, 0, 0, 0.71) !important;
 }
 
 .hd-active > span:first-child,
 .full-active > span:last-child {
-	color: #000 !important;
+    color: #000 !important;
 }
 
 .genre-container > .movie-genre,
 .search-content > .search-title {
-	color: #757575 !important;
+    color: #757575 !important;
 }
 
 .app-menu > div:hover {
-	background-color: #764dc2;
-	color: #fff !important;
+    background-color: #764dc2;
+    color: #fff !important;
 }
 
 .app-menu > div > .beta-tag {
-	background-color: #764dc2;
+    background-color: #764dc2;
 }
 .app-menu > div:hover .beta-tag {
-	background-color: #fff;
-	color: #764dc2;
+    background-color: #fff;
+    color: #764dc2;
 }
 
 .app-menu > .menu-active {
-	color: #764dc2 !important;
+    color: #764dc2 !important;
 }
