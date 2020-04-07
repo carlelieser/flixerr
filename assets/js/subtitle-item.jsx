@@ -1,41 +1,43 @@
-import React, {Component} from "react";
+import React, { Component } from 'react'
 
 class SubtitleItem extends Component {
     constructor(props) {
-        super(props);
+        super(props)
     }
 
     handleSubtitle = () => {
-        this
-            .props
-            .setSubtitleData(this.props.item);
-        this
-            .props
-            .setActiveSubtitle(this.props.item);
+        this.props.setSubtitleData(this.props.item)
+        this.props.setActiveSubtitle(this.props.item)
     }
 
     shouldComponentUpdate(nextProps) {
-        if (nextProps.active === this.props.active && nextProps.item === this.props.item) {
-            return false;
+        if (
+            nextProps.active === this.props.active &&
+            nextProps.item === this.props.item
+        ) {
+            return false
         } else {
-            return true;
+            return true
         }
     }
 
     render() {
         return (
             <div
-                className={`subtitle-item ${this.props.active
-                ? 'active-subtitle'
-                : ''}`}
-                onClick={this.handleSubtitle}>
+                className={`subtitle-item ${
+                    this.props.active ? 'active-subtitle' : ''
+                }`}
+                onClick={this.handleSubtitle}
+            >
                 <div className="subtitle-language">{this.props.item.lang}</div>
-                {this.props.active
-                    ? <i className="mdi mdi-checkbox-blank-circle mdi-light"/>
-                    : ''}
+                {this.props.active ? (
+                    <i className="mdi mdi-checkbox-blank-circle mdi-light" />
+                ) : (
+                    ''
+                )}
             </div>
         )
     }
 }
 
-export default SubtitleItem;
+export default SubtitleItem
