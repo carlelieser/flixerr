@@ -10,7 +10,7 @@ The best free movie & tv series torrent streaming app.
 ### Join us on <a href="https://discord.gg/vQPuPjS"> Discord </a>
 
 <p align="center">
-<img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/new-mac-mockup.png?raw=true=">
+<img src="https://flixerrtv.com/static/flixerr-mac-mockup-min-b2683a8c4b63095aed6bcac5c6dafa6c.png">
 </p>
 
 ### Installation
