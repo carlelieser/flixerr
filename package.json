@@ -47,6 +47,7 @@
         "start": "electron .",
         "format": "prettier --config ./.prettierrc --write ./assets/js ./assets/css",
         "clean": "node clean.js",
+        "deep-clean": "node clean.js --deepClean=true",
         "compile": "babel ./assets/js --out-dir dist/js",
         "build": "electron-builder --dir",
         "build-all": "electron-builder --dir -mwl",

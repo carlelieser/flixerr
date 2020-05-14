@@ -7,10 +7,8 @@ The best free movie & tv series torrent streaming app.
 
 ### Now with dark mode and PiP view!
 
-### Join us on <a href="https://discord.gg/vQPuPjS"> Discord </a>
-
 <p align="center">
-<img src="https://flixerrtv.com/static/flixerr-mac-mockup-min-b2683a8c4b63095aed6bcac5c6dafa6c.png">
+<img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/new-mac-mockup.png?raw=true=">
 </p>
 
 ### Installation
@@ -41,4 +39,4 @@ The process is as follows:
 4. Torrent is saved in case the user tries to watch the same movie more than once.
 
 ### Contributing
- If you want to contribute to making Flixerr better/faster, please don't hesitate! If you have any questions please email support@flixerrtv.com, issues are only for bugs/feature requests. 
+ If you want to contribute to making Flixerr better/faster, please don't hesitate!If you have any questions please email info@flixerr.co, issues are only for bugs/feature requests. 

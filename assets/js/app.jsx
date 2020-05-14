@@ -1385,7 +1385,7 @@ class App extends Component {
         let isSeries = this.isSeries(movie),
             type = isSeries ? 'show' : 'movie',
             url = `https://movies-v2.api-fetch.sh/${type}/${id}`
-
+        
         return this.fetchContent(url)
             .then((data) => {
                 this.setLoadingContent()

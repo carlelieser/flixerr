@@ -4,7 +4,17 @@ let exec = require('child_process').exec,
 let emoji = require('node-emoji'),
     coffee = emoji.get('coffee'),
     x = emoji.get('x'),
-    check = emoji.get('white_check_mark')
+	check = emoji.get('white_check_mark')
+	
+let getArguments = () => {
+	return process.argv;
+}
+
+let isDeepClean = () => {
+	let arguments = getArguments();
+	let deepClean = arguments.indexOf('--deepClean') > -1;
+	return deepClean;
+}
 
 let outputToTerminal = (emoji, text) => {
     console.log(emoji, text)
@@ -24,7 +34,12 @@ let cleanDirectory = () => {
     }
 }
 
+let handleDeepClean = () => {
+	if (isDeepClean()) paths.push('./node_modules');
+}
+
 let initClean = () => {
+	handleDeepClean();
     outputToTerminal(coffee, 'Cleaning directory...')
     cleanDirectory()
 }
