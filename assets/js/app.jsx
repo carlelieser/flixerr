@@ -1384,7 +1384,7 @@ class App extends Component {
     fetchFromPopcorn = (id, movie) => {
         let isSeries = this.isSeries(movie),
             type = isSeries ? 'show' : 'movie',
-            url = `http://popcorn-api.io/${type}/${id}`
+            url = `https://tv-v2.api-fetch.website/${type}/${id}`
 
         return this.fetchContent(url)
             .then((data) => {
