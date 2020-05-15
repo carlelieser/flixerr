@@ -147,17 +147,8 @@ class Player extends Component {
         this.props.removeClient(this.props.currentTime)
     }
 
-    handleClose = (e) => {
-        e.preventDefault()
-        this.pauseVideo()
-        this.props.setWillClose(true)
-        this.props.handleVideoClose(this.videoElement.current)
-        e.returnValue = false
-    }
-
     handleTorrentClick = (torrent) => {
         this.props.setPlayerLoading(true)
-        this.props.updateMovieTime(this.videoElement.current.currentTime)
         this.props.resetClient(true).then(() => {
             this.props.streamTorrent(torrent)
         })
@@ -225,7 +216,6 @@ class Player extends Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         if (
-            nextProps.readyToClose === this.props.readyToClose &&
             nextProps.showIntro === this.props.showIntro &&
             nextProps.downloadPercent === this.props.downloadPercent &&
             nextProps.downloadSpeed === this.props.downloadSpeed &&
@@ -239,6 +229,7 @@ class Player extends Component {
             nextProps.playerStatus.status === this.props.playerStatus.status &&
             nextProps.seekValue === this.props.seekValue &&
             nextProps.currentTime === this.props.currentTime &&
+            nextProps.readyToStream === this.props.readyToStream &&
             nextState.videoBuffering === this.state.videoBuffering &&
             nextProps.startTime === this.props.startTime &&
             nextProps.fileLoaded === this.props.fileLoaded &&
@@ -254,13 +245,31 @@ class Player extends Component {
         }
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (prevProps.startTime !== this.props.startTime) {
-            if (this.videoElement.current) {
-                this.videoElement.current.currentTime = this.props.startTime
-            }
-        }
+    handleInitCurrentTime = () => {
+        console.log('Setting video element current time to start time')
+        let node = this.videoElement.current
+        if (node && this.props.startTime)
+            this.setVideoTime(this.props.startTime)
+	}
+	
+	closeApp = () => {
+		let { remote } = require('electron');
+		let { app } = remote;
+		app.exit(0);
+	}
 
+    handleBeforeUnload = (e) => {
+		e.preventDefault();
+		e.returnValue = false;
+		this.pauseVideo();
+		setTimeout(this.closeApp, 400);
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.readyToStream !== this.props.readyToStream) {
+			this.handleInitCurrentTime()
+			this.props.startAutoSaveInterval()
+        }
         if (prevState.subtitleData !== this.state.subtitleData) {
             if (this.state.subtitleData) {
                 this.setSubtitles()
@@ -268,16 +277,6 @@ class Player extends Component {
                 this.removeSubtitles()
             }
         }
-
-        if (this.props.readyToClose === true) {
-            window.removeEventListener('beforeunload', this.handleClose)
-            window.close()
-        }
-    }
-
-    clearTimeouts = () => {
-        clearTimeout(this.mouseTimeout)
-        clearTimeout(this.windowTimeout)
     }
 
     componentDidMount() {
@@ -287,13 +286,13 @@ class Player extends Component {
         this.props.setVideoElement(this.videoElement)
 
         window.addEventListener('keydown', this.handleKeyPress)
-        window.addEventListener('beforeunload', this.handleClose)
+        window.addEventListener('beforeunload', this.handleBeforeUnload)
     }
 
     componentWillUnmount() {
-        this.clearTimeouts()
+        clearTimeout(this.mouseTimeout)
         window.removeEventListener('keydown', this.handleKeyPress)
-        window.removeEventListener('beforeunload', this.handleClose)
+        window.removeEventListener('beforeunload', this.handleBeforeUnload)
     }
 
     render() {
@@ -321,7 +320,6 @@ class Player extends Component {
                         ? this.videoElement.current.currentTime
                         : 0
                 }
-                updateMovieTime={this.props.updateMovieTime}
                 torrents={this.props.movie.preferredTorrents}
                 getCurrentMagnet={this.props.getCurrentMagnet}
                 handleTorrentClick={this.handleTorrentClick}

@@ -32,6 +32,8 @@ class App extends Component {
         this.fileLoadedTimeout = false
         this.qualityTimeout = false
         this.introTimeout = false
+		this.saveLastLeftOffTimeout = false
+		this.autoSaveInterval = false;
 
         this.state = {
             apiKey: '22b4015cb2245d35a9c1ad8cd48e314c',
@@ -39,7 +41,6 @@ class App extends Component {
             readyToStream: false,
             willClose: false,
             trailer: false,
-            readyToClose: false,
             loginError: false,
             showIntro: false,
             currentVideoStream: false,
@@ -111,14 +112,6 @@ class App extends Component {
 
     setFileLoaded = (fileLoaded) => {
         this.setState({ fileLoaded })
-    }
-
-    setReady = (readyToClose) => {
-        this.setState({ readyToClose })
-    }
-
-    setWillClose = (willClose) => {
-        this.setState({ willClose })
     }
 
     toggleIntro = (showIntro) => {
@@ -300,10 +293,9 @@ class App extends Component {
                 console.log(data)
             }
 
-            this.databaseRef.update(data, (err) => {
-                console.log('Data set!')
-                this.setCloseReady()
-            })
+            this.databaseRef.update(data, () => {
+				console.log('Database updated.')
+			})
         }
     }
 
@@ -444,19 +436,6 @@ class App extends Component {
         }
     }
 
-    setCloseReady = (message, load) => {
-        if (this.state.willClose) {
-            setTimeout(() => {
-                this.setPlayerStatus(
-                    message ? message : 'Data saved succesfully!',
-                    load ? load : false
-                ).then(() => {
-                    this.setReady(true)
-                })
-            }, 600)
-        }
-    }
-
     setStorage = (key) => {
         console.log('Setting storage', key)
         storage.set(
@@ -469,15 +448,11 @@ class App extends Component {
                 darkMode: this.state.darkMode,
             },
             (error) => {
-                if (error) {
-                    throw error
-                }
+				if (error) throw error
 
                 if (firebase.auth().currentUser) {
                     this.setEverything = false
                     this.setBucket(key)
-                } else {
-                    this.setCloseReady()
                 }
             }
         )
@@ -640,13 +615,36 @@ class App extends Component {
         this.setState({ time })
     }
 
+    saveLastLeftOff = (time) => {
+        clearTimeout(this.saveLastLeftOffTimeout)
+        this.saveLastLeftOffTimeout = setTimeout(() => {
+            this.updateMovieTime(time)
+        }, 400)
+	}
+
+	updateMovieTimeWithCurrentTime = () => {
+		let {currentTime} = this.state;
+		this.updateMovieTime(currentTime);
+	}
+	
+	startAutoSaveInterval = () => {
+		console.log('Setting auto-save interval.')
+		let ms = 1000 * 30;
+		this.autoSaveInterval = accurateInterval(this.updateMovieTimeWithCurrentTime, ms)
+	}
+
+	clearAutoSaveInterval = () => {
+		console.log('Clearing auto-save interval');
+		if(this.autoSaveInterval) this.autoSaveInterval.clear();
+		this.autoSaveInterval = false;
+	}
+
     handleVideo = (e) => {
         let video = e.currentTarget
-        if (video.duration) {
-            let value = this.state.live
-                    ? 100
-                    : (100 / video.duration) * video.currentTime,
-                formatted = video.duration - video.currentTime
+        let { duration, currentTime, paused } = video
+        if (duration) {
+            let value = this.state.live ? 100 : (100 / duration) * currentTime,
+                formatted = duration - currentTime
             let time = this.state.live ? 'LIVE' : this.formatTime(formatted)
             let colorStop = this.state.seekValue / 100
 
@@ -657,19 +655,12 @@ class App extends Component {
             }
 
             this.setPlayerTime(time)
-            this.setCurrentTime(video.currentTime)
+            this.setCurrentTime(currentTime)
             this.setSeekValue(value)
-        }
-        this.togglePause(video.paused)
-    }
 
-    handleVideoClose = (video) => {
-        if (video.src) {
-            this.setPlayerStatus('Saving data before closing', true)
-            this.updateMovieTime(video.currentTime, () => {
-                this.setCloseReady('Closing', true)
-            })
+            this.saveLastLeftOff(currentTime)
         }
+        this.togglePause(paused)
     }
 
     setMovieTime = () => {
@@ -679,6 +670,7 @@ class App extends Component {
 
         if (movieMatch) {
             if (movieMatch.currentTime) {
+                console.log('User left off at:', movieMatch.currentTime)
                 this.setStartTime(movieMatch.currentTime)
             }
 
@@ -1385,7 +1377,7 @@ class App extends Component {
         let isSeries = this.isSeries(movie),
             type = isSeries ? 'show' : 'movie',
             url = `https://movies-v2.api-fetch.sh/${type}/${id}`
-        
+
         return this.fetchContent(url)
             .then((data) => {
                 this.setLoadingContent()
@@ -1774,26 +1766,24 @@ class App extends Component {
         })
     }
 
-    updateMovieTime = (time, fallback) => {
+    updateMovieTime = (time, callback) => {
         let movie = this.getCurrentMovie()
         if (movie) {
             if (time) {
+                console.log('Updating movie time to:', time)
                 let clone = this.getObjectClone(movie)
                 clone.currentTime = time
                 this.setCurrentMovie(clone)
                 this.updateMovieTimeArray(clone)
             } else {
-                if (fallback) {
-                    fallback()
-                }
+                if (callback) callback()
             }
         }
     }
 
     removeClient = (time) => {
-        if (time) {
-            this.updateMovieTime(time)
-        }
+		if (time) this.updateMovieTime(time)
+		this.clearAutoSaveInterval();
         this.setState(
             {
                 error: false,
@@ -1801,10 +1791,10 @@ class App extends Component {
             },
             () => {
                 this.destroyClient().then(() => {
-                    this.removeTorrents().then((result) => {
-                        console.log(result)
-                    })
-                })
+                    return this.removeTorrents()
+				}).then((result) => {
+					console.log(result)
+				})
             }
         )
         this.setFullScreen()
@@ -2208,7 +2198,6 @@ class App extends Component {
             isSeries ? '' : `&primary_release_date.lte=${this.getDateforURL(1)}`
         }`
 
-        console.log(url)
         return url
     }
 
@@ -2718,7 +2707,6 @@ class App extends Component {
             playerLoading,
             playerStatus,
             videoQuality,
-            readyToClose,
             recentlyPlayed,
             searchContent,
             seekValue,
@@ -2771,13 +2759,12 @@ class App extends Component {
         let playerModal = this.showElementBasedOnValue(
             currentMovie,
             <Player
+				startAutoSaveInterval={this.startAutoSaveInterval}
                 subtitleOptions={subtitleOptions}
                 fileLoaded={fileLoaded}
                 currentVideoStream={this.state.currentVideoStream}
                 readyToStream={this.state.readyToStream}
                 setFileLoaded={this.setFileLoaded}
-                setWillClose={this.setWillClose}
-                readyToClose={readyToClose}
                 showIntro={showIntro}
                 toggleIntro={this.toggleIntro}
                 downloadPercent={downloadPercent}
@@ -2785,7 +2772,6 @@ class App extends Component {
                 startTime={startTime}
                 isStreaming={isStreaming}
                 changeCurrentMagnet={this.changeCurrentMagnet}
-                updateMovieTime={this.updateMovieTime}
                 resetClient={this.destroyClient}
                 togglePause={this.togglePause}
                 showBackup={this.showBackup}
@@ -2802,7 +2788,6 @@ class App extends Component {
                 videoIndex={videoIndex}
                 paused={paused}
                 removeClient={this.removeClient}
-                handleVideoClose={this.handleVideoClose}
                 setFullScreen={this.setFullScreen}
                 movie={currentMovie}
                 getCurrentMagnet={this.getCurrentMagnet}
@@ -2814,6 +2799,7 @@ class App extends Component {
                 handleVideo={this.handleVideo}
                 setSeekValue={this.setSeekValue}
                 seekValue={seekValue}
+                updateMovieTime={this.updateMovieTime}
             />
         )
 
