@@ -11,10 +11,9 @@ class BackupTorrents extends Component {
 
     handleReload = () => {
         this.props.setPlayerLoading(true)
-        this.props.updateMovieTime(this.props.currentTime)
         this.props
             .resetClient(true)
-            .then((result) => {
+            .then(() => {
                 let movie = this.props.movie
                 movie.magnet = false
                 this.props.searchTorrent(movie)
