@@ -322,10 +322,7 @@ class MovieModal extends Component {
                                 <i className="mdi mdi-arrow-right" />
                             </div>
                         ) : (
-                            <div
-                                className="movie-modal-play"
-                                onClick={this.handlePlayMovie}
-                            >
+                            <div className="btn" onClick={this.handlePlayMovie}>
                                 <i className="mdi mdi-play-circle-outline mdi-36px" />
                             </div>
                         )}

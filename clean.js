@@ -4,16 +4,16 @@ let exec = require('child_process').exec,
 let emoji = require('node-emoji'),
     coffee = emoji.get('coffee'),
     x = emoji.get('x'),
-	check = emoji.get('white_check_mark')
-	
+    check = emoji.get('white_check_mark')
+
 let getArguments = () => {
-	return process.argv;
+    return process.argv
 }
 
 let isDeepClean = () => {
-	let arguments = getArguments();
-	let deepClean = arguments.indexOf('--deepClean') > -1;
-	return deepClean;
+    let arguments = getArguments()
+    let deepClean = arguments.indexOf('--deepClean=true') > -1
+    return deepClean
 }
 
 let outputToTerminal = (emoji, text) => {
@@ -23,7 +23,7 @@ let outputToTerminal = (emoji, text) => {
 let cleanDirectory = () => {
     for (let i = 0; i < paths.length; i++) {
         let path = paths[i]
-        let command = `rm -r ${path}`
+        let command = `rm -rf ${path}`
         exec(command, (err, stdout, stderr) => {
             if (err) {
                 outputToTerminal(x, `Error removing ${path}`)
@@ -35,11 +35,11 @@ let cleanDirectory = () => {
 }
 
 let handleDeepClean = () => {
-	if (isDeepClean()) paths.push('./node_modules');
+    if (isDeepClean()) paths.push('./node_modules')
 }
 
 let initClean = () => {
-	handleDeepClean();
+    handleDeepClean()
     outputToTerminal(coffee, 'Cleaning directory...')
     cleanDirectory()
 }

@@ -15,6 +15,7 @@ html {
 .movie-player > .top-bar-container > .top-bar > div {
     cursor: default;
 }
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -655,15 +656,17 @@ html {
 }
 
 .movie-modal {
-    width: 700px;
-    height: 600px;
+    width: auto;
+    height: auto;
+    min-width: 700px;
+    min-height: 600px;
     box-sizing: border-box;
-    padding: 40px;
+    padding: 3em;
     top: 50%;
     left: 50%;
     position: fixed;
     transform: translate(-50%, -50%);
-    border-radius: 4px;
+    border-radius: 8px;
     box-shadow: 0 6px 40px 0 rgba(0, 0, 0, 0.31);
     z-index: 800;
     cursor: default;
@@ -705,6 +708,8 @@ html {
     left: 0;
     position: absolute;
     z-index: 10;
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
 }
 
 .seasons-loading {
@@ -1139,8 +1144,9 @@ html {
     margin-left: 5px;
 }
 
-.movie-modal > .movie-modal-info > .movie-modal-play {
-    width: 200px;
+.btn {
+    width: auto;
+    min-width: 200px;
     min-height: 50px;
     border-radius: 999px;
     margin-top: 30px;
@@ -1149,12 +1155,17 @@ html {
     box-shadow: 0 10px 20px -12px rgba(241, 24, 24, 0.41);
     position: relative;
     transition: all 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:hover,
+.btn:hover *,
 .open-series:hover {
     color: rgb(241, 24, 24) !important;
+    z-index: 50;
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:before,
+
+.btn:before,
 .open-series:before {
     content: '';
     position: absolute;
@@ -1170,43 +1181,128 @@ html {
     border-radius: 999px;
     pointer-events: none;
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:hover:before,
+.btn:hover:before,
 .open-series:hover:before {
     transform: translate(-1%, -1%);
     opacity: 1;
 }
-.movie-modal > .movie-modal-info > .movie-modal-play:hover,
+
+.btn:hover,
 .open-series:hover {
     box-shadow: 0 10px 20px -12px rgba(255, 255, 255, 0.41) !important;
 }
 
-.movie-modal > .movie-modal-info > .movie-modal-play > * {
-    position: absolute;
-    z-index: 100;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.movie-modal > .movie-modal-info > .movie-modal-play > i {
+.btn > i {
     color: inherit;
 }
 
-.movie-modal > .movie-modal-info > .movie-modal-play > div {
+.btn > div {
     font-family: 'Avenir';
     font-weight: bold;
-    font-size: 24px;
+    font-size: 0.9em;
     text-transform: uppercase;
-    margin-left: 20px;
+    margin-left: 0.5em;
 }
 
-.subtitle-container {
+.subtitles-container {
+    margin-right: 100px !important;
+}
+
+.cast-container {
+    margin-right: 150px !important;
+}
+
+.cast-screen {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    background-color: rgba(121, 143, 241, 0.548);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.cast-screen > div:not(.cast-screen-bg) {
+    z-index: 50;
+}
+
+.cast-screen-bg {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-image: url('../imgs/casting-bg.svg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.61;
+    position: absolute;
+    z-index: 0;
+}
+
+.cast-screen > .cast-screen-info {
+    width: auto;
+    height: auto;
+    padding: 2.5em;
+    border-radius: 8px;
+    box-shadow: 0px 10px 20px -5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.cast-screen > .cast-screen-info > img {
+    width: 100%;
+    max-width: 160px;
+    padding: 2em;
+}
+
+.cast-screen > .cast-screen-info > .mdi {
+    color: #f73636;
+}
+
+.cast-screen > .cast-screen-info > .cast-screen-title {
+    font-family: 'Avenir', sans-serif;
+    font-weight: bold;
+    font-size: 1.5em;
+    color: rgb(44, 56, 54);
+    margin-top: 0.5em;
+}
+
+.cast-screen > .cast-screen-info > .cast-screen-desc {
+    font-family: 'Avenir', sans-serif;
+    font-size: 1em;
+    color: rgb(44, 56, 54);
+    opacity: 0.81;
+    margin-top: 0.5em;
+}
+
+.cast-screen > .cast-screen-info > .cast-screen-desc > span {
+    font-weight: bold;
+}
+
+.casting-video {
+    top: 100% !important ;
+    filter: blur(2px);
+    transform: scale(4) translateY(-50%) !important;
+}
+
+.p {
+    padding: 1.25em;
+}
+
+.player-dialog-container {
     width: 200px;
     height: auto;
     bottom: 0;
     right: 0;
     position: absolute;
-    margin-right: 70px !important;
     margin-bottom: 60px !important;
     background-color: #313131;
     border-radius: 4px;
@@ -1214,7 +1310,67 @@ html {
     transition: height 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
-.subtitle-container > div {
+.player-dialog-container > .player-dialog-title {
+    font-family: 'Avenir', sans-serif;
+    font-weight: bold;
+    font-size: 1.25em;
+    color: #fff;
+}
+
+.player-dialog-subtitle {
+    font-family: 'Avenir', sans-serif;
+    font-size: 1em;
+    color: #fff;
+    opacity: 0.71;
+    text-transform: capitalize;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.player-dialog-loading-container {
+    width: 100%;
+    height: 40px;
+    background-image: url('../imgs//loading.svg');
+    background-position: center;
+    background-size: 24px;
+    background-repeat: no-repeat;
+}
+
+.cast-device {
+    height: 25px;
+    font-family: 'Avenir';
+    font-size: 0.9em;
+    color: #fff;
+    opacity: 0.81;
+    transition: all 0.25s ease-in-out;
+    display: flex;
+    align-items: center;
+}
+
+.cast-device:hover {
+    opacity: 1;
+}
+
+.cast-device-active {
+    opacity: 1;
+    color: rgb(24, 117, 255);
+    font-weight: bold;
+}
+
+.cast-device-active > .mdi-light:before,
+.action-is-casting:before {
+    color: rgb(24, 117, 255) !important;
+}
+
+.cast-device > .cast-device-name {
+    margin-left: 0.5em;
+}
+
+.cast-device > .mdi {
+    font-size: 1.25em;
+}
+
+.subtitles-container > div {
     width: 100%;
     height: 50px;
     display: flex;
@@ -1228,7 +1384,7 @@ html {
     font-size: 12px;
     transition: 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
-.subtitle-container > div:hover {
+.subtitles-container > div:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -1236,7 +1392,7 @@ html {
     justify-content: center;
 }
 
-.subtitle-container > div > .subtitle-loading {
+.subtitles-container > div > .subtitle-loading {
     width: 20px;
     height: 20px;
     background-size: 20px;
@@ -1245,14 +1401,14 @@ html {
     background-position: center;
 }
 
-.subtitle-container > div > i {
+.subtitles-container > div > i {
     position: absolute;
     right: 0;
     margin-right: 20px;
     font-size: 10px;
 }
 
-.subtitle-container > .active-subtitle {
+.subtitles-container > .active-subtitle {
     color: rgb(255, 255, 255);
 }
 
@@ -1660,14 +1816,18 @@ video::-webkit-media-text-track-display {
     > .bottom-bar-container
     > .bottom-bar
     > .bottom-bar-action-container
-    > i:not(.pip-btn) {
+    > i {
     font-size: 36px;
     line-height: 36px;
 }
 
-.pip-btn {
-    font-size: 33px;
-    line-height: 33px;
+.movie-player
+    > .bottom-bar-container
+    > .bottom-bar
+    > .bottom-bar-action-container
+    > .special-size {
+    font-size: 42px;
+    line-height: 42px;
 }
 
 .movie-hide {
@@ -1680,6 +1840,7 @@ video::-webkit-media-text-track-display {
     animation-fill-mode: forwards;
     pointer-events: none;
 }
+
 @keyframes topHide {
     from {
         transform: translateY(0);
@@ -1698,6 +1859,7 @@ video::-webkit-media-text-track-display {
     animation-fill-mode: forwards;
     pointer-events: none;
 }
+
 @keyframes bottomHide {
     from {
         transform: translateY(0);
@@ -2459,6 +2621,10 @@ input[type='range']::-webkit-slider-thumb:hover {
 
 .dark-mode-toggle.dark-mode-toggle-dark:hover i:before {
     color: #1d1e29;
+}
+
+.no-pointer-events {
+    pointer-events: none !important;
 }
 
 @font-face {

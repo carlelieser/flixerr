@@ -3,8 +3,10 @@ import React, { Component } from 'react'
 import { CSSTransitionGroup } from 'react-transition-group'
 import Fade from 'react-reveal/Fade'
 
-import SubtitleItem from './subtitle-item'
+import SubtitlesContainer from './subtitles/subtitles-container'
 import BackupTorrents from './backup-torrent-container'
+import CastContainer from './cast/cast-container'
+import CastScreen from './cast/cast-screen'
 
 class Player extends Component {
     constructor(props) {
@@ -20,10 +22,45 @@ class Player extends Component {
             fullScreen: false,
             showOverlay: true,
             showSubtitles: false,
+            showCastContainer: false,
+            activeCastingDevice: false,
+            videoUrl: false,
             videoBuffering: false,
-            subtitleData: false,
             activeSubtitle: false,
+            bottomBarActions: [
+                {
+                    icon: 'cast',
+                    onClick: this.toggleCastContainer,
+                },
+                {
+                    hideWhenPipView: true,
+                    icon: 'subtitles-outline',
+                    special: true,
+                    onClick: this.toggleSubtitleMenu,
+                },
+                {
+                    className: 'pip-btn',
+                    icon: 'picture-in-picture-bottom-right',
+                    onClick: this.togglePipView,
+                },
+                {
+                    className: 'fullscreen-btn',
+                    hideWhenPipView: true,
+                    icon: 'fullscreen',
+                    special: true,
+                    onClick: this.toggleFullscreen,
+                },
+            ],
         }
+    }
+
+    setActiveCastingDevice = (activeCastingDevice) => {
+        this.setState({ activeCastingDevice }, () => {
+            console.log(
+                'Set active casting device to:',
+                this.state.activeCastingDevice
+            )
+        })
     }
 
     setActiveSubtitle = (activeSubtitle) => {
@@ -34,6 +71,14 @@ class Player extends Component {
         this.setState((prevState) => {
             return {
                 showSubtitles: !prevState.showSubtitles,
+            }
+        })
+    }
+
+    toggleCastContainer = () => {
+        this.setState((prevState) => {
+            return {
+                showCastContainer: !prevState.showCastContainer,
             }
         })
     }
@@ -73,6 +118,7 @@ class Player extends Component {
         this.setState((prevState) => {
             return {
                 pipView: !prevState.pipView,
+                showSubtitles: false,
             }
         })
     }
@@ -81,14 +127,14 @@ class Player extends Component {
         if (this.videoElement.current) {
             if (toggle) {
                 if (this.videoElement.current.paused == true) {
-                    this.videoElement.current.play()
+                    this.playVideoElement()
                 } else {
-                    this.videoElement.current.pause()
+                    this.pauseVideoElement()
                 }
             } else if (play) {
-                this.videoElement.current.play()
+                this.playVideoElement()
             } else {
-                this.videoElement.current.pause()
+                this.pauseVideoElement()
             }
 
             this.toggleOverlay(this.videoElement.current.paused)
@@ -103,8 +149,24 @@ class Player extends Component {
         this.handleVideoPlayback()
     }
 
+    playVideoElement = () => {
+        if (this.state.activeCastingDevice)
+            this.state.activeCastingDevice.play()
+        this.videoElement.current.play()
+    }
+
+    pauseVideoElement = () => {
+        if (this.state.activeCastingDevice) {
+            this.state.activeCastingDevice.pause()
+        }
+        this.videoElement.current.pause()
+    }
+
     setVideoTime = (time) => {
         this.videoElement.current.currentTime = time
+        if (this.state.activeCastingDevice) {
+            this.state.activeCastingDevice.seek(time)
+        }
     }
 
     toggleVideoPlayback = () => {
@@ -183,35 +245,44 @@ class Player extends Component {
     }
 
     stopIntro = () => {
+        this.setState({ showIntro: false })
         this.props.toggleIntro()
     }
 
-    setSubtitleData = (subtitleData) => {
-        if (!subtitleData) {
-            this.setActiveSubtitle()
+    createSubtitleTrack = () => {
+        let { activeSubtitle } = this.state
+        if (activeSubtitle) {
+            let { language, src } = activeSubtitle
+            let track = document.createElement('track')
+            track.kind = 'subtitles'
+            track.label = language
+            track.src = src
+            return track
         }
-        this.setState({ subtitleData })
     }
 
-    handleSubtitlesOff = () => {
-        this.toggleSubtitleMenu()
-        this.setSubtitleData()
+    addTrackToVideoElement = (track) => {
+        let node = this.videoElement.current
+        if (node) node.append(track)
     }
 
-    setSubtitles = () => {
-        let track = document.createElement('track')
-        track.kind = 'subtitles'
-        track.label = this.state.subtitleData.language
-        track.src = this.state.subtitleData.src
-        this.removeSubtitles()
-        this.videoElement.current.append(track)
+    showTrackInVideoElement = (track) => {
+        let node = this.videoElement.current
         track.mode = 'showing'
-        this.videoElement.current.textTracks[0].mode = 'showing'
+        if (node) node.textTracks[0].mode = 'showing'
+    }
+
+    insertSubtitlesIntoVideo = () => {
+        let track = this.createSubtitleTrack()
+        this.removeSubtitlesFromVideo()
+        this.addTrackToVideoElement(track)
+        this.showTrackInVideoElement(track)
         this.toggleSubtitleMenu()
     }
 
-    removeSubtitles = () => {
-        this.videoElement.current.innerHTML = ''
+    removeSubtitlesFromVideo = () => {
+        let node = this.videoElement.current
+        if (node) node.innerHTML = ''
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -234,10 +305,11 @@ class Player extends Component {
             nextProps.startTime === this.props.startTime &&
             nextProps.fileLoaded === this.props.fileLoaded &&
             nextProps.subtitleOptions === this.props.subtitleOptions &&
-            nextState.subtitleData === this.state.subtitleData &&
             nextState.activeSubtitle === this.state.activeSubtitle &&
             nextState.showSubtitles === this.state.showSubtitles &&
-            nextState.pipView === this.state.pipView
+            nextState.pipView === this.state.pipView &&
+            nextState.showCastContainer === this.state.showCastContainer &&
+            nextState.activeCastingDevice === this.state.activeCastingDevice
         ) {
             return false
         } else {
@@ -250,32 +322,75 @@ class Player extends Component {
         let node = this.videoElement.current
         if (node && this.props.startTime)
             this.setVideoTime(this.props.startTime)
-	}
-	
-	closeApp = () => {
-		let { remote } = require('electron');
-		let { app } = remote;
-		app.exit(0);
-	}
+    }
+
+    closeApp = () => {
+        let { remote } = require('electron')
+        let { app } = remote
+        app.exit(0)
+    }
 
     handleBeforeUnload = (e) => {
-		e.preventDefault();
-		e.returnValue = false;
-		this.pauseVideo();
-		setTimeout(this.closeApp, 400);
+        e.preventDefault()
+        e.returnValue = false
+        this.pauseVideo()
+        setTimeout(this.closeApp, 400)
+    }
+
+    updateVideoUrl = () => {
+        let videoUrl = `http://localhost:8000/${
+            this.props.currentVideoStream ? '' : this.props.videoIndex
+        }`
+        this.setState({ videoUrl })
+    }
+
+    setPlayerVolume = (volume) => {
+        let node = this.videoElement.current
+        if (node) node.volume = volume
     }
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.readyToStream !== this.props.readyToStream) {
-			this.handleInitCurrentTime()
-			this.props.startAutoSaveInterval()
+            this.handleInitCurrentTime()
+            this.props.startAutoSaveInterval()
         }
-        if (prevState.subtitleData !== this.state.subtitleData) {
-            if (this.state.subtitleData) {
-                this.setSubtitles()
-            } else {
-                this.removeSubtitles()
+
+        if (prevState.pipView !== this.state.pipView) {
+            if (this.state.pipView) {
+                this.removeSubtitlesFromVideo()
+            } else if (this.state.activeSubtitle) {
+                this.insertSubtitlesIntoVideo()
             }
+        }
+
+        if (prevState.activeSubtitle !== this.state.activeSubtitle) {
+            if (this.state.activeSubtitle) {
+                this.insertSubtitlesIntoVideo()
+            } else {
+                this.removeSubtitlesFromVideo()
+            }
+        }
+
+        if (
+            prevProps.currentVideoStream !== this.props.currentVideoStream ||
+            prevProps.videoIndex !== this.props.videoIndex
+        ) {
+            this.updateVideoUrl()
+        }
+
+        if (prevState.videoBuffering !== this.state.videoBuffering) {
+            if (this.state.videoBuffering) {
+                if (this.state.activeCastingDevice)
+                    this.state.activeCastingDevice.pause()
+            } else {
+                if (this.state.activeCastingDevice)
+                    this.state.activeCastingDevice.play()
+            }
+        }
+
+        if (prevState.activeCastingDevice !== this.state.activeCastingDevice) {
+            let volume = this.state.activeCastingDevice ? 0 : 1
+            this.setPlayerVolume(volume)
         }
     }
 
@@ -293,33 +408,37 @@ class Player extends Component {
         clearTimeout(this.mouseTimeout)
         window.removeEventListener('keydown', this.handleKeyPress)
         window.removeEventListener('beforeunload', this.handleBeforeUnload)
+        if (this.state.activeCastingDevice)
+            this.state.activeCastingDevice.stop()
     }
 
     render() {
-        let subtitles = this.props.subtitleOptions
-            ? this.props.subtitleOptions.map((item) => {
-                  let isActive = this.state.activeSubtitle
-                      ? this.state.activeSubtitle.name == item.name
-                      : false
-                  return (
-                      <SubtitleItem
-                          active={isActive}
-                          setActiveSubtitle={this.setActiveSubtitle}
-                          setSubtitleData={this.setSubtitleData}
-                          item={item}
-                      />
-                  )
-              })
-            : ''
+        let bottomBarActions = this.state.bottomBarActions.map((action) => {
+            let { hideWhenPipView, className, onClick, icon, special } = action
+            let iconClass = `mdi-${icon}`
+            let specialClass = special ? 'special-size' : ''
+            let isCasting = icon === 'cast'
+            let castingClass =
+                isCasting && this.state.activeCastingDevice
+                    ? 'action-is-casting'
+                    : ''
+            let component = (
+                <i
+                    key={icon}
+                    className={`mdi mdi-light ${iconClass} ${className} ${specialClass} ${castingClass}`}
+                    onClick={onClick}
+                />
+            )
+            return hideWhenPipView
+                ? this.state.pipView
+                    ? null
+                    : component
+                : component
+        })
 
         let backupContainer = this.props.openBackup ? (
             <BackupTorrents
                 movie={this.props.movie}
-                currentTime={
-                    this.videoElement.current
-                        ? this.videoElement.current.currentTime
-                        : 0
-                }
                 torrents={this.props.movie.preferredTorrents}
                 getCurrentMagnet={this.props.getCurrentMagnet}
                 handleTorrentClick={this.handleTorrentClick}
@@ -343,6 +462,8 @@ class Player extends Component {
             this.props.openBackup ||
             this.state.showSubtitles ||
             (this.props.playerStatus ? this.props.playerStatus.status : false)
+
+        let playerTitle = this.props.movie.show_title || this.props.movie.title
 
         return (
             <div
@@ -427,13 +548,8 @@ class Player extends Component {
                             className="mdi mdi-light mdi-chevron-left mdi-36px"
                             onClick={this.closeClient}
                         />
-                        <div>
-                            {this.props.movie.show_title ||
-                                this.props.movie.title}
-                        </div>
-                        {this.state.pipView ? (
-                            ''
-                        ) : (
+                        <div>{playerTitle}</div>
+                        {this.state.pipView ? null : (
                             <i
                                 className="open-backup mdi mdi-light mdi-sort-variant"
                                 onClick={this.handleOpenBackup}
@@ -482,49 +598,37 @@ class Player extends Component {
                             </div>
                         )}
                         <span>{this.props.time}</span>
-                        {this.state.pipView ? (
-                            ''
-                        ) : (
-                            <Fade
-                                mountOnEnter
-                                unmountOnExit
-                                duration={350}
-                                when={this.state.showSubtitles}
-                                distance="10%"
-                                bottom
-                            >
-                                <div className="subtitle-container">
-                                    {subtitles}
-                                    <div onClick={this.handleSubtitlesOff}>
-                                        Off
-                                    </div>
-                                </div>
-                            </Fade>
+                        <CastContainer
+                            show={this.state.showCastContainer}
+                            videoUrl={this.state.videoUrl}
+                            playerTitle={playerTitle}
+                            currentTime={this.props.currentTime}
+                            activeCastingDevice={this.state.activeCastingDevice}
+                            setActiveCastingDevice={this.setActiveCastingDevice}
+                            toggleCastContainer={this.toggleCastContainer}
+                            setVideoTime={this.setVideoTime}
+                            playVideo={this.playVideo}
+                            pauseVideo={this.pauseVideo}
+                        />
+                        {this.state.pipView ? null : (
+                            <SubtitlesContainer
+                                show={this.state.showSubtitles}
+                                activeSubtitle={this.state.activeSubtitle}
+                                setActiveSubtitle={this.setActiveSubtitle}
+                                subtitleOptions={this.props.subtitleOptions}
+                                toggleSubtitleMenu={this.toggleSubtitleMenu}
+                            />
                         )}
                         <div className="bottom-bar-action-container">
-                            {this.state.pipView ? (
-                                ''
-                            ) : (
-                                <i
-                                    className="mdi mdi-light mdi-subtitles-outline"
-                                    onClick={this.toggleSubtitleMenu}
-                                />
-                            )}
-                            <i
-                                className="mdi mdi-light mdi-picture-in-picture-bottom-right pip-btn"
-                                onClick={this.togglePipView}
-                            />
-                            {this.state.pipView ? (
-                                ''
-                            ) : (
-                                <i
-                                    className="mdi mdi-light mdi-fullscreen fullscreen-btn"
-                                    onClick={this.toggleFullscreen}
-                                />
-                            )}
+                            {bottomBarActions}
                         </div>
                     </div>
                 </div>
+                <CastScreen
+                    device={this.state.activeCastingDevice}
+                    show={this.state.activeCastingDevice}
+                    setActiveCastingDevice={this.setActiveCastingDevice}
+                />
                 {this.props.showIntro ? (
                     <video
                         autoPlay
@@ -532,25 +636,22 @@ class Player extends Component {
                         src="./assets/video/intro.mp4"
                         onEnded={this.stopIntro}
                     />
-                ) : (
-                    <div></div>
-                )}
+                ) : null}
                 {this.props.readyToStream ? (
                     <video
+                        className={
+                            this.state.activeCastingDevice
+                                ? 'casting-video'
+                                : ''
+                        }
                         autoPlay
                         type="video/mp4"
                         onTimeUpdate={this.handleUpdate}
                         onWaiting={this.handleBuffer}
-                        src={`http://localhost:8000/${
-                            this.props.currentVideoStream
-                                ? ''
-                                : this.props.videoIndex
-                        }`}
+                        src={this.state.videoUrl}
                         ref={this.videoElement}
                     />
-                ) : (
-                    ''
-                )}
+                ) : null}
             </div>
         )
     }

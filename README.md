@@ -16,6 +16,8 @@ The best free movie & tv series torrent streaming app.
 ### Installation
 To install Flixerr, click the appropriate link for your system in the releases page. Alternatively, you can click the download button on our website.
 
+As of update 1.6.0, it is recommended to run `npm run rebuild` after runnind `npm install` for the first time.
+
 ### Features
 Flixerr makes it easy to stream movies straight from your desktop. Just find the movie you want to watch, and click play.
 

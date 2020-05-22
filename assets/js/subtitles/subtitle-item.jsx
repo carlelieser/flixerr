@@ -6,14 +6,13 @@ class SubtitleItem extends Component {
     }
 
     handleSubtitle = () => {
-        this.props.setSubtitleData(this.props.item)
-        this.props.setActiveSubtitle(this.props.item)
+        this.props.setActiveSubtitle(this.props.subtitle)
     }
 
     shouldComponentUpdate(nextProps) {
         if (
             nextProps.active === this.props.active &&
-            nextProps.item === this.props.item
+            nextProps.subtitle === this.props.subtitle
         ) {
             return false
         } else {
@@ -24,12 +23,14 @@ class SubtitleItem extends Component {
     render() {
         return (
             <div
-                className={`subtitle-item ${
+                className={`subtitle-subtitle ${
                     this.props.active ? 'active-subtitle' : ''
                 }`}
                 onClick={this.handleSubtitle}
             >
-                <div className="subtitle-language">{this.props.item.lang}</div>
+                <div className="subtitle-language">
+                    {this.props.subtitle.lang}
+                </div>
                 {this.props.active ? (
                     <i className="mdi mdi-checkbox-blank-circle mdi-light" />
                 ) : (
