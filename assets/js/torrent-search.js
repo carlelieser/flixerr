@@ -12,9 +12,7 @@ let TorrentSearch = function () {
             name: 'The Pirate Bay',
             url: 'https://www.pirate-bay.net/search?q=',
             queryFunction: (query) => {
-                return `${encodeURI(
-                    query
-                )}&video=on&category=0&page=0&orderby=99`
+                return `${encodeURI(query)}`
             },
         },
         {
@@ -133,6 +131,7 @@ let TorrentSearch = function () {
                     (show && provider.forShows) ||
                     (!show && !provider.forShows)
                 ) {
+                    console.log(url)
                     let promise = searchProvider(url)
                     searchPromises.push(promise)
                 }
