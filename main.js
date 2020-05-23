@@ -9,7 +9,7 @@ const { autoUpdater } = require('electron-updater')
 
 let mainWindow
 
-global.flixerrDevelop = false
+if(process.argv.indexOf('-dev') > -1) global.flixerrDevelop = true
 
 function createWindow() {
     let mainWindowState = windowStateKeeper({

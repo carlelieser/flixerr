@@ -44,10 +44,11 @@
         }
     },
     "scripts": {
-        "start": "electron .",
+		"start": "npm run compile ; electron .",
+		"develop": "electron . -dev",
         "format": "prettier --config ./.prettierrc --write ./assets/js ./assets/css",
         "clean": "node clean.js",
-        "deep-clean": "node clean.js --deepClean=true",
+        "deep-clean": "node clean.js --deep-clean",
         "compile": "babel ./assets/js --out-dir dist/js",
         "rebuild": "./node_modules/.bin/electron-rebuild",
         "build": "electron-builder --dir",

@@ -12,7 +12,7 @@ let getArguments = () => {
 
 let isDeepClean = () => {
     let arguments = getArguments()
-    let deepClean = arguments.indexOf('--deepClean=true') > -1
+    let deepClean = arguments.indexOf('--deep-clean') > -1
     return deepClean
 }
 
