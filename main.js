@@ -14,7 +14,7 @@ global.flixerrDevelop = false
 function createWindow() {
     let mainWindowState = windowStateKeeper({
         defaultWidth: 1200,
-        defaultHeight: 800,
+        defaultHeight: 700,
     })
 
     mainWindow = new BrowserWindow({
@@ -23,8 +23,8 @@ function createWindow() {
         width: mainWindowState.width,
         height: mainWindowState.height,
         minWidth: 1200,
-        minHeight: 800,
-        maximizable: false,
+        minHeight: 700,
+        maximizable: process.platform == 'win32',
         title: 'Flixerr',
         icon: __dirname + '/assets/imgs/icon.ico',
         backgroundColor: '#5d16fd',
