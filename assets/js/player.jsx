@@ -7,6 +7,7 @@ import SubtitlesContainer from './subtitles/subtitles-container'
 import BackupTorrents from './backup-torrent-container'
 import CastContainer from './cast/cast-container'
 import CastScreen from './cast/cast-screen'
+import CastScreenModal from './cast/cast-screen-modal'
 
 class Player extends Component {
     constructor(props) {
@@ -624,11 +625,12 @@ class Player extends Component {
                         </div>
                     </div>
                 </div>
-                <CastScreen
-                    device={this.state.activeCastingDevice}
+                <CastScreenModal
                     show={this.state.activeCastingDevice}
                     setActiveCastingDevice={this.setActiveCastingDevice}
+                    device={this.state.activeCastingDevice}
                 />
+                <CastScreen show={this.state.activeCastingDevice} />
                 {this.props.showIntro ? (
                     <video
                         autoPlay

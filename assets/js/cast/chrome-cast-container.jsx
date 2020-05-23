@@ -48,8 +48,12 @@ class ChromeCastContainer extends Component {
     }
 
     getReceiverAddress = (device) => {
-        let { addresses } = device
-        return addresses[1]
+		let { addresses } = device
+		let ipRegex = /\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/g;
+		let ip = addresses.find((address) =>
+            address.match(ipRegex)
+		)
+        return ip
     }
 
     getMediaUrl = () => {
@@ -306,7 +310,7 @@ class ChromeCastContainer extends Component {
     loadReceivers = () => {
         this.browser = mdns.createBrowser(mdns.tcp('googlecast'))
         this.browser.on('serviceUp', this.addReceiver)
-        this.browser.on('serviceDown', this.removeReceiver)
+		this.browser.on('serviceDown', this.removeReceiver)
         this.browser.start()
     }
 
@@ -355,6 +359,9 @@ class ChromeCastContainer extends Component {
         return (
             <div className="chrome-cast-container">
                 <div className="player-dialog-subtitle">Chrome cast</div>
+                <div className="player-dialog-text">
+					{devices.length === 0 ? 'No devices found.' : loading ? 'Loading devices...' : ''}
+				</div>
                 {loading ? (
                     <div className="player-dialog-loading-container"></div>
                 ) : (
