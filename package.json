@@ -44,8 +44,8 @@
         }
     },
     "scripts": {
-		"start": "npm run compile ; electron .",
-		"develop": "electron . -dev",
+        "start": "npm run compile ; electron .",
+        "develop": "electron . -dev",
         "format": "prettier --config ./.prettierrc --write ./assets/js ./assets/css",
         "clean": "node clean.js",
         "deep-clean": "node clean.js --deep-clean",
@@ -61,12 +61,10 @@
     "devDependencies": {
         "babel-cli": "^6.26.0",
         "babel-core": "^6.26.3",
-        "color-it": "^1.2.11",
         "electron": "^5.0.13",
         "electron-builder": "^21.2.0",
         "electron-notarize": "^0.1.1",
         "electron-rebuild": "^1.11.0",
-        "emojic": "^1.1.15",
         "prettier": "^2.0.4"
     },
     "dependencies": {
