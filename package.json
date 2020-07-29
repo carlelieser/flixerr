@@ -38,13 +38,13 @@
         },
         "linux": {
             "target": [
-                "deb"
+                "AppImage"
             ],
             "category": "video"
         }
     },
     "scripts": {
-        "start": "npm run compile ; electron .",
+        "start": "npm run compile && electron .",
         "develop": "electron . -dev",
         "format": "prettier --config ./.prettierrc --write ./assets/js ./assets/css",
         "clean": "node clean.js",
