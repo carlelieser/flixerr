@@ -2578,7 +2578,7 @@ class App extends Component {
         let id = (movie.id || movie.rg_id).toString()
         let audienceRef = this.firestoreDatabase.collection('audiences').doc(id)
 
-        audienceRef.get((doc) => {
+        audienceRef.get().then((doc) => {
             if (doc.exists) {
                 audienceRef.update({
                     count: firebase.firestore.FieldValue.increment(1),
