@@ -1157,8 +1157,8 @@ html {
     transition: all 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
     display: flex;
     align-items: center;
-	justify-content: center;
-	pointer-events: all !important;
+    justify-content: center;
+    pointer-events: all !important;
 }
 .btn:hover *,
 .open-series:hover {
@@ -1241,8 +1241,8 @@ html {
     z-index: 0;
 }
 
-.z-index-0{
-	z-index: 0 !important;
+.z-index-0 {
+    z-index: 0 !important;
 }
 
 .cast-screen-modal-container {
@@ -1253,8 +1253,8 @@ html {
     left: 0;
     display: flex;
     align-items: center;
-	justify-content: center;
-	pointer-events: none;
+    justify-content: center;
+    pointer-events: none;
     z-index: 9999;
 }
 
@@ -1354,12 +1354,12 @@ html {
     margin-bottom: 0.5em;
 }
 
-.player-dialog-text{
-	font-family: 'Avenir', sans-serif;
-	font-size: 0.8em;
-	color: #fff;
-	opacity: 0.61;
-	margin-top: 0.25em;
+.player-dialog-text {
+    font-family: 'Avenir', sans-serif;
+    font-size: 0.8em;
+    color: #fff;
+    opacity: 0.61;
+    margin-top: 0.25em;
     margin-bottom: 0.25em;
 }
 
@@ -1712,8 +1712,8 @@ video::-webkit-media-text-track-display {
 .movie-player {
     width: 100%;
     height: 100%;
-    bottom: 0;
-    right: 0;
+    top: 0;
+    left: 0;
     position: fixed;
     z-index: 1000;
     background-color: #000;
@@ -1723,6 +1723,10 @@ video::-webkit-media-text-track-display {
     will-change: transform;
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.movie-player.movie-chat-view-player {
+    width: calc(100% - 350px) !important;
 }
 
 .movie-player.movie-pip-view-player {
@@ -1812,6 +1816,12 @@ video::-webkit-media-text-track-display {
     position: absolute;
     right: 0;
     margin-right: 80px;
+    font-size: 28px !important;
+}
+.movie-player > .top-bar-container > .top-bar > .open-movie-chat {
+    position: absolute;
+    right: 0;
+    margin-right: 140px;
     font-size: 28px !important;
 }
 
@@ -2616,6 +2626,202 @@ input[type='range']::-webkit-slider-thumb:hover {
     > .movie-item {
     width: 320px;
     height: 200px;
+}
+
+.premium-quality-indicator {
+    width: 80px;
+    height: 30px;
+    padding-left: 1em;
+    padding-right: 1em;
+    border-radius: 9999px;
+    background-color: #23202b;
+    color: #fff;
+    font-family: 'Roboto';
+    font-weight: 500;
+    font-size: 12px;
+    position: absolute;
+    right: 0;
+    margin-top: 90px;
+    margin-right: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.premium-quality-indicator > .active-indicator {
+    width: 8px;
+    height: 8px;
+    background-color: rgb(39, 223, 137);
+    border-radius: 100%;
+    margin-left: 0.75em;
+}
+
+.movie-chat-container {
+    width: 350px;
+    height: 100%;
+    background-color: #221c38;
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 999;
+}
+
+.movie-chat-container > .movie-chat-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+    margin-bottom: 0.5em;
+}
+
+.movie-chat-container > .movie-chat-header > .title {
+    font-family: 'Avenir', sans-serif;
+    font-weight: 700;
+    font-size: 36px;
+    color: #fff;
+}
+
+.movie-chat-container > .movie-chat-header > .audience-count {
+	font-family: 'Roboto', sans-serif;
+}
+
+.movie-chat-container > .movie-chat-header > .audience-count > span:first-child{
+	color: rgba(255, 255, 255, 0.61);
+}
+
+.movie-chat-container > .movie-chat-header > .audience-count > span:last-child {
+    font-weight: 500;
+	margin-left: 0.5em;
+	color: #FFF;
+}
+
+.movie-chat-container > .chat-list {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 1em;
+}
+
+.movie-chat-container > .chat-list::-webkit-scrollbar {
+    display: none;
+    width: 0;
+}
+
+.movie-chat-container > .chat-list > .message {
+    width: 100%;
+    height: auto;
+    padding: 0.75em;
+    display: flex;
+    box-sizing: border-box;
+}
+
+.movie-chat-container > .chat-list > .message > .profile-photo {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 100%;
+    text-align: center;
+    line-height: 28px;
+    font-family: 'Avenir', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.81);
+}
+
+.movie-chat-container > .chat-list > .message > .message-content {
+    display: flex;
+    flex-direction: column;
+    margin-left: 1em;
+}
+
+.movie-chat-container > .chat-list > .message > .message-content > span {
+    display: flex;
+    align-items: center;
+}
+
+.movie-chat-container
+    > .chat-list
+    > .message
+    > .message-content
+    > span
+    > .alias {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    color: #fff;
+}
+
+.movie-chat-container
+    > .chat-list
+    > .message
+    > .message-content
+    > span
+    > .date {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.51);
+    margin-left: 1em;
+}
+
+.movie-chat-container > .chat-list > .message > .message-content > .text {
+    font-family: 'Roboto', sans-serif;
+    color: rgba(255, 255, 255, 0.81);
+    display: inline-block;
+    width: 100%;
+    margin-top: 0.1em;
+    font-size: 12px;
+}
+
+.movie-chat-container > .message-input-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+    padding: 1em 1.5em;
+    background-color: #fff;
+    border-radius: 1em;
+    box-shadow: 0px 10px 20px -5px rgba(0, 0, 0, 0.1);
+}
+
+.movie-chat-container > .message-input-container > textarea {
+    width: 100%;
+    height: 100%;
+    min-height: 28px;
+    max-height: 400px;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    border: none;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    background-color: transparent;
+    resize: none;
+    outline: none;
+}
+
+.movie-chat-container > .message-input-container > .message-send-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(91, 46, 255);
+    background-color: #fff;
+    transition: all 0.25s ease-in-out;
+    margin-left: 1em;
+}
+
+.movie-chat-container > .message-input-container > .message-send-btn:hover {
+    color: #fff;
+    background-color: rgb(91, 46, 255);
 }
 
 .dark-mode-toggle {

@@ -62,6 +62,7 @@ class Header extends Component {
             nextProps.inputValue === this.props.inputValue &&
             nextProps.searchContent === this.props.searchContent &&
             nextProps.user === this.props.user &&
+            nextProps.isPremiumUser === this.props.isPremiumUser &&
             nextProps.subtitle === this.props.subtitle &&
             nextState.active === this.state.active
         ) {
@@ -100,7 +101,9 @@ class Header extends Component {
                         bottom
                     >
                         <div className="app-header-title">
-                            <div>{`Flixerr v${version} ·`}</div>
+                            <div>{`Flixerr ${
+                                this.props.isPremiumUser ? 'Premium' : ''
+                            } v${version} ·`}</div>
                             <div className="user-email">
                                 {this.props.user
                                     ? this.props.user.name ||
@@ -157,33 +160,42 @@ class Header extends Component {
                             ''
                         )}
                     </div>
-                    <div
-                        className={`quality ${
-                            this.props.videoQuality == 'HD'
-                                ? 'hd-active'
-                                : 'full-active'
-                        }`}
-                    >
-                        <span>HD</span>
-                        <div className="quality-control-container">
-                            <input
-                                readOnly
-                                checked={
-                                    this.props.videoQuality == 'FULL HD'
-                                        ? true
-                                        : false
-                                }
-                                type="checkbox"
-                                name="quality-control"
-                                className="quality-control-checkbox"
-                            />
-                            <label
-                                className="quality-control-label"
-                                onClick={this.handleQualityControl}
-                            />
+                    {this.props.isPremiumUser ? (
+                        <div className="premium-quality-indicator">
+                            <span>Ultra HD</span>
+							<span className="active-indicator"></span>
                         </div>
-                        <span>FULL HD</span>
-                    </div>
+                    ) : (
+                        <div>
+                            <div
+                                className={`quality ${
+                                    this.props.videoQuality == 'HD'
+                                        ? 'hd-active'
+                                        : 'full-active'
+                                }`}
+                            >
+                                <span>HD</span>
+                                <div className="quality-control-container">
+                                    <input
+                                        readOnly
+                                        checked={
+                                            this.props.videoQuality == 'FULL HD'
+                                                ? true
+                                                : false
+                                        }
+                                        type="checkbox"
+                                        name="quality-control"
+                                        className="quality-control-checkbox"
+                                    />
+                                    <label
+                                        className="quality-control-label"
+                                        onClick={this.handleQualityControl}
+                                    />
+                                </div>
+                                <span>FULL HD</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         )

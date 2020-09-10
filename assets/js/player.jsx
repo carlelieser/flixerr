@@ -8,13 +8,16 @@ import BackupTorrents from './backup-torrent-container'
 import CastContainer from './cast/cast-container'
 import CastScreen from './cast/cast-screen'
 import CastScreenModal from './cast/cast-screen-modal'
+import MovieChat from './movie-chat'
 
 class Player extends Component {
     constructor(props) {
         super(props)
 
         this.videoElement = React.createRef()
-        this.mouseTimeout = false
+		this.mouseTimeout = false
+		this.movieChatObserver = false
+		this.movieAudienceObserver = false
 
         this.handleUpdate.bind(this)
         this.changeTime.bind(this)
@@ -24,6 +27,7 @@ class Player extends Component {
             showOverlay: true,
             showSubtitles: false,
             showCastContainer: false,
+            showMovieChat: false,
             activeCastingDevice: false,
             videoUrl: false,
             videoBuffering: false,
@@ -53,6 +57,15 @@ class Player extends Component {
                 },
             ],
         }
+    }
+
+    toggleShowMovieChat = () => {
+        this.setState((prevState) => {
+            let showMovieChat = prevState.showMovieChat
+            return {
+                showMovieChat: !showMovieChat,
+            }
+        })
     }
 
     setActiveCastingDevice = (activeCastingDevice) => {
@@ -175,7 +188,7 @@ class Player extends Component {
     }
 
     handleKeyPress = (e) => {
-        if (e.keyCode == 32) {
+        if (e.keyCode == 32 && e.target.nodeName !== "TEXTAREA") {
             this.toggleVideoPlayback()
         } else if (e.keyCode == 27) {
             if (this.state.fullScreen) {
@@ -305,12 +318,16 @@ class Player extends Component {
             nextState.videoBuffering === this.state.videoBuffering &&
             nextProps.startTime === this.props.startTime &&
             nextProps.fileLoaded === this.props.fileLoaded &&
-            nextProps.subtitleOptions === this.props.subtitleOptions &&
+			nextProps.subtitleOptions === this.props.subtitleOptions &&
+			nextProps.currentChat === this.props.currentChat &&
+			nextProps.currentAudienceCount === this.props.currentAudienceCount &&
+			nextProps.user === this.props.user &&
             nextState.activeSubtitle === this.state.activeSubtitle &&
             nextState.showSubtitles === this.state.showSubtitles &&
             nextState.pipView === this.state.pipView &&
             nextState.showCastContainer === this.state.showCastContainer &&
-            nextState.activeCastingDevice === this.state.activeCastingDevice
+			nextState.activeCastingDevice === this.state.activeCastingDevice &&
+			nextState.showMovieChat === this.state.showMovieChat
         ) {
             return false
         } else {
@@ -339,9 +356,16 @@ class Player extends Component {
     }
 
     updateVideoUrl = () => {
-        let videoUrl = `http://localhost:8000/${
-            this.props.currentVideoStream ? '' : this.props.videoIndex
-        }`
+        let isPremium = this.props.videoIndex
+            ? typeof this.props.videoIndex === 'string'
+                ? this.props.videoIndex.startsWith('https://flixerrtv.com/api/')
+                : this.props.videoIndex
+            : false
+        let videoUrl = isPremium
+            ? this.props.videoIndex
+            : `http://localhost:8000/${
+                  this.props.currentVideoStream ? '' : this.props.videoIndex
+              }`
         this.setState({ videoUrl })
     }
 
@@ -396,6 +420,8 @@ class Player extends Component {
     }
 
     componentDidMount() {
+		this.movieChatObserver = this.props.initializeMovieChat(this.props.movie);
+		this.movieAudienceObserver = this.props.initializeMovieAudience(this.props.movie)
         this.props.setSeekValue(0)
         this.props.setColorStop(0)
         this.props.setFileLoaded(0)
@@ -410,7 +436,10 @@ class Player extends Component {
         window.removeEventListener('keydown', this.handleKeyPress)
         window.removeEventListener('beforeunload', this.handleBeforeUnload)
         if (this.state.activeCastingDevice)
-            this.state.activeCastingDevice.stop()
+			this.state.activeCastingDevice.stop()
+		if (this.movieChatObserver) this.movieChatObserver();
+		if (this.movieAudienceObserver) this.movieAudienceObserver();
+		this.props.leaveAudience(this.props.movie);
     }
 
     render() {
@@ -467,193 +496,216 @@ class Player extends Component {
         let playerTitle = this.props.movie.show_title || this.props.movie.title
 
         return (
-            <div
-                className={`movie-player ${
-                    !shouldShowOverlay ? 'movie-hide' : ''
-                } ${this.state.pipView ? 'movie-pip-view-player' : ''}`}
-                style={{
-                    backgroundImage: `${
-                        this.props.loading
-                            ? this.props.error
-                                ? 'none'
-                                : 'url(assets/imgs/loading.svg)'
-                            : 'none'
-                    }`,
-                }}
-                onMouseMove={this.mouseMove}
-            >
-                {this.state.videoBuffering ? (
-                    <div className="video-buffer-container" />
-                ) : (
-                    ''
-                )}
-                <CSSTransitionGroup
-                    transitionName="movie-box-anim"
-                    transitionEnterTimeout={250}
-                    transitionLeaveTimeout={250}
+            <div>
+                <div
+                    className={`movie-player ${
+                        !shouldShowOverlay ? 'movie-hide' : ''
+                    } ${this.state.pipView ? 'movie-pip-view-player' : ''} ${
+                        this.state.showMovieChat ? 'movie-chat-view-player' : ''
+                    }`}
+                    style={{
+                        backgroundImage: `${
+                            this.props.loading
+                                ? this.props.error
+                                    ? 'none'
+                                    : 'url(assets/imgs/loading.svg)'
+                                : 'none'
+                        }`,
+                    }}
+                    onMouseMove={this.mouseMove}
                 >
-                    {backupContainer}
-                </CSSTransitionGroup>
-                <CSSTransitionGroup
-                    transitionName="box-anim"
-                    transitionEnterTimeout={250}
-                    transitionLeaveTimeout={250}
-                >
-                    {backupContainerBg}
-                </CSSTransitionGroup>
-                <Fade
-                    mountOnEnter
-                    unmountOnExit
-                    duration={350}
-                    when={this.props.playerStatus}
-                    distance="10%"
-                    bottom
-                >
-                    <div className="player-status-container">
-                        <span>{this.props.playerStatus.status}</span>
-                        {this.props.playerStatus.loading ? (
-                            <span className="dots" />
-                        ) : (
-                            ''
-                        )}
-                        {this.props.downloadPercent ? (
-                            <div className="download-info">
-                                <span className="download-percent">
-                                    {this.props.downloadPercent}%
-                                </span>
-                                <span className="download-speed">
-                                    {`${this.props.downloadSpeed} Kb/s`}
-                                </span>
-                            </div>
-                        ) : (
-                            ''
-                        )}
-                        {this.props.downloadPercent ? (
-                            <Fade distance="10%" bottom>
-                                <div
-                                    className="progress-bar"
-                                    style={{
-                                        width: `${this.props.downloadPercent}%`,
-                                    }}
-                                />
-                                <div className="progress-bar-shadow" />
-                            </Fade>
-                        ) : (
-                            ''
-                        )}
-                    </div>
-                </Fade>
-                <div className="top-bar-container">
-                    <div className="top-bar">
-                        <i
-                            className="mdi mdi-light mdi-chevron-left mdi-36px"
-                            onClick={this.closeClient}
-                        />
-                        <div>{playerTitle}</div>
-                        {this.state.pipView ? null : (
+                    {this.state.videoBuffering ? (
+                        <div className="video-buffer-container" />
+                    ) : (
+                        ''
+                    )}
+                    <CSSTransitionGroup
+                        transitionName="movie-box-anim"
+                        transitionEnterTimeout={250}
+                        transitionLeaveTimeout={250}
+                    >
+                        {backupContainer}
+                    </CSSTransitionGroup>
+                    <CSSTransitionGroup
+                        transitionName="box-anim"
+                        transitionEnterTimeout={250}
+                        transitionLeaveTimeout={250}
+                    >
+                        {backupContainerBg}
+                    </CSSTransitionGroup>
+                    <Fade
+                        mountOnEnter
+                        unmountOnExit
+                        duration={350}
+                        when={this.props.playerStatus}
+                        distance="10%"
+                        bottom
+                    >
+                        <div className="player-status-container">
+                            <span>{this.props.playerStatus.status}</span>
+                            {this.props.playerStatus.loading ? (
+                                <span className="dots" />
+                            ) : (
+                                ''
+                            )}
+                            {this.props.downloadPercent ? (
+                                <div className="download-info">
+                                    <span className="download-percent">
+                                        {this.props.downloadPercent}%
+                                    </span>
+                                    <span className="download-speed">
+                                        {`${this.props.downloadSpeed} Kb/s`}
+                                    </span>
+                                </div>
+                            ) : (
+                                ''
+                            )}
+                            {this.props.downloadPercent ? (
+                                <Fade distance="10%" bottom>
+                                    <div
+                                        className="progress-bar"
+                                        style={{
+                                            width: `${this.props.downloadPercent}%`,
+                                        }}
+                                    />
+                                    <div className="progress-bar-shadow" />
+                                </Fade>
+                            ) : (
+                                ''
+                            )}
+                        </div>
+                    </Fade>
+                    <div className="top-bar-container">
+                        <div className="top-bar">
                             <i
-                                className="open-backup mdi mdi-light mdi-sort-variant"
-                                onClick={this.handleOpenBackup}
+                                className="mdi mdi-light mdi-chevron-left mdi-36px"
+                                onClick={this.closeClient}
                             />
-                        )}
-                    </div>
-                </div>
-                <div className="bottom-bar-container">
-                    <div className="bottom-bar">
-                        <i
-                            className={
-                                'mdi mdi-light mdi-36px play-button ' +
-                                (this.props.paused ? 'mdi-play' : 'mdi-pause')
-                            }
-                            onClick={this.toggleVideoPlayback}
-                        />
-                        {this.state.pipView ? (
-                            ''
-                        ) : (
-                            <div className="video-data">
-                                <div
-                                    className="file-loaded"
-                                    style={{
-                                        width: `${this.props.fileLoaded}%`,
-                                    }}
-                                ></div>
-                                <input
-                                    className="seek-bar"
-                                    type="range"
-                                    value={this.props.seekValue}
-                                    onChange={this.changeTime}
-                                    onMouseDown={this.handleMouseDown}
-                                    onMouseUp={this.playVideo}
-                                    min={0}
-                                    max={
-                                        this.state.videoElement
-                                            ? this.state.videoElement.current
-                                                  .duration
-                                            : 100
-                                    }
-                                    step={0.1}
-                                    style={{
-                                        backgroundImage: `-webkit-gradient(linear, left top, right top, color-stop(${this.props.colorStop}, rgb(255, 0, 0)), color-stop(${this.props.colorStop}, rgba(255, 255, 255, 0.158)))`,
-                                    }}
+                            <div>{playerTitle}</div>
+                            {this.state.pipView ? null : (
+                                <i
+                                    className="open-backup mdi mdi-light mdi-sort-variant"
+                                    onClick={this.handleOpenBackup}
                                 />
-                            </div>
-                        )}
-                        <span>{this.props.time}</span>
-                        <CastContainer
-                            show={this.state.showCastContainer}
-                            videoUrl={this.state.videoUrl}
-                            playerTitle={playerTitle}
-                            currentTime={this.props.currentTime}
-                            activeCastingDevice={this.state.activeCastingDevice}
-                            setActiveCastingDevice={this.setActiveCastingDevice}
-                            toggleCastContainer={this.toggleCastContainer}
-                            setVideoTime={this.setVideoTime}
-                            playVideo={this.playVideo}
-                            pauseVideo={this.pauseVideo}
-                        />
-                        {this.state.pipView ? null : (
-                            <SubtitlesContainer
-                                show={this.state.showSubtitles}
-                                activeSubtitle={this.state.activeSubtitle}
-                                setActiveSubtitle={this.setActiveSubtitle}
-                                subtitleOptions={this.props.subtitleOptions}
-                                toggleSubtitleMenu={this.toggleSubtitleMenu}
-                            />
-                        )}
-                        <div className="bottom-bar-action-container">
-                            {bottomBarActions}
+                            )}
+                            {this.state.pipView ? null : (
+                                <i
+                                    className="open-movie-chat mdi mdi-light mdi-message"
+                                    onClick={this.toggleShowMovieChat}
+                                />
+                            )}
                         </div>
                     </div>
+                    <div className="bottom-bar-container">
+                        <div className="bottom-bar">
+                            <i
+                                className={
+                                    'mdi mdi-light mdi-36px play-button ' +
+                                    (this.props.paused
+                                        ? 'mdi-play'
+                                        : 'mdi-pause')
+                                }
+                                onClick={this.toggleVideoPlayback}
+                            />
+                            {this.state.pipView ? (
+                                ''
+                            ) : (
+                                <div className="video-data">
+                                    <div
+                                        className="file-loaded"
+                                        style={{
+                                            width: `${this.props.fileLoaded}%`,
+                                        }}
+                                    ></div>
+                                    <input
+                                        className="seek-bar"
+                                        type="range"
+                                        value={this.props.seekValue}
+                                        onChange={this.changeTime}
+                                        onMouseDown={this.handleMouseDown}
+                                        onMouseUp={this.playVideo}
+                                        min={0}
+                                        max={
+                                            this.state.videoElement
+                                                ? this.state.videoElement
+                                                      .current.duration
+                                                : 100
+                                        }
+                                        step={0.1}
+                                        style={{
+                                            backgroundImage: `-webkit-gradient(linear, left top, right top, color-stop(${this.props.colorStop}, rgb(255, 0, 0)), color-stop(${this.props.colorStop}, rgba(255, 255, 255, 0.158)))`,
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            <span>{this.props.time}</span>
+                            <CastContainer
+                                show={this.state.showCastContainer}
+                                videoUrl={this.state.videoUrl}
+                                playerTitle={playerTitle}
+                                currentTime={this.props.currentTime}
+                                activeCastingDevice={
+                                    this.state.activeCastingDevice
+                                }
+                                setActiveCastingDevice={
+                                    this.setActiveCastingDevice
+                                }
+                                toggleCastContainer={this.toggleCastContainer}
+                                setVideoTime={this.setVideoTime}
+                                playVideo={this.playVideo}
+                                pauseVideo={this.pauseVideo}
+                            />
+                            {this.state.pipView ? null : (
+                                <SubtitlesContainer
+                                    show={this.state.showSubtitles}
+                                    activeSubtitle={this.state.activeSubtitle}
+                                    setActiveSubtitle={this.setActiveSubtitle}
+                                    subtitleOptions={this.props.subtitleOptions}
+                                    toggleSubtitleMenu={this.toggleSubtitleMenu}
+                                />
+                            )}
+                            <div className="bottom-bar-action-container">
+                                {bottomBarActions}
+                            </div>
+                        </div>
+                    </div>
+                    <CastScreenModal
+                        show={this.state.activeCastingDevice}
+                        setActiveCastingDevice={this.setActiveCastingDevice}
+                        device={this.state.activeCastingDevice}
+                    />
+                    <CastScreen show={this.state.activeCastingDevice} />
+                    {this.props.showIntro ? (
+                        <video
+                            autoPlay
+                            type="video/mp4"
+                            src="./assets/video/intro.mp4"
+                            onEnded={this.stopIntro}
+                        />
+                    ) : null}
+                    {this.props.readyToStream ? (
+                        <video
+                            className={
+                                this.state.activeCastingDevice
+                                    ? 'casting-video'
+                                    : ''
+                            }
+                            autoPlay
+                            type="video/mp4"
+                            onTimeUpdate={this.handleUpdate}
+                            onWaiting={this.handleBuffer}
+                            src={this.state.videoUrl}
+                            ref={this.videoElement}
+                        />
+                    ) : null}
                 </div>
-                <CastScreenModal
-                    show={this.state.activeCastingDevice}
-                    setActiveCastingDevice={this.setActiveCastingDevice}
-                    device={this.state.activeCastingDevice}
+                <MovieChat
+                    messages={this.props.currentChat}
+                    currentAudienceCount={this.props.currentAudienceCount}
+					sendMovieMessage={this.props.sendMovieMessage}
+                    movie={this.props.movie}
+                    email={this.props.user.email}
                 />
-                <CastScreen show={this.state.activeCastingDevice} />
-                {this.props.showIntro ? (
-                    <video
-                        autoPlay
-                        type="video/mp4"
-                        src="./assets/video/intro.mp4"
-                        onEnded={this.stopIntro}
-                    />
-                ) : null}
-                {this.props.readyToStream ? (
-                    <video
-                        className={
-                            this.state.activeCastingDevice
-                                ? 'casting-video'
-                                : ''
-                        }
-                        autoPlay
-                        type="video/mp4"
-                        onTimeUpdate={this.handleUpdate}
-                        onWaiting={this.handleBuffer}
-                        src={this.state.videoUrl}
-                        ref={this.videoElement}
-                    />
-                ) : null}
             </div>
         )
     }
