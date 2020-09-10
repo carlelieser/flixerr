@@ -2578,7 +2578,7 @@ class App extends Component {
         let id = (movie.id || movie.rg_id).toString()
         let audienceRef = this.firestoreDatabase.collection('audiences').doc(id)
         let doc = await audienceRef.get();
-        let currentCount = doc.data().count;
+        let currentCount = doc.data() ? doc.data().count : 0;
 
         var userOnlineState = firebase.database().ref(`users/${this.state.user.uid}/status`);
 
