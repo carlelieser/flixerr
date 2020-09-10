@@ -15,9 +15,9 @@ class Player extends Component {
         super(props)
 
         this.videoElement = React.createRef()
-		this.mouseTimeout = false
-		this.movieChatObserver = false
-		this.movieAudienceObserver = false
+        this.mouseTimeout = false
+        this.movieChatObserver = false
+        this.movieAudienceObserver = false
 
         this.handleUpdate.bind(this)
         this.changeTime.bind(this)
@@ -188,7 +188,7 @@ class Player extends Component {
     }
 
     handleKeyPress = (e) => {
-        if (e.keyCode == 32 && e.target.nodeName !== "TEXTAREA") {
+        if (e.keyCode == 32 && e.target.nodeName !== 'TEXTAREA') {
             this.toggleVideoPlayback()
         } else if (e.keyCode == 27) {
             if (this.state.fullScreen) {
@@ -318,16 +318,17 @@ class Player extends Component {
             nextState.videoBuffering === this.state.videoBuffering &&
             nextProps.startTime === this.props.startTime &&
             nextProps.fileLoaded === this.props.fileLoaded &&
-			nextProps.subtitleOptions === this.props.subtitleOptions &&
-			nextProps.currentChat === this.props.currentChat &&
-			nextProps.currentAudienceCount === this.props.currentAudienceCount &&
-			nextProps.user === this.props.user &&
+            nextProps.subtitleOptions === this.props.subtitleOptions &&
+            nextProps.currentChat === this.props.currentChat &&
+            nextProps.currentAudienceCount ===
+                this.props.currentAudienceCount &&
+            nextProps.user === this.props.user &&
             nextState.activeSubtitle === this.state.activeSubtitle &&
             nextState.showSubtitles === this.state.showSubtitles &&
             nextState.pipView === this.state.pipView &&
             nextState.showCastContainer === this.state.showCastContainer &&
-			nextState.activeCastingDevice === this.state.activeCastingDevice &&
-			nextState.showMovieChat === this.state.showMovieChat
+            nextState.activeCastingDevice === this.state.activeCastingDevice &&
+            nextState.showMovieChat === this.state.showMovieChat
         ) {
             return false
         } else {
@@ -419,9 +420,13 @@ class Player extends Component {
         }
     }
 
-    componentDidMount() {
-		this.movieChatObserver = this.props.initializeMovieChat(this.props.movie);
-		this.movieAudienceObserver = this.props.initializeMovieAudience(this.props.movie)
+    async componentDidMount() {
+        this.movieChatObserver = this.props.initializeMovieChat(
+            this.props.movie
+        )
+        this.movieAudienceObserver = await this.props.initializeMovieAudience(
+            this.props.movie
+        )
         this.props.setSeekValue(0)
         this.props.setColorStop(0)
         this.props.setFileLoaded(0)
@@ -436,10 +441,11 @@ class Player extends Component {
         window.removeEventListener('keydown', this.handleKeyPress)
         window.removeEventListener('beforeunload', this.handleBeforeUnload)
         if (this.state.activeCastingDevice)
-			this.state.activeCastingDevice.stop()
-		if (this.movieChatObserver) this.movieChatObserver();
-		if (this.movieAudienceObserver) this.movieAudienceObserver();
-		this.props.leaveAudience(this.props.movie);
+            this.state.activeCastingDevice.stop()
+        if (this.movieChatObserver) this.movieChatObserver()
+        if (typeof this.movieAudienceObserver === 'function')
+            this.movieAudienceObserver()
+        this.props.leaveAudience(this.props.movie)
     }
 
     render() {
@@ -702,7 +708,7 @@ class Player extends Component {
                 <MovieChat
                     messages={this.props.currentChat}
                     currentAudienceCount={this.props.currentAudienceCount}
-					sendMovieMessage={this.props.sendMovieMessage}
+                    sendMovieMessage={this.props.sendMovieMessage}
                     movie={this.props.movie}
                     email={this.props.user.email}
                 />

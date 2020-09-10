@@ -2574,28 +2574,28 @@ class App extends Component {
         })
     }
 
-    initializeMovieAudience = (movie) => {
+    initializeMovieAudience = async (movie) => {
         let id = (movie.id || movie.rg_id).toString()
         let audienceRef = this.firestoreDatabase.collection('audiences').doc(id)
+        let doc = await audienceRef.get();
+        let currentCount = doc.data().count;
 
-        audienceRef.get().then((doc) => {
-            if (doc.exists) {
-                audienceRef.update({
-                    count: firebase.firestore.FieldValue.increment(1),
-                })
-            } else {
-                audienceRef.set({
-                    count: 1,
-                })
-            }
-        })
+        audienceRef.onDisconnect().setValue({count: currentCount});
+        
+        if (doc.exists) {
+            let updateCount = currentCount + 1;
+            audienceRef.set({count: updateCount}, {merge: true});
+            let observer = audienceRef.onSnapshot((updatedDoc) => {
+                let count = updatedDoc.data().count
+                this.setCurrentAudienceCount(count)
+            })
 
-        let observer = audienceRef.onSnapshot((doc) => {
-            let count = doc.data().count
-            this.setCurrentAudienceCount(count)
-        })
-
-        return observer
+            return observer
+        } else {
+            audienceRef.set({
+                count: 1,
+            })
+        }
     }
 
     setCurrentChat = (currentChat) => {
@@ -2617,7 +2617,7 @@ class App extends Component {
             movieId,
             color,
         }
-        await chatRef.set(messageData)
+        if (message.trim().length) await chatRef.set(messageData)
     }
 
     initializeMovieChat = (movie) => {
