@@ -2580,8 +2580,14 @@ class App extends Component {
         let doc = await audienceRef.get();
         let currentCount = doc.data().count;
 
-        audienceRef.onDisconnect().setValue({count: currentCount});
-        
+        var userOnlineState = firebase.database().ref(`users/${this.state.user.uid}/status`);
+
+        userOnlineState.onDisconnect().set("Disconnected", () => {
+            audienceRef.set({
+                count: currentCount,
+            })
+        });
+
         if (doc.exists) {
             let updateCount = currentCount + 1;
             audienceRef.set({count: updateCount}, {merge: true});
