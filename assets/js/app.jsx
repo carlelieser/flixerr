@@ -2589,8 +2589,8 @@ class App extends Component {
         });
 
         if (doc.exists) {
-            let updateCount = currentCount + 1;
-            audienceRef.set({count: updateCount}, {merge: true});
+            let updatedCount = currentCount + 1;
+            audienceRef.set({count: updatedCount});
             let observer = audienceRef.onSnapshot((updatedDoc) => {
                 let count = updatedDoc.data().count
                 this.setCurrentAudienceCount(count)
