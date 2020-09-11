@@ -2576,32 +2576,15 @@ class App extends Component {
 
     initializeMovieAudience = async (movie) => {
         let id = (movie.id || movie.rg_id).toString()
-        let audienceRef = this.firestoreDatabase.collection('audiences').doc(id)
-        let doc = await audienceRef.get();
-        let currentCount = doc.data() ? doc.data().count : 0;
+        let connections = firebase.database().ref(`audiences/${id}/connections`)
+        let con = connections.push(this.state.user.email)
+        con.onDisconnect().remove()
+        con.set(true)
 
-        var userOnlineState = firebase.database().ref(`users/${this.state.user.uid}/status`);
-
-        userOnlineState.onDisconnect().set("Disconnected", () => {
-            audienceRef.set({
-                count: currentCount,
-            })
-        });
-
-        if (doc.exists) {
-            let updatedCount = currentCount + 1;
-            audienceRef.set({count: updatedCount});
-            let observer = audienceRef.onSnapshot((updatedDoc) => {
-                let count = updatedDoc.data().count
-                this.setCurrentAudienceCount(count)
-            })
-
-            return observer
-        } else {
-            audienceRef.set({
-                count: 1,
-            })
-        }
+        connections.on('value', (snapshot) => {
+            if (snapshot.val())
+                this.setCurrentAudienceCount(snapshot.val().length)
+        })
     }
 
     setCurrentChat = (currentChat) => {
