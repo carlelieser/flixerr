@@ -58,24 +58,24 @@ class MovieChat extends Component {
 
     adjustChatScroll = () => {
         this.chatListRef.current.scrollTop = this.chatListRef.current.scrollHeight
-	}
-	
-	handleKeyUp = (e) => {
-		if (e.keyCode === 13){
-			e.preventDefault();
-			if(e.shiftKey){
-				this.setState((prevState) => {
-					let message = prevState.currentMessage;
-					let newMessage = message + "\n";
-					return {
-						currentMessage: newMessage
-					}
-				})
-			}else{
-				this.handleSendMessage()
-			}
-		}
-	}
+    }
+
+    handleKeyUp = (e) => {
+        if (e.keyCode === 13) {
+            e.preventDefault()
+            if (e.shiftKey) {
+                this.setState((prevState) => {
+                    let message = prevState.currentMessage
+                    let newMessage = message + '\n'
+                    return {
+                        currentMessage: newMessage,
+                    }
+                })
+            } else {
+                this.handleSendMessage()
+            }
+        }
+    }
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.messages !== this.props.messages) {
@@ -129,10 +129,12 @@ class MovieChat extends Component {
             <div className="movie-chat-container">
                 <span className="movie-chat-header">
                     <div className="title">Chat</div>
-					<span className="audience-count">
-						<span>Watching</span>
-						<span>{this.props.currentAudienceCount}</span>
-					</span>
+                    <span className="audience-count">
+                        <span>Watching</span>
+                        <Fade spy={this.props.currentAudienceCount}>
+                            <span>{this.props.currentAudienceCount}</span>
+                        </Fade>
+                    </span>
                 </span>
                 <div className="chat-list" ref={this.chatListRef}>
                     {movieChats}

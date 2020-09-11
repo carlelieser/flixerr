@@ -2567,16 +2567,20 @@ class App extends Component {
 
     leaveAudience = (movie) => {
         let id = (movie.id || movie.rg_id).toString()
-        let connection = firebase.database().ref(`audiences/${id}/connections/${this.state.user.email}`);
-        connection.remove();
+        let connection = firebase
+            .database()
+            .ref(`audiences/${id}/connections/${this.state.user.uid}`)
+        connection.remove()
     }
 
     initializeMovieAudience = async (movie) => {
         let id = (movie.id || movie.rg_id).toString()
         let connections = firebase.database().ref(`audiences/${id}/connections`)
-        let con = connections.push(this.state.user.email)
-        con.onDisconnect().remove()
-        con.set(true)
+        let userConnection = firebase
+            .database()
+            .ref(`audiences/${id}/connections/${this.state.user.uid}`)
+        userConnection.onDisconnect().remove()
+        userConnection.set(true)
 
         connections.on('value', (snapshot) =>
             this.setCurrentAudienceCount(snapshot.numChildren())
