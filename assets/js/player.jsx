@@ -130,8 +130,10 @@ class Player extends Component {
 
     togglePipView = () => {
         this.setState((prevState) => {
+            let visibility = !prevState.pipView;
             return {
-                pipView: !prevState.pipView,
+                pipView: visibility,
+                showMovieChat: false,
                 showSubtitles: false,
             }
         })
@@ -502,7 +504,7 @@ class Player extends Component {
         let playerTitle = this.props.movie.show_title || this.props.movie.title
 
         return (
-            <div>
+            <div className="movie-player-container">
                 <div
                     className={`movie-player ${
                         !shouldShowOverlay ? 'movie-hide' : ''
@@ -596,7 +598,7 @@ class Player extends Component {
                             )}
                             {this.state.pipView ? null : (
                                 <i
-                                    className="open-movie-chat mdi mdi-light mdi-message"
+                                    className="open-movie-chat mdi mdi-light mdi-message-outline"
                                     onClick={this.toggleShowMovieChat}
                                 />
                             )}
@@ -705,13 +707,13 @@ class Player extends Component {
                         />
                     ) : null}
                 </div>
-                <MovieChat
+                {this.state.showMovieChat ? <MovieChat
                     messages={this.props.currentChat}
                     currentAudienceCount={this.props.currentAudienceCount}
                     sendMovieMessage={this.props.sendMovieMessage}
                     movie={this.props.movie}
                     email={this.props.user.email}
-                />
+                /> : null}
             </div>
         )
     }

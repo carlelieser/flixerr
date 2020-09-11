@@ -85,6 +85,7 @@ class MovieChat extends Component {
 
     componentDidMount() {
         this.initializeChatData()
+        this.adjustChatScroll()
     }
 
     render() {
@@ -132,11 +133,27 @@ class MovieChat extends Component {
                     <span className="audience-count">
                         <span>Watching</span>
                         <Fade spy={this.props.currentAudienceCount}>
-                            <span>{this.props.currentAudienceCount}</span>
+                            <span
+                                style={{ color: this.state.chatProfileColor }}
+                            >
+                                {this.props.currentAudienceCount}
+                            </span>
                         </Fade>
                     </span>
                 </span>
                 <div className="chat-list" ref={this.chatListRef}>
+                {this.props.currentAudienceCount == 1 ? (
+                    <div className="chat-empty-state">
+                        <div className="chat-empty-state-img"></div>
+                        <div className="title">
+                            Looks like you're the only one here.
+                        </div>
+                        <div className="subtitle">
+                            Invite your friends to watch this movie with you or
+                            just go nuts in the chat!
+                        </div>
+                    </div>
+                ) : null}
                     {movieChats}
                 </div>
                 <div className="message-input-container">
