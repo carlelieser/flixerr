@@ -2581,10 +2581,9 @@ class App extends Component {
         con.onDisconnect().remove()
         con.set(true)
 
-        connections.on('value', (snapshot) => {
-            if (snapshot.val())
-                this.setCurrentAudienceCount(snapshot.val().length)
-        })
+        connections.on('value', (snapshot) =>
+            this.setCurrentAudienceCount(snapshot.numChildren())
+        )
     }
 
     setCurrentChat = (currentChat) => {
