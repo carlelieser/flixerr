@@ -270,9 +270,9 @@ class App extends Component {
     }
 
     createDataBase = () => {
+        let db = firebase.database()
+        this.firestoreDatabase = firebase.firestore()
         if (this.state.user) {
-            let db = firebase.database()
-            this.firestoreDatabase = firebase.firestore()
             this.usersRef = db.ref(`users/${this.state.user.uid}`)
         }
     }
@@ -2566,19 +2566,22 @@ class App extends Component {
     }
 
     leaveAudience = (movie) => {
-        let id = (movie.id || movie.rg_id).toString()
-        let connection = firebase
-            .database()
-            .ref(`audiences/${id}/connections/${this.state.user.uid}`)
-        connection.remove()
+        if (this.state.user) {
+            let id = (movie.id || movie.rg_id).toString()
+            let connection = firebase
+                .database()
+                .ref(`audiences/${id}/connections/${this.state.user.uid}`)
+            connection.remove()
+        }
     }
 
     initializeMovieAudience = async (movie) => {
         let id = (movie.id || movie.rg_id).toString()
         let connections = firebase.database().ref(`audiences/${id}/connections`)
+        let userId = this.state.user ? this.state.user.uid : uniqid()
         let userConnection = firebase
             .database()
-            .ref(`audiences/${id}/connections/${this.state.user.uid}`)
+            .ref(`audiences/${id}/connections/${userId}`)
         userConnection.onDisconnect().remove()
         userConnection.set(true)
 
@@ -2600,7 +2603,7 @@ class App extends Component {
         let messageData = {
             id: messageId,
             text: message,
-            from: this.state.user.email,
+            from: this.state.user ? this.state.user.email : null,
             alias: username,
             createdOn: time,
             movieId,

@@ -109,7 +109,13 @@ class MovieChat extends Component {
                                       className="alias"
                                       style={{
                                           color:
-                                              message.from === this.props.email
+                                              message.from === null
+                                                  ? message.alias ===
+                                                    this.state.chatUsername
+                                                      ? '#a58cff'
+                                                      : '#FFF'
+                                                  : message.from ===
+                                                    this.props.email
                                                   ? '#a58cff'
                                                   : '#FFF',
                                       }}
@@ -142,18 +148,18 @@ class MovieChat extends Component {
                     </span>
                 </span>
                 <div className="chat-list" ref={this.chatListRef}>
-                {this.props.currentAudienceCount == 1 ? (
-                    <div className="chat-empty-state">
-                        <div className="chat-empty-state-img"></div>
-                        <div className="title">
-                            Looks like you're the only one here.
+                    {this.props.currentAudienceCount == 1 ? (
+                        <div className="chat-empty-state">
+                            <div className="chat-empty-state-img"></div>
+                            <div className="title">
+                                Looks like you're the only one here.
+                            </div>
+                            <div className="subtitle">
+                                Invite your friends to watch this movie with you
+                                or just go nuts in the chat!
+                            </div>
                         </div>
-                        <div className="subtitle">
-                            Invite your friends to watch this movie with you or
-                            just go nuts in the chat!
-                        </div>
-                    </div>
-                ) : null}
+                    ) : null}
                     {movieChats}
                 </div>
                 <div className="message-input-container">

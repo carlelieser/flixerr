@@ -712,7 +712,7 @@ class Player extends Component {
                     currentAudienceCount={this.props.currentAudienceCount}
                     sendMovieMessage={this.props.sendMovieMessage}
                     movie={this.props.movie}
-                    email={this.props.user.email}
+                    email={this.props.user ? this.props.user.email : null}
                 /> : null}
             </div>
         )
