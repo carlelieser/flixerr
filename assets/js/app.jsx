@@ -2567,11 +2567,8 @@ class App extends Component {
 
     leaveAudience = (movie) => {
         let id = (movie.id || movie.rg_id).toString()
-        let audienceRef = this.firestoreDatabase.collection('audiences').doc(id)
-
-        audienceRef.update({
-            count: firebase.firestore.FieldValue.increment(-1),
-        })
+        let connection = firebase.database().ref(`audiences/${id}/connections/${this.state.user.email}`);
+        connection.remove();
     }
 
     initializeMovieAudience = async (movie) => {
