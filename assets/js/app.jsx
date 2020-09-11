@@ -38,6 +38,7 @@ class App extends Component {
         this.saveLastLeftOffTimeout = false
         this.autoSaveInterval = false
         this.firestoreDatabase = false
+        this.movieAudienceId = false
 
         this.state = {
             apiKey: '22b4015cb2245d35a9c1ad8cd48e314c',
@@ -2566,13 +2567,11 @@ class App extends Component {
     }
 
     leaveAudience = (movie) => {
-        if (this.state.user) {
-            let id = (movie.id || movie.rg_id).toString()
-            let connection = firebase
-                .database()
-                .ref(`audiences/${id}/connections/${this.state.user.uid}`)
-            connection.remove()
-        }
+        let id = (movie.id || movie.rg_id).toString()
+        let connection = firebase
+            .database()
+            .ref(`audiences/${id}/connections/${this.movieAudienceId}`)
+        connection.remove()
     }
 
     initializeMovieAudience = async (movie) => {
@@ -2585,6 +2584,7 @@ class App extends Component {
         userConnection.onDisconnect().remove()
         userConnection.set(true)
 
+        this.movieAudienceId = userId
         connections.on('value', (snapshot) =>
             this.setCurrentAudienceCount(snapshot.numChildren())
         )
