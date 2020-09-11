@@ -6,6 +6,7 @@ import storage from 'electron-json-storage'
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/database'
+import 'firebase/firestore'
 
 import AccountContainer from './account-container'
 import Menu from './menu'
@@ -22,6 +23,8 @@ import SubtitleSearch from './subtitles/subtitle-search'
 import { default as request } from 'axios'
 import VideoStream from './video-stream'
 
+import uniqid from 'uniqid'
+
 let accurateInterval = require('accurate-interval')
 class App extends Component {
     constructor(props) {
@@ -34,6 +37,7 @@ class App extends Component {
         this.introTimeout = false
         this.saveLastLeftOffTimeout = false
         this.autoSaveInterval = false
+        this.firestoreDatabase = false
 
         this.state = {
             apiKey: '22b4015cb2245d35a9c1ad8cd48e314c',
@@ -49,12 +53,15 @@ class App extends Component {
             inputEmail: '',
             inputPass: '',
             user: false,
+            isPremiumUser: false,
             isGuest: false,
             isLoading: false,
             downloadPercent: false,
             downloadSpeed: 0,
             fileLoaded: 0,
             active: 'Featured',
+            currentChat: [],
+            currentAudienceCount: 1,
             suggested: [],
             recentlyPlayed: [],
             favorites: [],
@@ -229,7 +236,7 @@ class App extends Component {
                         account: data.account,
                         isGuest: data.isGuest,
                     },
-                    () => {
+                    async () => {
                         this.startFireBase()
                     }
                 )
@@ -263,9 +270,10 @@ class App extends Component {
     }
 
     createDataBase = () => {
+        let db = firebase.database()
+        this.firestoreDatabase = firebase.firestore()
         if (this.state.user) {
-            let db = firebase.database()
-            this.databaseRef = db.ref(`users/${this.state.user.uid}`)
+            this.usersRef = db.ref(`users/${this.state.user.uid}`)
         }
     }
 
@@ -293,7 +301,7 @@ class App extends Component {
                 console.log(data)
             }
 
-            this.databaseRef.update(data, () => {
+            this.usersRef.update(data, () => {
                 console.log('Database updated.')
             })
         }
@@ -431,8 +439,8 @@ class App extends Component {
     }
 
     listenToBucket = () => {
-        if (this.databaseRef) {
-            this.databaseRef.on('value', this.setBucketData)
+        if (this.usersRef) {
+            this.usersRef.on('value', this.setBucketData)
         }
     }
 
@@ -1270,7 +1278,9 @@ class App extends Component {
     }
 
     getMovieDate = (movie) => {
-        return movie.release_date ? movie.release_date.substring(0, 4) : ''
+        let isSeries = this.isSeries(movie)
+        let date = isSeries ? movie.show.release_date : movie.release_date
+        return date.substring(0, 4)
     }
 
     getQualityinProgressive = () => {
@@ -1466,19 +1476,89 @@ class App extends Component {
         return [].concat.apply([], arr)
     }
 
+    constructUrlWithParams = (baseUrl, params) => {
+        let url = baseUrl + '/'
+        let count = 0
+        for (let key in params) {
+            let item = params[key]
+            url += `${count ? '&' : '?'}${key}=${item}`
+            count += 1
+        }
+        return url
+    }
+
+    preparePremiumQueryUrl = (movie, quality, endpoint, seriesData) => {
+        let date = this.getMovieDate(movie)
+        let isSeries = this.isSeries(movie)
+        let params = {
+            title: `${isSeries ? movie.show.title : movie.title} (${date})`,
+            user: this.state.user.email,
+            ...seriesData,
+        }
+        if (quality) params.quality = quality
+        let url = this.constructUrlWithParams(
+            `https://flixerrtv.com/api/${endpoint}`,
+            params
+        )
+        return url
+    }
+
+    checkUserPremiumAvailability = async () => {
+        if (!this.state.user) return null
+        let url = `https://flixerrtv.com/api/user-has-premium/?user=${this.state.user.email}`
+        let isPremiumUser = (await request.get(url)).data
+        console.log(`${this.state.user.email} is premium: ${isPremiumUser}`)
+        return isPremiumUser
+    }
+
+    checkMoviePremiumAvailability = async (movie) => {
+        let url = this.preparePremiumQueryUrl(movie, false, 'content-exists')
+        let exists = await request.get(url)
+        console.log(`${movie.title} exists in premium:`, exists.data)
+        return exists.data
+    }
+
+    streamPremium = async (movie) => {
+        let isSeries = this.isSeries(movie)
+        let url = this.preparePremiumQueryUrl(
+            movie,
+            isSeries ? false : '1080',
+            'content',
+            isSeries
+                ? {
+                      season: movie.season_number,
+                      episode: movie.episode_number_formatted,
+                  }
+                : null
+        )
+        this.setStreaming()
+        this.setStreamTimeout(20000)
+        this.setPlayerStatus('Fetching movie from a magical place', true)
+
+        await this.toggleIntro(true)
+        this.setMovieTime()
+        this.setVideoIndex(url)
+        this.setReadyToStream(true)
+    }
+
     searchTorrent = (movie, excludeDate) => {
         let isSeries = this.isSeries(movie),
             hasMagnet = this.hasMagnet(movie)
         this.resetVideo()
 
         this.closeServer()
-        this.removeTorrents().then(() => {
-            if (hasMagnet) {
+        this.removeTorrents().then(async () => {
+            let query = this.getSearchQuery(movie, excludeDate)
+            let isPremium = this.state.isPremiumUser
+                ? await this.checkMoviePremiumAvailability(movie)
+                : false
+            if (isPremium) {
+                this.streamPremium(movie)
+            } else if (hasMagnet) {
                 this.streamTorrent(movie)
             } else {
                 let currentMovie = this.getCurrentMovie()
                 if (currentMovie) {
-                    let query = this.getSearchQuery(movie, excludeDate)
                     let title = this.getMovieTitle(movie)
 
                     this.setPlayerStatus(
@@ -2293,7 +2373,7 @@ class App extends Component {
                         isLoading: false,
                     },
                     () => {
-                        if (this.databaseRef) {
+                        if (this.usersRef) {
                             this.setBucket()
                         }
                     }
@@ -2481,6 +2561,75 @@ class App extends Component {
             })
     }
 
+    setCurrentAudienceCount = (currentAudienceCount) => {
+        this.setState({ currentAudienceCount })
+    }
+
+    leaveAudience = (movie) => {
+        if (this.state.user) {
+            let id = (movie.id || movie.rg_id).toString()
+            let connection = firebase
+                .database()
+                .ref(`audiences/${id}/connections/${this.state.user.uid}`)
+            connection.remove()
+        }
+    }
+
+    initializeMovieAudience = async (movie) => {
+        let id = (movie.id || movie.rg_id).toString()
+        let connections = firebase.database().ref(`audiences/${id}/connections`)
+        let userId = this.state.user ? this.state.user.uid : uniqid()
+        let userConnection = firebase
+            .database()
+            .ref(`audiences/${id}/connections/${userId}`)
+        userConnection.onDisconnect().remove()
+        userConnection.set(true)
+
+        connections.on('value', (snapshot) =>
+            this.setCurrentAudienceCount(snapshot.numChildren())
+        )
+    }
+
+    setCurrentChat = (currentChat) => {
+        this.setState({ currentChat })
+    }
+
+    sendMovieMessage = async (movieId, message, username, color) => {
+        let messageId = uniqid()
+        let chatRef = this.firestoreDatabase
+            .collection('messages')
+            .doc(messageId)
+        let time = new Date().getTime()
+        let messageData = {
+            id: messageId,
+            text: message,
+            from: this.state.user ? this.state.user.email : null,
+            alias: username,
+            createdOn: time,
+            movieId,
+            color,
+        }
+        if (message.trim().length) await chatRef.set(messageData)
+    }
+
+    initializeMovieChat = (movie) => {
+        let id = (movie.id || movie.rg_id).toString()
+        let query = this.firestoreDatabase
+            .collection('messages')
+            .where('movieId', '==', id)
+
+        let observer = query.onSnapshot((snapshot) => {
+            let chatsForThisMovie = []
+            snapshot.forEach((doc) => {
+                chatsForThisMovie.push(doc.data())
+            })
+            chatsForThisMovie.sort((a, b) => a.createdOn - b.createdOn)
+            this.setCurrentChat(chatsForThisMovie)
+        })
+
+        return observer
+    }
+
     startFireBase = () => {
         let firebaseConfig = {
             apiKey: 'AIzaSyAOWT7w9hA8qsLY-KP7F14Qfv9vLjw3YJM',
@@ -2501,7 +2650,7 @@ class App extends Component {
                         return { user }
                     }
                 },
-                () => {
+                async () => {
                     if (this.state.user == user) {
                         this.setEverything = true
                         this.createDataBase()
@@ -2509,6 +2658,8 @@ class App extends Component {
                         this.listenToBucket()
                     }
                     this.setUserCredentials()
+                    let isPremiumUser = await this.checkUserPremiumAvailability()
+                    this.setState({ isPremiumUser })
                 }
             )
         })
@@ -2611,7 +2762,7 @@ class App extends Component {
             .auth()
             .signOut()
             .then(() => {
-                this.databaseRef = false
+                this.usersRef = false
                 this.setStorage()
             })
             .catch((error) => {
@@ -2725,6 +2876,7 @@ class App extends Component {
             inputValue,
             isLoading,
             isOffline,
+            isPremiumUser,
             isStreaming,
             loginError,
             logoLoaded,
@@ -2787,6 +2939,12 @@ class App extends Component {
         let playerModal = this.showElementBasedOnValue(
             currentMovie,
             <Player
+                currentChat={this.state.currentChat}
+                currentAudienceCount={this.state.currentAudienceCount}
+                initializeMovieChat={this.initializeMovieChat}
+                initializeMovieAudience={this.initializeMovieAudience}
+                leaveAudience={this.leaveAudience}
+                sendMovieMessage={this.sendMovieMessage}
                 startAutoSaveInterval={this.startAutoSaveInterval}
                 subtitleOptions={subtitleOptions}
                 fileLoaded={fileLoaded}
@@ -2828,6 +2986,7 @@ class App extends Component {
                 setSeekValue={this.setSeekValue}
                 seekValue={seekValue}
                 updateMovieTime={this.updateMovieTime}
+                user={this.state.user}
             />
         )
 
@@ -2966,6 +3125,7 @@ class App extends Component {
                             searchMovies={this.searchMovies}
                             inputValue={inputValue}
                             setInputValue={this.setInputValue}
+                            isPremiumUser={isPremiumUser}
                             user={user}
                         />
                         <CSSTransitionGroup

@@ -120,3 +120,12 @@ html {
 .app-menu > .menu-active {
     color: #764dc2 !important;
 }
+
+.premium-quality-indicator{
+	background-color: #FFF;
+	color: #000;
+}
+
+.premium-quality-indicator > .active-indicator{
+	background-color: #000;
+}
