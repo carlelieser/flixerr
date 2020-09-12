@@ -934,8 +934,10 @@ class App extends Component {
 
         for (let i = 0; i < arrayOfSubtitles.length; i++) {
             let fileObject = arrayOfSubtitles[i]
-            let promise = this.getFileComplete(fileObject)
-            promises.push(promise)
+            if (fileObject) {
+                let promise = this.getFileComplete(fileObject)
+                promises.push(promise)
+            }
         }
 
         return Promise.all(promises).then((subtitleOptions) => {
@@ -2307,7 +2309,7 @@ class App extends Component {
             isSeries ? '' : `&primary_release_date.lte=${this.getDateforURL(1)}`
         }`
 
-        return url
+        return movie.id ? url : ''
     }
 
     getArrayElements = (arr, n) => {

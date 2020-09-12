@@ -130,13 +130,49 @@ class Player extends Component {
 
     togglePipView = () => {
         this.setState((prevState) => {
-            let visibility = !prevState.pipView;
+            let visibility = !prevState.pipView
             return {
                 pipView: visibility,
                 showMovieChat: false,
                 showSubtitles: false,
             }
         })
+    }
+
+    applyPipViewToWindow = () => {
+        const { BrowserWindow, screen } = require('electron').remote
+        let window = BrowserWindow.getFocusedWindow()
+        let { width, height } = screen.getPrimaryDisplay().workAreaSize
+        let pipViewSize = {
+            width: 500,
+            height: 400,
+        }
+        let pipViewPosition = {
+            x: width - pipViewSize.width - 20,
+            y: height - pipViewSize.height - 20,
+        }
+        this.originalWindowSize = window.isFullScreen()
+            ? [1200, 700]
+            : window.getSize()
+        window.setFullScreen(false)
+        window.setAlwaysOnTop(true)
+        window.setMinimumSize(400, 300)
+        window.setMaximumSize(600, 500)
+        window.setMaximizable(false)
+        window.setSize(pipViewSize.width, pipViewSize.height, true)
+        window.setPosition(pipViewPosition.x, pipViewPosition.y)
+    }
+
+    revertPipViewToWindow = () => {
+        const { BrowserWindow, screen } = require('electron').remote
+        let window = BrowserWindow.getFocusedWindow()
+        let { width, height } = screen.getPrimaryDisplay().workAreaSize
+        window.setAlwaysOnTop(false)
+        window.setMinimumSize(1200, 700)
+        window.setSize(this.originalWindowSize[0], this.originalWindowSize[1])
+        window.setMaximumSize(width + 5000, height + 5000)
+        window.setMaximizable(true)
+        window.center()
     }
 
     handleVideoPlayback = (toggle, play) => {
@@ -222,6 +258,7 @@ class Player extends Component {
     }
 
     closeClient = () => {
+        if (this.state.pipView) this.togglePipView()
         this.props.removeClient(this.props.currentTime)
     }
 
@@ -268,18 +305,30 @@ class Player extends Component {
     createSubtitleTrack = () => {
         let { activeSubtitle } = this.state
         if (activeSubtitle) {
-            let { language, src } = activeSubtitle
-            let track = document.createElement('track')
-            track.kind = 'subtitles'
-            track.label = language
-            track.src = src
-            return track
+            let { lang, src } = activeSubtitle
+            let trackElement = document.createElement('track')
+            trackElement.kind = 'captions'
+            trackElement.label = lang
+            trackElement.src = src
+            trackElement.track.mode = 'hidden'
+            return trackElement
         }
     }
 
-    addTrackToVideoElement = (track) => {
+    addTrackToVideoElement = (trackElement) => {
         let node = this.videoElement.current
-        if (node) node.append(track)
+        if (node) {
+            node.append(trackElement)
+            node.textTracks[0].mode = 'hidden'
+            trackElement.addEventListener('load', () => {
+                let textTrack = trackElement.track
+                for (let j = 0; j < textTrack.cues.length; ++j) {
+                    let cue = textTrack.cues[j]
+                    cue.line = -3
+                }
+                this.showTrackInVideoElement(textTrack)
+            })
+        }
     }
 
     showTrackInVideoElement = (track) => {
@@ -292,13 +341,15 @@ class Player extends Component {
         let track = this.createSubtitleTrack()
         this.removeSubtitlesFromVideo()
         this.addTrackToVideoElement(track)
-        this.showTrackInVideoElement(track)
         this.toggleSubtitleMenu()
     }
 
     removeSubtitlesFromVideo = () => {
         let node = this.videoElement.current
-        if (node) node.innerHTML = ''
+        if (node) {
+            if (node.textTracks[0]) node.textTracks[0].mode = 'disabled'
+            node.innerHTML = ''
+        }
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -385,18 +436,18 @@ class Player extends Component {
 
         if (prevState.pipView !== this.state.pipView) {
             if (this.state.pipView) {
+                this.applyPipViewToWindow()
                 this.removeSubtitlesFromVideo()
-            } else if (this.state.activeSubtitle) {
-                this.insertSubtitlesIntoVideo()
+            } else if (!this.state.pipView) {
+                this.revertPipViewToWindow()
             }
+            if (this.state.activeSubtitle && !this.state.pipView)
+                this.insertSubtitlesIntoVideo()
         }
 
         if (prevState.activeSubtitle !== this.state.activeSubtitle) {
-            if (this.state.activeSubtitle) {
-                this.insertSubtitlesIntoVideo()
-            } else {
-                this.removeSubtitlesFromVideo()
-            }
+            this.removeSubtitlesFromVideo()
+            if (this.state.activeSubtitle) this.insertSubtitlesIntoVideo()
         }
 
         if (
@@ -504,7 +555,14 @@ class Player extends Component {
         let playerTitle = this.props.movie.show_title || this.props.movie.title
 
         return (
-            <div className="movie-player-container">
+            <div
+                className="movie-player-container"
+                style={{
+                    backgroundColor: this.state.pipView
+                        ? 'transparent'
+                        : '#221c38',
+                }}
+            >
                 <div
                     className={`movie-player ${
                         !shouldShowOverlay ? 'movie-hide' : ''
@@ -707,13 +765,15 @@ class Player extends Component {
                         />
                     ) : null}
                 </div>
-                {this.state.showMovieChat ? <MovieChat
-                    messages={this.props.currentChat}
-                    currentAudienceCount={this.props.currentAudienceCount}
-                    sendMovieMessage={this.props.sendMovieMessage}
-                    movie={this.props.movie}
-                    email={this.props.user ? this.props.user.email : null}
-                /> : null}
+                {this.state.showMovieChat ? (
+                    <MovieChat
+                        messages={this.props.currentChat}
+                        currentAudienceCount={this.props.currentAudienceCount}
+                        sendMovieMessage={this.props.sendMovieMessage}
+                        movie={this.props.movie}
+                        email={this.props.user ? this.props.user.email : null}
+                    />
+                ) : null}
             </div>
         )
     }

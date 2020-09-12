@@ -1716,7 +1716,6 @@ video::-webkit-media-text-track-display {
     left: 0;
     position: fixed;
     z-index: 1000;
-    background-color: #221c38;
 }
 
 .movie-player {
@@ -1737,18 +1736,6 @@ video::-webkit-media-text-track-display {
 
 .movie-player.movie-chat-view-player {
     width: calc(100% - 350px) !important;
-}
-
-.movie-player.movie-pip-view-player {
-    width: 420px;
-    height: 280px;
-    right: 0;
-    left: auto;
-    top: auto;
-    bottom: 0;
-    margin: 2em;
-    border-radius: 10px;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .movie-player.movie-pip-view-player > .top-bar-container > .top-bar,
