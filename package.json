@@ -16,7 +16,6 @@
             "target": [
                 "zip"
             ],
-            "hardenedRuntime": true,
             "category": "public.app-category.entertainment",
             "icon": "./assets/imgs/icon.icns"
         },
