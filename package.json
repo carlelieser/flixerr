@@ -25,16 +25,22 @@
         },
         "win": {
             "target": [
-                "nsis"
+                "squirrel"
             ],
             "icon": "./assets/imgs/icon.ico"
+        },
+        "squirrelWindows": {
+            "iconUrl": "https://raw.githubusercontent.com/carlelieser/Flixerr/master/assets/imgs/icon.ico",
+            "loadingGif": "./assets/imgs/package.gif",
+            "remoteReleases": true,
+            "artifactName": "flixerr-${version}.Windows.${ext}"
         },
         "nsis": {
             "deleteAppDataOnUninstall": true,
             "createDesktopShortcut": true,
             "createStartMenuShortcut": true,
             "shortcutName": "Flixerr",
-            "artifactName": "flixerr.setup.${version}.${ext}"
+            "artifactName": "flixerr-${version}.Windows.${ext}"
         },
         "linux": {
             "target": [
@@ -63,6 +69,7 @@
         "babel-core": "^6.26.3",
         "electron": "^7.2.4",
         "electron-builder": "^21.2.0",
+        "electron-builder-squirrel-windows": "^22.8.1",
         "electron-notarize": "^0.1.1",
         "electron-rebuild": "^1.11.0",
         "prettier": "^2.0.4"
