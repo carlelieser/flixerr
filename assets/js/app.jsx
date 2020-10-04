@@ -3039,7 +3039,7 @@ class App extends Component {
                 ) : (
                     <div
                         className={`app-container ${
-                            process.platform === 'win32'
+                            process.platform !== "darwin"
                                 ? 'windows-compensate'
                                 : ''
                         }`}
