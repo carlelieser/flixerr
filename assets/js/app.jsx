@@ -2005,7 +2005,6 @@ class App extends Component {
         if (justYear) {
             return year - n
         }
-		console.log('Month:', month, date.getMonth());
         return `${year - n}-${month}-${day}`
     }
 
