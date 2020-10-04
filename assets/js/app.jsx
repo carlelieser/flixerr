@@ -1994,7 +1994,7 @@ class App extends Component {
         let date = new Date(),
             year = date.getFullYear(),
             month =
-                date.getMonth().toString().length < 2
+                date.getMonth() < 9
                     ? '0' + (date.getMonth() + 1)
                     : date.getMonth() + 1,
             day =
@@ -2005,7 +2005,7 @@ class App extends Component {
         if (justYear) {
             return year - n
         }
-
+		console.log('Month:', month, date.getMonth());
         return `${year - n}-${month}-${day}`
     }
 
