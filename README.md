@@ -1,3 +1,5 @@
+### This repository is no longer being maintained, but will be completely revamped for desktop and mobile in a seperate repository.
+
 <p align="center">
 <img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/icon.png?raw=true=" width="128" height="128"/>
 </p>
