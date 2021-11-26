@@ -50,7 +50,7 @@
     },
     "scripts": {
         "start": "npm run compile && electron .",
-        "init": "npm install && npm run rebuild",
+        "init": "npm install && npm run rebuild && npm run compile",
         "develop": "electron . -dev",
         "format": "prettier --config ./.prettierrc --write ./assets/js ./assets/css",
         "clean": "node clean.js",
