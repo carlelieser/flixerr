@@ -1,24 +1,24 @@
-import React, { Component } from 'react'
-import Fade from 'react-reveal/Fade'
+import React, { Component } from "react";
+import Fade from "react-reveal/Fade";
 
-import SubtitleItem from './subtitle-item'
+import SubtitleItem from "./subtitle-item";
 
 class SubtitlesContainer extends Component {
     constructor(props) {
-        super(props)
+        super(props);
     }
 
     turnOffSubtitles = () => {
-        this.props.setActiveSubtitle()
-        this.props.toggleSubtitleMenu()
-    }
+        this.props.setActiveSubtitle();
+        this.props.toggleSubtitleMenu();
+    };
 
     render() {
-        let { activeSubtitle, subtitleOptions } = this.props
+        let { activeSubtitle, subtitleOptions } = this.props;
         let subtitles = subtitleOptions.map((subtitle) => {
             let isActive = activeSubtitle
                 ? activeSubtitle.name == subtitle.name
-                : false
+                : false;
             return (
                 <SubtitleItem
                     key={subtitle.name}
@@ -26,8 +26,8 @@ class SubtitlesContainer extends Component {
                     setActiveSubtitle={this.props.setActiveSubtitle}
                     subtitle={subtitle}
                 />
-            )
-        })
+            );
+        });
         return (
             <Fade
                 mountOnEnter
@@ -40,15 +40,15 @@ class SubtitlesContainer extends Component {
                 <div className="player-dialog-container subtitles-container">
                     {subtitles}
                     <div
-                        className={!activeSubtitle ? 'active-subtitle' : ''}
+                        className={!activeSubtitle ? "active-subtitle" : ""}
                         onClick={this.turnOffSubtitles}
                     >
                         Off
                     </div>
                 </div>
             </Fade>
-        )
+        );
     }
 }
 
-export default SubtitlesContainer
+export default SubtitlesContainer;

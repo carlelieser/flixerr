@@ -1,165 +1,165 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import Fade from 'react-reveal/Fade'
-import Season from './season'
+import Fade from "react-reveal/Fade";
+import Season from "./season";
 
-import uniqid from 'uniqid'
-import { default as request } from 'axios'
+import uniqid from "uniqid";
+import { default as request } from "axios";
 
 class MovieModal extends Component {
     constructor(props) {
-        super(props)
+        super(props);
 
         this.state = {
             trailer: false,
             seasons: [],
             showSeasons: false,
             isLoading: false,
-        }
+        };
     }
 
     setLoading = (isLoading) => {
-        this.setState({ isLoading })
-    }
+        this.setState({ isLoading });
+    };
 
     setShowSeasons = (showSeasons) => {
-        this.setState({ showSeasons })
-    }
+        this.setState({ showSeasons });
+    };
 
     openSeasons = () => {
-        this.setShowSeasons(true)
-    }
+        this.setShowSeasons(true);
+    };
 
     closeSeasons = () => {
-        this.setShowSeasons(false)
-    }
+        this.setShowSeasons(false);
+    };
 
     setSeasons = (seasons) => {
-        this.setState({ seasons })
-    }
+        this.setState({ seasons });
+    };
 
     setTrailer = (trailer) => {
-        this.setState({ trailer })
-    }
+        this.setState({ trailer });
+    };
 
     getTrailer = () => {
-        let movieTrailer = require('movie-trailer'),
+        let movieTrailer = require("movie-trailer"),
             name = this.props.movie.title,
-            releaseDate = this.props.movie.release_date.substring(0, 4)
+            releaseDate = this.props.movie.release_date.substring(0, 4);
 
         movieTrailer(name, releaseDate)
             .then((url) => {
-                this.setTrailer(url)
+                this.setTrailer(url);
             })
             .catch((err) => {
-                this.setTrailer()
-            })
-    }
+                this.setTrailer();
+            });
+    };
 
     handleViewTrailer = () => {
-        let { trailer } = this.state
+        let { trailer } = this.state;
 
-        this.props.setTrailer(trailer)
-    }
+        this.props.setTrailer(trailer);
+    };
 
     handlePlayMovie = () => {
-        this.props.playMovie(this.props.movie)
-    }
+        this.props.playMovie(this.props.movie);
+    };
 
     handleFavorites = () => {
         if (this.props.isFavorite(this.props.movie)) {
-            this.props.removeFromFavorites(this.props.movie)
+            this.props.removeFromFavorites(this.props.movie);
         } else {
-            this.props.addToFavorites(this.props.movie)
+            this.props.addToFavorites(this.props.movie);
         }
-    }
+    };
 
     formatNumber = (number) => {
-        number = number.toString()
-        let formatted = number.length === 1 ? `0${number}` : number
-        return formatted
-    }
+        number = number.toString();
+        let formatted = number.length === 1 ? `0${number}` : number;
+        return formatted;
+    };
 
     getEpisodes = (season) => {
-        let url = `https://api.themoviedb.org/3/tv/${this.props.movie.id}/season/${season.season_number}?api_key=${this.props.apiKey}&language=en-US`
+        let url = `https://api.themoviedb.org/3/tv/${this.props.movie.id}/season/${season.season_number}?api_key=${this.props.apiKey}&language=en-US`;
         return request
             .get(url)
             .then((response) => {
-                let episodes = response.data.episodes
-                let flixerrEpisodes = []
+                let episodes = response.data.episodes;
+                let flixerrEpisodes = [];
                 if (episodes) {
                     for (let i = 0; i < episodes.length; i++) {
-                        let episode = episodes[i]
+                        let episode = episodes[i];
                         let clonedMovie = {
                             ...this.props.movie,
-                        }
+                        };
                         let newEpisode = {
                             ...episode,
-                        }
-                        newEpisode.title = `${clonedMovie.title} / ${newEpisode.name}`
+                        };
+                        newEpisode.title = `${clonedMovie.title} / ${newEpisode.name}`;
                         newEpisode.episode_number_formatted = this.formatNumber(
                             newEpisode.episode_number
-                        )
-                        newEpisode.query = `${clonedMovie.title} S${season.season_number_formatted}E${newEpisode.episode_number_formatted}`
-                        newEpisode.show = clonedMovie
-                        flixerrEpisodes.push(newEpisode)
+                        );
+                        newEpisode.query = `${clonedMovie.title} S${season.season_number_formatted}E${newEpisode.episode_number_formatted}`;
+                        newEpisode.show = clonedMovie;
+                        flixerrEpisodes.push(newEpisode);
                     }
 
                     return {
                         name: season.name,
                         number: season.season_number,
                         episodes: flixerrEpisodes,
-                    }
+                    };
                 }
             })
-            .catch((err) => console.log(err))
-    }
+            .catch((err) => console.log(err));
+    };
 
     getSeriesData = () => {
-        let url = `https://api.themoviedb.org/3/tv/${this.props.movie.id}?api_key=${this.props.apiKey}&language=en-US`
+        let url = `https://api.themoviedb.org/3/tv/${this.props.movie.id}?api_key=${this.props.apiKey}&language=en-US`;
         return request
             .get(url)
             .then((response) => {
-                return response.data
+                return response.data;
             })
-            .catch((err) => console.log(err))
-    }
+            .catch((err) => console.log(err));
+    };
 
     getSeasons = () => {
         if (this.props.movie.isSeries) {
-            this.setLoading(true)
+            this.setLoading(true);
             return this.getSeriesData().then((data) => {
-                let seasons = data.seasons
-                let seasonData = []
+                let seasons = data.seasons;
+                let seasonData = [];
                 for (let i = seasons.length - 1; i >= 0; i--) {
-                    let season = seasons[i]
+                    let season = seasons[i];
                     season.season_number_formatted = this.formatNumber(
                         season.season_number
-                    )
+                    );
                     if (season.season_number) {
-                        let episodes = this.getEpisodes(season)
-                        seasonData.push(episodes)
+                        let episodes = this.getEpisodes(season);
+                        seasonData.push(episodes);
                     }
                 }
 
                 return Promise.all(seasonData).then((response) => {
-                    this.setLoading()
-                    this.setSeasons(response)
-                })
-            })
+                    this.setLoading();
+                    this.setSeasons(response);
+                });
+            });
         }
-    }
+    };
 
     generateRgbCss = (r, g, b, opacity) => {
-        return `rgba(${r}, ${g}, ${b}, ${opacity}0)`
-    }
+        return `rgba(${r}, ${g}, ${b}, ${opacity}0)`;
+    };
 
     getLinearGradient = () => {
-        let { movie } = this.props
-        let { averageColor } = movie
+        let { movie } = this.props;
+        let { averageColor } = movie;
         let r = averageColor.value[0],
             g = averageColor.value[1],
-            b = averageColor.value[2]
+            b = averageColor.value[2];
 
         return `linear-gradient(180deg, ${this.generateRgbCss(
             r,
@@ -171,8 +171,8 @@ class MovieModal extends Component {
             g,
             b,
             0.8
-        )} 50%, ${averageColor.hex} 100%)`
-    }
+        )} 50%, ${averageColor.hex} 100%)`;
+    };
 
     shouldComponentUpdate(nextProps, nextState) {
         if (
@@ -183,20 +183,20 @@ class MovieModal extends Component {
             nextState.isLoading === this.state.isLoading &&
             this.state.trailer === nextState.trailer
         ) {
-            return false
+            return false;
         } else {
-            return true
+            return true;
         }
     }
 
     componentDidMount() {
-        this.getTrailer()
-        this.getSeasons()
+        this.getTrailer();
+        this.getSeasons();
     }
 
     render() {
-        let { seasons, showSeasons, isLoading } = this.state
-        let { movie, playMovie, isFavorite } = this.props
+        let { seasons, showSeasons, isLoading } = this.state;
+        let { movie, playMovie, isFavorite } = this.props;
         let {
             release_date,
             averageColor,
@@ -205,15 +205,15 @@ class MovieModal extends Component {
             overview,
             isSeries,
             vote_average,
-        } = movie
-        let { isLight, hex } = averageColor
+        } = movie;
+        let { isLight, hex } = averageColor;
         let releaseDate = release_date.substring(0, 4),
-            modalClass = isLight ? 'light-modal' : 'dark-modal',
-            iconClass = isLight ? 'mdi-dark' : 'mdi-light',
-            closeClass = isLight ? 'close-dark' : 'close-light',
+            modalClass = isLight ? "light-modal" : "dark-modal",
+            iconClass = isLight ? "mdi-dark" : "mdi-light",
+            closeClass = isLight ? "close-dark" : "close-light",
             favoriteClass = isFavorite(movie)
-                ? 'mdi-heart'
-                : 'mdi-heart-outline'
+                ? "mdi-heart"
+                : "mdi-heart-outline";
 
         let seasonData = seasons.map((season, index) => {
             if (season) {
@@ -225,13 +225,13 @@ class MovieModal extends Component {
                             playMovie={playMovie}
                             season={season}
                         />
-                    )
+                    );
                 }
             }
-        })
+        });
 
-        let showInfo = !showSeasons
-        let linearGradient = this.getLinearGradient()
+        let showInfo = !showSeasons;
+        let linearGradient = this.getLinearGradient();
         return (
             <div
                 className={`movie-modal ${modalClass}`}
@@ -292,7 +292,7 @@ class MovieModal extends Component {
                             <i
                                 className={`mdi ${iconClass} ${favoriteClass}`}
                                 onClick={this.handleFavorites}
-                            />{' '}
+                            />{" "}
                             {this.state.trailer ? (
                                 <Fade
                                     mountOnEnter
@@ -308,7 +308,7 @@ class MovieModal extends Component {
                                     </div>
                                 </Fade>
                             ) : (
-                                ''
+                                ""
                             )}
                         </div>
                         <div className="movie-modal-title">{title}</div>
@@ -339,12 +339,12 @@ class MovieModal extends Component {
                 <div
                     className="movie-gradient"
                     style={{
-                        background: averageColor ? linearGradient : '',
+                        background: averageColor ? linearGradient : "",
                     }}
                 />
             </div>
-        )
+        );
     }
 }
 
-export default MovieModal
+export default MovieModal;

@@ -1,22 +1,22 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
 class SubtitleItem extends Component {
     constructor(props) {
-        super(props)
+        super(props);
     }
 
     handleSubtitle = () => {
-        this.props.setActiveSubtitle(this.props.subtitle)
-    }
+        this.props.setActiveSubtitle(this.props.subtitle);
+    };
 
     shouldComponentUpdate(nextProps) {
         if (
             nextProps.active === this.props.active &&
             nextProps.subtitle === this.props.subtitle
         ) {
-            return false
+            return false;
         } else {
-            return true
+            return true;
         }
     }
 
@@ -24,7 +24,7 @@ class SubtitleItem extends Component {
         return (
             <div
                 className={`subtitle-subtitle ${
-                    this.props.active ? 'active-subtitle' : ''
+                    this.props.active ? "active-subtitle" : ""
                 }`}
                 onClick={this.handleSubtitle}
             >
@@ -34,11 +34,11 @@ class SubtitleItem extends Component {
                 {this.props.active ? (
                     <i className="mdi mdi-checkbox-blank-circle mdi-light" />
                 ) : (
-                    ''
+                    ""
                 )}
             </div>
-        )
+        );
     }
 }
 
-export default SubtitleItem
+export default SubtitleItem;

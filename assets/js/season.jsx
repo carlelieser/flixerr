@@ -1,28 +1,28 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import Episode from './episode'
+import Episode from "./episode";
 
-import Fade from 'react-reveal/Fade'
+import Fade from "react-reveal/Fade";
 
 class Season extends Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
             collapsed: true,
-        }
+        };
     }
 
     handleStreamEpisode = (episode) => {
-        this.props.playMovie(episode)
-    }
+        this.props.playMovie(episode);
+    };
 
     toggleCollapse = () => {
         this.setState((prevState) => {
             return {
                 collapsed: !prevState.collapsed,
-            }
-        })
-    }
+            };
+        });
+    };
 
     render() {
         let episodes = this.props.season.episodes.map((episode, index) => (
@@ -31,7 +31,7 @@ class Season extends Component {
                 episode={episode}
                 iconClass={this.props.iconClass}
             />
-        ))
+        ));
 
         return (
             <div className="season" onClick={this.toggleCollapse}>
@@ -40,8 +40,8 @@ class Season extends Component {
                     <i
                         className={`mdi ${this.props.iconClass} ${
                             this.state.collapsed
-                                ? 'mdi-menu-down arrow-collapse'
-                                : 'mdi-menu-up'
+                                ? "mdi-menu-down arrow-collapse"
+                                : "mdi-menu-up"
                         }`}
                     />
                 </div>
@@ -53,15 +53,15 @@ class Season extends Component {
                 >
                     <div
                         className={`episodes ${
-                            this.state.collapsed ? 'episodes-collapsed' : ''
+                            this.state.collapsed ? "episodes-collapsed" : ""
                         }`}
                     >
                         {episodes}
                     </div>
                 </Fade>
             </div>
-        )
+        );
     }
 }
 
-export default Season
+export default Season;

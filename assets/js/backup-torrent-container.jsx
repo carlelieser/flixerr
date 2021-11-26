@@ -1,43 +1,43 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import uniqid from 'uniqid'
+import uniqid from "uniqid";
 
-import Torrent from './torrent'
+import Torrent from "./torrent";
 
 class BackupTorrents extends Component {
     constructor(props) {
-        super(props)
+        super(props);
     }
 
     handleReload = () => {
-        this.props.setPlayerLoading(true)
+        this.props.setPlayerLoading(true);
         this.props
             .resetClient(true)
             .then(() => {
-                let movie = this.props.movie
-                movie.magnet = false
-                this.props.searchTorrent(movie)
+                let movie = this.props.movie;
+                movie.magnet = false;
+                this.props.searchTorrent(movie);
             })
-            .catch((err) => console.log(err))
-        this.props.closeBackup()
-    }
+            .catch((err) => console.log(err));
+        this.props.closeBackup();
+    };
 
     shouldComponentUpdate(nextProps, nextState) {
         if (
             nextProps.torrents !== this.props.torrents ||
             nextProps.movie.magnet !== this.props.movie.magnet
         ) {
-            return true
+            return true;
         }
 
-        return false
+        return false;
     }
 
     render() {
         let torrents = this.props.torrents
             ? this.props.torrents.map((torrent) => {
-                  let title = torrent.title
-                  let videoQuality = torrent.resolution || torrent.videoQuality
+                  let title = torrent.title;
+                  let videoQuality = torrent.resolution || torrent.videoQuality;
 
                   return (
                       <Torrent
@@ -45,16 +45,16 @@ class BackupTorrents extends Component {
                           torrent={torrent}
                           name={`torrent ${
                               this.props.getCurrentMagnet() == torrent.magnet
-                                  ? 'active'
-                                  : ''
+                                  ? "active"
+                                  : ""
                           }`}
                           videoQuality={videoQuality}
                           title={title}
                           handleTorrentClick={this.props.handleTorrentClick}
                       />
-                  )
+                  );
               })
-            : ''
+            : "";
         return (
             <div className="backup-container">
                 <div className="title">Torrents</div>
@@ -72,8 +72,8 @@ class BackupTorrents extends Component {
                     <span>Reload</span>
                 </div>
             </div>
-        )
+        );
     }
 }
 
-export default BackupTorrents
+export default BackupTorrents;

@@ -1,12 +1,12 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import uniqid from 'uniqid'
+import uniqid from "uniqid";
 
-import MovieItem from './movie-item'
+import MovieItem from "./movie-item";
 
 class SearchContainer extends Component {
     constructor(props) {
-        super(props)
+        super(props);
     }
 
     setHeader = () => {
@@ -14,26 +14,26 @@ class SearchContainer extends Component {
             if (this.props.searchContent.length) {
                 this.props.setHeader(
                     this.props.searchContent[0].flixerr_data.backdrop_path
-                )
+                );
             }
         }
-    }
+    };
 
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.searchContent === this.props.searchContent) {
-            return false
+            return false;
         } else {
-            return true
+            return true;
         }
     }
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.searchContent !== this.props.searchContent) {
-            this.setHeader()
+            this.setHeader();
         }
     }
     componentDidMount() {
-        this.setHeader()
+        this.setHeader();
     }
 
     render() {
@@ -46,19 +46,19 @@ class SearchContainer extends Component {
                       fallback={true}
                       openBox={this.props.openBox}
                   />
-              ))
+              ));
 
         return (
             <div className="search-container">
                 {this.props.searchContent.$$typeof ? (
-                    ''
+                    ""
                 ) : (
                     <div className="search-title">{`Search Results (${this.props.searchContent.length})`}</div>
                 )}
                 <div className="search-results">{searchContent}</div>
             </div>
-        )
+        );
     }
 }
 
-export default SearchContainer
+export default SearchContainer;

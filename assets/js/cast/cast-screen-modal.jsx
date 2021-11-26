@@ -1,18 +1,18 @@
-import React, { Component } from 'react'
-import Fade from 'react-reveal/Fade'
+import React, { Component } from "react";
+import Fade from "react-reveal/Fade";
 
 class CastScreenModal extends Component {
     constructor(props) {
-        super(props)
+        super(props);
     }
 
     handleStopCasting = () => {
-        this.props.setActiveCastingDevice(false)
-    }
+        this.props.setActiveCastingDevice(false);
+    };
 
     render() {
-        let { show, device } = this.props
-        let name = device ? device.name : ''
+        let { show, device } = this.props;
+        let name = device ? device.name : "";
         return (
             <Fade
                 mountOnEnter
@@ -30,7 +30,7 @@ class CastScreenModal extends Component {
                             Hey there hot stuff.
                         </div>
                         <div className="cast-screen-desc">
-                            Look's like you're streaming to your{' '}
+                            Look's like you're streaming to your{" "}
                             <span>{name}</span>.
                         </div>
                         <div className="btn" onClick={this.handleStopCasting}>
@@ -41,8 +41,8 @@ class CastScreenModal extends Component {
                     <div class="cast-screen-modal-bg"></div>
                 </div>
             </Fade>
-        )
+        );
     }
 }
 
-export default CastScreenModal
+export default CastScreenModal;

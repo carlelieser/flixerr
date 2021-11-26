@@ -1,54 +1,52 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import Fade from 'react-reveal/Fade'
+import Fade from "react-reveal/Fade";
 
 class AccountContainer extends Component {
     constructor(props) {
-        super(props)
+        super(props);
 
-        this.handleInput.bind(this)
+        this.handleInput.bind(this);
 
         this.state = {
             accountModalInfo: {
                 create: {
-                    title: 'Create an account',
-                    desc:
-                        'Register to easily synchronize data across multiple devices.',
+                    title: "Create an account",
+                    desc: "Register to easily synchronize data across multiple devices.",
                     submit: {
-                        text: 'Create',
+                        text: "Create",
                         action: this.props.handleAccountCreation,
                     },
                     secondary: {
-                        text: 'Login',
+                        text: "Login",
                         action: this.props.openAccount,
                     },
                 },
                 login: {
-                    title: 'Login',
-                    desc:
-                        'Flixerr will use your account to synchronize data across all your devices.',
+                    title: "Login",
+                    desc: "Flixerr will use your account to synchronize data across all your devices.",
                     submit: {
-                        text: 'Login',
+                        text: "Login",
                         action: this.props.handleAccountSignin,
                     },
                     secondary: {
-                        text: 'Sign Up',
+                        text: "Sign Up",
                         action: this.props.openAccountCreation,
                     },
                 },
             },
             showContainer: true,
-            active: 'login',
-        }
+            active: "login",
+        };
     }
 
     handleInput = (e) => {
         if (e.keyCode == 13) {
-            this.state.accountModalInfo[this.state.active].submit.action()
+            this.state.accountModalInfo[this.state.active].submit.action();
         } else {
-            this.props.handleInput(e)
+            this.props.handleInput(e);
         }
-    }
+    };
 
     initalizeAnimation = () => {
         this.setState(
@@ -57,30 +55,30 @@ class AccountContainer extends Component {
             },
             () => {
                 setTimeout(() => {
-                    this.setState({ showContainer: true })
-                }, 250)
+                    this.setState({ showContainer: true });
+                }, 250);
             }
-        )
-    }
+        );
+    };
 
     setActive = () => {
-        let active = this.props.account ? 'login' : 'create'
-        this.setState({ active })
-    }
+        let active = this.props.account ? "login" : "create";
+        this.setState({ active });
+    };
 
     componentDidUpdate(prevProps) {
         if (prevProps.account != this.props.account) {
-            this.initalizeAnimation()
-            this.setActive()
+            this.initalizeAnimation();
+            this.setActive();
         }
     }
 
     componentDidMount() {
-        this.setActive()
+        this.setActive();
     }
 
     render() {
-        let accountInfo = this.state.accountModalInfo[this.state.active]
+        let accountInfo = this.state.accountModalInfo[this.state.active];
         return (
             <div className="account-container">
                 <Fade
@@ -142,8 +140,8 @@ class AccountContainer extends Component {
                     </div>
                 </Fade>
             </div>
-        )
+        );
     }
 }
 
-export default AccountContainer
+export default AccountContainer;

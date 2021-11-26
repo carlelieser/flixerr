@@ -1,26 +1,26 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import { CSSTransitionGroup } from 'react-transition-group'
-import Fade from 'react-reveal/Fade'
+import { CSSTransitionGroup } from "react-transition-group";
+import Fade from "react-reveal/Fade";
 
-import SubtitlesContainer from './subtitles/subtitles-container'
-import BackupTorrents from './backup-torrent-container'
-import CastContainer from './cast/cast-container'
-import CastScreen from './cast/cast-screen'
-import CastScreenModal from './cast/cast-screen-modal'
-import MovieChat from './movie-chat'
+import SubtitlesContainer from "./subtitles/subtitles-container";
+import BackupTorrents from "./backup-torrent-container";
+import CastContainer from "./cast/cast-container";
+import CastScreen from "./cast/cast-screen";
+import CastScreenModal from "./cast/cast-screen-modal";
+import MovieChat from "./movie-chat";
 
 class Player extends Component {
     constructor(props) {
-        super(props)
+        super(props);
 
-        this.videoElement = React.createRef()
-        this.mouseTimeout = false
-        this.movieChatObserver = false
-        this.movieAudienceObserver = false
+        this.videoElement = React.createRef();
+        this.mouseTimeout = false;
+        this.movieChatObserver = false;
+        this.movieAudienceObserver = false;
 
-        this.handleUpdate.bind(this)
-        this.changeTime.bind(this)
+        this.handleUpdate.bind(this);
+        this.changeTime.bind(this);
 
         this.state = {
             fullScreen: false,
@@ -34,323 +34,323 @@ class Player extends Component {
             activeSubtitle: false,
             bottomBarActions: [
                 {
-                    icon: 'cast',
+                    icon: "cast",
                     onClick: this.toggleCastContainer,
                 },
                 {
                     hideWhenPipView: true,
-                    icon: 'subtitles-outline',
+                    icon: "subtitles-outline",
                     special: true,
                     onClick: this.toggleSubtitleMenu,
                 },
                 {
-                    className: 'pip-btn',
-                    icon: 'picture-in-picture-bottom-right',
+                    className: "pip-btn",
+                    icon: "picture-in-picture-bottom-right",
                     onClick: this.togglePipView,
                 },
                 {
-                    className: 'fullscreen-btn',
+                    className: "fullscreen-btn",
                     hideWhenPipView: true,
-                    icon: 'fullscreen',
+                    icon: "fullscreen",
                     special: true,
                     onClick: this.toggleFullscreen,
                 },
             ],
-        }
+        };
     }
 
     toggleShowMovieChat = () => {
         this.setState((prevState) => {
-            let showMovieChat = prevState.showMovieChat
+            let showMovieChat = prevState.showMovieChat;
             return {
                 showMovieChat: !showMovieChat,
-            }
-        })
-    }
+            };
+        });
+    };
 
     setActiveCastingDevice = (activeCastingDevice) => {
         this.setState({ activeCastingDevice }, () => {
             console.log(
-                'Set active casting device to:',
+                "Set active casting device to:",
                 this.state.activeCastingDevice
-            )
-        })
-    }
+            );
+        });
+    };
 
     setActiveSubtitle = (activeSubtitle) => {
-        this.setState({ activeSubtitle })
-    }
+        this.setState({ activeSubtitle });
+    };
 
     toggleSubtitleMenu = () => {
         this.setState((prevState) => {
             return {
                 showSubtitles: !prevState.showSubtitles,
-            }
-        })
-    }
+            };
+        });
+    };
 
     toggleCastContainer = () => {
         this.setState((prevState) => {
             return {
                 showCastContainer: !prevState.showCastContainer,
-            }
-        })
-    }
+            };
+        });
+    };
 
     toggleOverlay = (show) => {
-        this.setState({ showOverlay: show })
-    }
+        this.setState({ showOverlay: show });
+    };
 
     mouseStopped = () => {
         if (!this.props.openBackup && !this.state.showSubtitles) {
-            this.toggleOverlay()
+            this.toggleOverlay();
         }
-    }
+    };
 
     mouseMove = () => {
         if (!this.props.openBackup && !this.state.showSubtitles) {
-            this.toggleOverlay(true)
-            clearTimeout(this.mouseTimeout)
-            this.mouseTimeout = setTimeout(this.mouseStopped, 5000)
+            this.toggleOverlay(true);
+            clearTimeout(this.mouseTimeout);
+            this.mouseTimeout = setTimeout(this.mouseStopped, 5000);
         }
-    }
+    };
 
     toggleFullscreen = () => {
         this.setState(
             (prevState) => {
                 return {
                     fullScreen: !prevState.fullScreen,
-                }
+                };
             },
             () => {
-                this.props.setFullScreen(this.state.fullScreen)
+                this.props.setFullScreen(this.state.fullScreen);
             }
-        )
-    }
+        );
+    };
 
     togglePipView = () => {
         this.setState((prevState) => {
-            let visibility = !prevState.pipView
+            let visibility = !prevState.pipView;
             return {
                 pipView: visibility,
                 showMovieChat: false,
                 showSubtitles: false,
-            }
-        })
-    }
+            };
+        });
+    };
 
     applyPipViewToWindow = () => {
-        const { BrowserWindow, screen } = require('electron').remote
-        let window = BrowserWindow.getFocusedWindow()
-        let { width, height } = screen.getPrimaryDisplay().workAreaSize
+        const { BrowserWindow, screen } = require("electron").remote;
+        let window = BrowserWindow.getFocusedWindow();
+        let { width, height } = screen.getPrimaryDisplay().workAreaSize;
         let pipViewSize = {
             width: 500,
             height: 400,
-        }
+        };
         let pipViewPosition = {
             x: width - pipViewSize.width - 20,
             y: height - pipViewSize.height - 20,
-        }
+        };
         this.originalWindowSize = window.isFullScreen()
             ? [1200, 700]
-            : window.getSize()
-        window.setFullScreen(false)
-        window.setAlwaysOnTop(true)
-        window.setMinimumSize(400, 300)
-        window.setMaximumSize(600, 500)
-        window.setMaximizable(false)
-        window.setSize(pipViewSize.width, pipViewSize.height, true)
-        window.setPosition(pipViewPosition.x, pipViewPosition.y)
-    }
+            : window.getSize();
+        window.setFullScreen(false);
+        window.setAlwaysOnTop(true);
+        window.setMinimumSize(400, 300);
+        window.setMaximumSize(600, 500);
+        window.setMaximizable(false);
+        window.setSize(pipViewSize.width, pipViewSize.height, true);
+        window.setPosition(pipViewPosition.x, pipViewPosition.y);
+    };
 
     revertPipViewToWindow = () => {
-        const { BrowserWindow, screen } = require('electron').remote
-        let window = BrowserWindow.getFocusedWindow()
-        let { width, height } = screen.getPrimaryDisplay().workAreaSize
-        window.setAlwaysOnTop(false)
-        window.setMinimumSize(1200, 700)
-        window.setSize(this.originalWindowSize[0], this.originalWindowSize[1])
-        window.setMaximumSize(width + 5000, height + 5000)
-        window.setMaximizable(true)
-        window.center()
-    }
+        const { BrowserWindow, screen } = require("electron").remote;
+        let window = BrowserWindow.getFocusedWindow();
+        let { width, height } = screen.getPrimaryDisplay().workAreaSize;
+        window.setAlwaysOnTop(false);
+        window.setMinimumSize(1200, 700);
+        window.setSize(this.originalWindowSize[0], this.originalWindowSize[1]);
+        window.setMaximumSize(width + 5000, height + 5000);
+        window.setMaximizable(true);
+        window.center();
+    };
 
     handleVideoPlayback = (toggle, play) => {
         if (this.videoElement.current) {
             if (toggle) {
                 if (this.videoElement.current.paused == true) {
-                    this.playVideoElement()
+                    this.playVideoElement();
                 } else {
-                    this.pauseVideoElement()
+                    this.pauseVideoElement();
                 }
             } else if (play) {
-                this.playVideoElement()
+                this.playVideoElement();
             } else {
-                this.pauseVideoElement()
+                this.pauseVideoElement();
             }
 
-            this.toggleOverlay(this.videoElement.current.paused)
+            this.toggleOverlay(this.videoElement.current.paused);
         }
-    }
+    };
 
     playVideo = () => {
-        this.handleVideoPlayback(false, true)
-    }
+        this.handleVideoPlayback(false, true);
+    };
 
     pauseVideo = () => {
-        this.handleVideoPlayback()
-    }
+        this.handleVideoPlayback();
+    };
 
     playVideoElement = () => {
         if (this.state.activeCastingDevice)
-            this.state.activeCastingDevice.play()
-        this.videoElement.current.play()
-    }
+            this.state.activeCastingDevice.play();
+        this.videoElement.current.play();
+    };
 
     pauseVideoElement = () => {
         if (this.state.activeCastingDevice) {
-            this.state.activeCastingDevice.pause()
+            this.state.activeCastingDevice.pause();
         }
-        this.videoElement.current.pause()
-    }
+        this.videoElement.current.pause();
+    };
 
     setVideoTime = (time) => {
-        this.videoElement.current.currentTime = time
+        this.videoElement.current.currentTime = time;
         if (this.state.activeCastingDevice) {
-            this.state.activeCastingDevice.seek(time)
+            this.state.activeCastingDevice.seek(time);
         }
-    }
+    };
 
     toggleVideoPlayback = () => {
-        this.handleVideoPlayback(true, false)
-    }
+        this.handleVideoPlayback(true, false);
+    };
 
     handleKeyPress = (e) => {
-        if (e.keyCode == 32 && e.target.nodeName !== 'TEXTAREA') {
-            this.toggleVideoPlayback()
+        if (e.keyCode == 32 && e.target.nodeName !== "TEXTAREA") {
+            this.toggleVideoPlayback();
         } else if (e.keyCode == 27) {
             if (this.state.fullScreen) {
-                this.toggleFullscreen()
+                this.toggleFullscreen();
             } else {
-                this.closeClient()
+                this.closeClient();
             }
         }
 
         if (e.keyCode == 37) {
-            let time = this.props.currentTime - 10
-            this.setVideoTime(time)
+            let time = this.props.currentTime - 10;
+            this.setVideoTime(time);
         }
 
         if (e.keyCode == 39) {
-            let time = this.props.currentTime + 30
-            this.setVideoTime(time)
+            let time = this.props.currentTime + 30;
+            this.setVideoTime(time);
         }
-    }
+    };
 
     changeTime = (e) => {
-        let value = e.currentTarget.value
-        let percent = value / 100
-        let time = this.videoElement.current.duration * percent
+        let value = e.currentTarget.value;
+        let percent = value / 100;
+        let time = this.videoElement.current.duration * percent;
 
-        this.setVideoTime(time)
-        this.props.setSeekValue(value)
-        this.props.setColorStop(percent)
-    }
+        this.setVideoTime(time);
+        this.props.setSeekValue(value);
+        this.props.setColorStop(percent);
+    };
 
     closeClient = () => {
-        if (this.state.pipView) this.togglePipView()
-        this.props.removeClient(this.props.currentTime)
-    }
+        if (this.state.pipView) this.togglePipView();
+        this.props.removeClient(this.props.currentTime);
+    };
 
     handleTorrentClick = (torrent) => {
-        this.props.setPlayerLoading(true)
+        this.props.setPlayerLoading(true);
         this.props.resetClient(true).then(() => {
-            this.props.streamTorrent(torrent)
-        })
-        this.props.closeBackup()
-    }
+            this.props.streamTorrent(torrent);
+        });
+        this.props.closeBackup();
+    };
 
     handleOpenBackup = () => {
         if (this.props.videoIndex !== false) {
-            this.pauseVideo()
+            this.pauseVideo();
         }
-        this.props.showBackup(true)
-    }
+        this.props.showBackup(true);
+    };
 
     handleBg = () => {
         if (this.props.videoIndex !== false) {
-            this.playVideo()
+            this.playVideo();
         }
-        this.props.closeBackup()
-    }
+        this.props.closeBackup();
+    };
 
     handleBuffer = () => {
-        this.setState({ videoBuffering: true })
-    }
+        this.setState({ videoBuffering: true });
+    };
 
     handleUpdate = (e) => {
-        this.setState({ videoBuffering: false })
-        this.props.handleVideo(e)
-    }
+        this.setState({ videoBuffering: false });
+        this.props.handleVideo(e);
+    };
 
     handleMouseDown = (e) => {
-        this.pauseVideo()
-    }
+        this.pauseVideo();
+    };
 
     stopIntro = () => {
-        this.setState({ showIntro: false })
-        this.props.toggleIntro()
-    }
+        this.setState({ showIntro: false });
+        this.props.toggleIntro();
+    };
 
     createSubtitleTrack = () => {
-        let { activeSubtitle } = this.state
+        let { activeSubtitle } = this.state;
         if (activeSubtitle) {
-            let { lang, src } = activeSubtitle
-            let trackElement = document.createElement('track')
-            trackElement.kind = 'captions'
-            trackElement.label = lang
-            trackElement.src = src
-            trackElement.track.mode = 'hidden'
-            return trackElement
+            let { lang, src } = activeSubtitle;
+            let trackElement = document.createElement("track");
+            trackElement.kind = "captions";
+            trackElement.label = lang;
+            trackElement.src = src;
+            trackElement.track.mode = "hidden";
+            return trackElement;
         }
-    }
+    };
 
     addTrackToVideoElement = (trackElement) => {
-        let node = this.videoElement.current
+        let node = this.videoElement.current;
         if (node) {
-            node.append(trackElement)
-            node.textTracks[0].mode = 'hidden'
-            trackElement.addEventListener('load', () => {
-                let textTrack = trackElement.track
+            node.append(trackElement);
+            node.textTracks[0].mode = "hidden";
+            trackElement.addEventListener("load", () => {
+                let textTrack = trackElement.track;
                 for (let j = 0; j < textTrack.cues.length; ++j) {
-                    let cue = textTrack.cues[j]
-                    cue.line = -3
+                    let cue = textTrack.cues[j];
+                    cue.line = -3;
                 }
-                this.showTrackInVideoElement(textTrack)
-            })
+                this.showTrackInVideoElement(textTrack);
+            });
         }
-    }
+    };
 
     showTrackInVideoElement = (track) => {
-        let node = this.videoElement.current
-        track.mode = 'showing'
-        if (node) node.textTracks[0].mode = 'showing'
-    }
+        let node = this.videoElement.current;
+        track.mode = "showing";
+        if (node) node.textTracks[0].mode = "showing";
+    };
 
     insertSubtitlesIntoVideo = () => {
-        let track = this.createSubtitleTrack()
-        this.removeSubtitlesFromVideo()
-        this.addTrackToVideoElement(track)
-        this.toggleSubtitleMenu()
-    }
+        let track = this.createSubtitleTrack();
+        this.removeSubtitlesFromVideo();
+        this.addTrackToVideoElement(track);
+        this.toggleSubtitleMenu();
+    };
 
     removeSubtitlesFromVideo = () => {
-        let node = this.videoElement.current
+        let node = this.videoElement.current;
         if (node) {
-            if (node.textTracks[0]) node.textTracks[0].mode = 'disabled'
-            node.innerHTML = ''
+            if (node.textTracks[0]) node.textTracks[0].mode = "disabled";
+            node.innerHTML = "";
         }
-    }
+    };
 
     shouldComponentUpdate(nextProps, nextState) {
         if (
@@ -383,147 +383,147 @@ class Player extends Component {
             nextState.activeCastingDevice === this.state.activeCastingDevice &&
             nextState.showMovieChat === this.state.showMovieChat
         ) {
-            return false
+            return false;
         } else {
-            return true
+            return true;
         }
     }
 
     handleInitCurrentTime = () => {
-        console.log('Setting video element current time to start time')
-        let node = this.videoElement.current
+        console.log("Setting video element current time to start time");
+        let node = this.videoElement.current;
         if (node && this.props.startTime)
-            this.setVideoTime(this.props.startTime)
-    }
+            this.setVideoTime(this.props.startTime);
+    };
 
     closeApp = () => {
-        let { remote } = require('electron')
-        let { app } = remote
-        app.exit(0)
-    }
+        let { remote } = require("electron");
+        let { app } = remote;
+        app.exit(0);
+    };
 
     handleBeforeUnload = (e) => {
-        e.preventDefault()
-        e.returnValue = false
-        this.pauseVideo()
-        setTimeout(this.closeApp, 400)
-    }
+        e.preventDefault();
+        e.returnValue = false;
+        this.pauseVideo();
+        setTimeout(this.closeApp, 400);
+    };
 
     updateVideoUrl = () => {
         let isPremium = this.props.videoIndex
-            ? typeof this.props.videoIndex === 'string'
-                ? this.props.videoIndex.startsWith('https://flixerrtv.com/api/')
+            ? typeof this.props.videoIndex === "string"
+                ? this.props.videoIndex.startsWith("https://flixerrtv.com/api/")
                 : this.props.videoIndex
-            : false
+            : false;
         let videoUrl = isPremium
             ? this.props.videoIndex
             : `http://localhost:8000/${
-                  this.props.currentVideoStream ? '' : this.props.videoIndex
-              }`
-        this.setState({ videoUrl })
-    }
+                  this.props.currentVideoStream ? "" : this.props.videoIndex
+              }`;
+        this.setState({ videoUrl });
+    };
 
     setPlayerVolume = (volume) => {
-        let node = this.videoElement.current
-        if (node) node.volume = volume
-    }
+        let node = this.videoElement.current;
+        if (node) node.volume = volume;
+    };
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.readyToStream !== this.props.readyToStream) {
-            this.handleInitCurrentTime()
-            this.props.startAutoSaveInterval()
+            this.handleInitCurrentTime();
+            this.props.startAutoSaveInterval();
         }
 
         if (prevState.pipView !== this.state.pipView) {
             if (this.state.pipView) {
-                this.applyPipViewToWindow()
-                this.removeSubtitlesFromVideo()
+                this.applyPipViewToWindow();
+                this.removeSubtitlesFromVideo();
             } else if (!this.state.pipView) {
-                this.revertPipViewToWindow()
+                this.revertPipViewToWindow();
             }
             if (this.state.activeSubtitle && !this.state.pipView)
-                this.insertSubtitlesIntoVideo()
+                this.insertSubtitlesIntoVideo();
         }
 
         if (prevState.activeSubtitle !== this.state.activeSubtitle) {
-            this.removeSubtitlesFromVideo()
-            if (this.state.activeSubtitle) this.insertSubtitlesIntoVideo()
+            this.removeSubtitlesFromVideo();
+            if (this.state.activeSubtitle) this.insertSubtitlesIntoVideo();
         }
 
         if (
             prevProps.currentVideoStream !== this.props.currentVideoStream ||
             prevProps.videoIndex !== this.props.videoIndex
         ) {
-            this.updateVideoUrl()
+            this.updateVideoUrl();
         }
 
         if (prevState.videoBuffering !== this.state.videoBuffering) {
             if (this.state.videoBuffering) {
                 if (this.state.activeCastingDevice)
-                    this.state.activeCastingDevice.pause()
+                    this.state.activeCastingDevice.pause();
             } else {
                 if (this.state.activeCastingDevice)
-                    this.state.activeCastingDevice.play()
+                    this.state.activeCastingDevice.play();
             }
         }
 
         if (prevState.activeCastingDevice !== this.state.activeCastingDevice) {
-            let volume = this.state.activeCastingDevice ? 0 : 1
-            this.setPlayerVolume(volume)
+            let volume = this.state.activeCastingDevice ? 0 : 1;
+            this.setPlayerVolume(volume);
         }
     }
 
     async componentDidMount() {
         this.movieChatObserver = this.props.initializeMovieChat(
             this.props.movie
-        )
+        );
         this.movieAudienceObserver = await this.props.initializeMovieAudience(
             this.props.movie
-        )
-        this.props.setSeekValue(0)
-        this.props.setColorStop(0)
-        this.props.setFileLoaded(0)
-        this.props.setVideoElement(this.videoElement)
+        );
+        this.props.setSeekValue(0);
+        this.props.setColorStop(0);
+        this.props.setFileLoaded(0);
+        this.props.setVideoElement(this.videoElement);
 
-        window.addEventListener('keydown', this.handleKeyPress)
-        window.addEventListener('beforeunload', this.handleBeforeUnload)
+        window.addEventListener("keydown", this.handleKeyPress);
+        window.addEventListener("beforeunload", this.handleBeforeUnload);
     }
 
     componentWillUnmount() {
-        clearTimeout(this.mouseTimeout)
-        window.removeEventListener('keydown', this.handleKeyPress)
-        window.removeEventListener('beforeunload', this.handleBeforeUnload)
+        clearTimeout(this.mouseTimeout);
+        window.removeEventListener("keydown", this.handleKeyPress);
+        window.removeEventListener("beforeunload", this.handleBeforeUnload);
         if (this.state.activeCastingDevice)
-            this.state.activeCastingDevice.stop()
-        if (this.movieChatObserver) this.movieChatObserver()
-        if (typeof this.movieAudienceObserver === 'function')
-            this.movieAudienceObserver()
-        this.props.leaveAudience(this.props.movie)
+            this.state.activeCastingDevice.stop();
+        if (this.movieChatObserver) this.movieChatObserver();
+        if (typeof this.movieAudienceObserver === "function")
+            this.movieAudienceObserver();
+        this.props.leaveAudience(this.props.movie);
     }
 
     render() {
         let bottomBarActions = this.state.bottomBarActions.map((action) => {
-            let { hideWhenPipView, className, onClick, icon, special } = action
-            let iconClass = `mdi-${icon}`
-            let specialClass = special ? 'special-size' : ''
-            let isCasting = icon === 'cast'
+            let { hideWhenPipView, className, onClick, icon, special } = action;
+            let iconClass = `mdi-${icon}`;
+            let specialClass = special ? "special-size" : "";
+            let isCasting = icon === "cast";
             let castingClass =
                 isCasting && this.state.activeCastingDevice
-                    ? 'action-is-casting'
-                    : ''
+                    ? "action-is-casting"
+                    : "";
             let component = (
                 <i
                     key={icon}
                     className={`mdi mdi-light ${iconClass} ${className} ${specialClass} ${castingClass}`}
                     onClick={onClick}
                 />
-            )
+            );
             return hideWhenPipView
                 ? this.state.pipView
                     ? null
                     : component
-                : component
-        })
+                : component;
+        });
 
         let backupContainer = this.props.openBackup ? (
             <BackupTorrents
@@ -538,44 +538,44 @@ class Player extends Component {
                 setPlayerLoading={this.props.setPlayerLoading}
             />
         ) : (
-            ''
-        )
+            ""
+        );
         let backupContainerBg = this.props.openBackup ? (
             <div className="backup-bg" onClick={this.handleBg} />
         ) : (
-            ''
-        )
+            ""
+        );
 
         let shouldShowOverlay =
             this.state.showOverlay ||
             this.props.openBackup ||
             this.state.showSubtitles ||
-            (this.props.playerStatus ? this.props.playerStatus.status : false)
+            (this.props.playerStatus ? this.props.playerStatus.status : false);
 
-        let playerTitle = this.props.movie.show_title || this.props.movie.title
+        let playerTitle = this.props.movie.show_title || this.props.movie.title;
 
         return (
             <div
                 className="movie-player-container"
                 style={{
                     backgroundColor: this.state.pipView
-                        ? 'transparent'
-                        : '#221c38',
+                        ? "transparent"
+                        : "#221c38",
                 }}
             >
                 <div
                     className={`movie-player ${
-                        !shouldShowOverlay ? 'movie-hide' : ''
-                    } ${this.state.pipView ? 'movie-pip-view-player' : ''} ${
-                        this.state.showMovieChat ? 'movie-chat-view-player' : ''
+                        !shouldShowOverlay ? "movie-hide" : ""
+                    } ${this.state.pipView ? "movie-pip-view-player" : ""} ${
+                        this.state.showMovieChat ? "movie-chat-view-player" : ""
                     }`}
                     style={{
                         backgroundImage: `${
                             this.props.loading
                                 ? this.props.error
-                                    ? 'none'
-                                    : 'url(assets/imgs/loading.svg)'
-                                : 'none'
+                                    ? "none"
+                                    : "url(assets/imgs/loading.svg)"
+                                : "none"
                         }`,
                     }}
                     onMouseMove={this.mouseMove}
@@ -583,7 +583,7 @@ class Player extends Component {
                     {this.state.videoBuffering ? (
                         <div className="video-buffer-container" />
                     ) : (
-                        ''
+                        ""
                     )}
                     <CSSTransitionGroup
                         transitionName="movie-box-anim"
@@ -612,7 +612,7 @@ class Player extends Component {
                             {this.props.playerStatus.loading ? (
                                 <span className="dots" />
                             ) : (
-                                ''
+                                ""
                             )}
                             {this.props.downloadPercent ? (
                                 <div className="download-info">
@@ -624,7 +624,7 @@ class Player extends Component {
                                     </span>
                                 </div>
                             ) : (
-                                ''
+                                ""
                             )}
                             {this.props.downloadPercent ? (
                                 <Fade distance="10%" bottom>
@@ -637,7 +637,7 @@ class Player extends Component {
                                     <div className="progress-bar-shadow" />
                                 </Fade>
                             ) : (
-                                ''
+                                ""
                             )}
                         </div>
                     </Fade>
@@ -666,15 +666,15 @@ class Player extends Component {
                         <div className="bottom-bar">
                             <i
                                 className={
-                                    'mdi mdi-light mdi-36px play-button ' +
+                                    "mdi mdi-light mdi-36px play-button " +
                                     (this.props.paused
-                                        ? 'mdi-play'
-                                        : 'mdi-pause')
+                                        ? "mdi-play"
+                                        : "mdi-pause")
                                 }
                                 onClick={this.toggleVideoPlayback}
                             />
                             {this.state.pipView ? (
-                                ''
+                                ""
                             ) : (
                                 <div className="video-data">
                                     <div
@@ -753,8 +753,8 @@ class Player extends Component {
                         <video
                             className={
                                 this.state.activeCastingDevice
-                                    ? 'casting-video'
-                                    : ''
+                                    ? "casting-video"
+                                    : ""
                             }
                             autoPlay
                             type="video/mp4"
@@ -775,8 +775,8 @@ class Player extends Component {
                     />
                 ) : null}
             </div>
-        )
+        );
     }
 }
 
-export default Player
+export default Player;

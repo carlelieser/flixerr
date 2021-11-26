@@ -1,19 +1,19 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import MovieItem from './movie-item'
+import MovieItem from "./movie-item";
 
 class Genre extends Component {
     constructor(props) {
-        super(props)
+        super(props);
 
-        this.genreElem = React.createRef()
+        this.genreElem = React.createRef();
 
         this.state = {
             page: 1,
             processing: true,
             changeNav: false,
             movies: [],
-        }
+        };
     }
 
     loadPage = () => {
@@ -29,56 +29,56 @@ class Genre extends Component {
                       this.state.page
                   }&release_date.lte=${this.props.getURLDate(1)}&with_genres=${
                       this.props.genreInfo.genreID
-                  }`
+                  }`;
 
             this.props.fetchContent(url, true).then((response) => {
-                this.props.setOffline()
-                let movies = this.props.extractMovies(response, false, false)
+                this.props.setOffline();
+                let movies = this.props.extractMovies(response, false, false);
                 this.setState((prevState) => {
                     return {
                         movies: prevState.movies.concat(movies),
                         processing: false,
-                    }
-                })
-            })
+                    };
+                });
+            });
         } else {
-            this.setCollection()
+            this.setCollection();
         }
-    }
+    };
 
     handleScroll = () => {
         let scrollTop = this.genreElem.current.scrollTop,
             scrollHeight = this.genreElem.current.scrollHeight,
-            limit = 30
+            limit = 30;
 
         if (!this.props.genreInfo.showCollection) {
             if (scrollTop >= scrollHeight - 1200) {
                 if (this.state.processing) {
-                    return
+                    return;
                 } else {
                     this.setState(
                         (prevState) => {
                             return {
                                 processing: true,
                                 page: prevState.page + 1,
-                            }
+                            };
                         },
                         () => {
-                            this.loadPage(this.state.page)
+                            this.loadPage(this.state.page);
                         }
-                    )
+                    );
                 }
             }
         }
 
         if (scrollTop > limit) {
-            this.setState({ changeNav: true })
+            this.setState({ changeNav: true });
         }
 
         if (scrollTop < limit) {
-            this.setState({ changeNav: false })
+            this.setState({ changeNav: false });
         }
-    }
+    };
 
     getEmptyState = () => {
         return (
@@ -89,11 +89,11 @@ class Genre extends Component {
                     <div className="desc">{`We couldn't find any movies in "${this.props.genreInfo.activeGenre}". To watch a movie, click the play button in the movie dialog box.`}</div>
                 </div>
             </div>
-        )
-    }
+        );
+    };
 
     setCollection = () => {
-        let collection = this.props[this.props.genreInfo.target]
+        let collection = this.props[this.props.genreInfo.target];
         this.setState({
             movies:
                 this.props.genreInfo.genreID == 21
@@ -102,8 +102,8 @@ class Genre extends Component {
                     ? collection
                     : [],
             processing: false,
-        })
-    }
+        });
+    };
 
     shouldComponentUpdate(nextProps, nextState) {
         if (
@@ -116,9 +116,9 @@ class Genre extends Component {
             nextProps.recentlyPlayed === this.props.recentlyPlayed &&
             nextProps.suggested === this.props.suggested
         ) {
-            return false
+            return false;
         } else {
-            return true
+            return true;
         }
     }
 
@@ -129,18 +129,18 @@ class Genre extends Component {
                 prevProps.recentlyPlayed !== this.props.recentlyPlayed ||
                 prevProps.suggested !== this.props.suggested
             ) {
-                this.setCollection()
+                this.setCollection();
             }
         }
     }
 
     componentDidMount() {
-        this.loadPage()
-        this.genreElem.current.addEventListener('scroll', this.handleScroll)
+        this.loadPage();
+        this.genreElem.current.addEventListener("scroll", this.handleScroll);
     }
 
     componentWillUnmount() {
-        this.genreElem.current.removeEventListener('scroll', this.handleScroll)
+        this.genreElem.current.removeEventListener("scroll", this.handleScroll);
     }
 
     render() {
@@ -150,18 +150,18 @@ class Genre extends Component {
                 movie={movie}
                 openBox={this.props.openBox}
             />
-        ))
+        ));
 
         return (
             <div className="paginated-genre-results" ref={this.genreElem}>
                 <div
                     className={`genre-bar ${
-                        this.state.changeNav ? 'genre-bar-on' : ''
+                        this.state.changeNav ? "genre-bar-on" : ""
                     }`}
                 />
                 <div
                     className={`close-genre ${
-                        this.state.changeNav ? 'close-genre-on' : ''
+                        this.state.changeNav ? "close-genre-on" : ""
                     }`}
                     onClick={this.props.closeGenre}
                 >
@@ -169,7 +169,7 @@ class Genre extends Component {
                 </div>
                 <div
                     className={`genre-name ${
-                        this.state.changeNav ? 'genre-name-on' : ''
+                        this.state.changeNav ? "genre-name-on" : ""
                     }`}
                 >
                     {this.props.genreInfo.activeGenre}
@@ -177,21 +177,21 @@ class Genre extends Component {
                 <div
                     className="genre-movie-list"
                     style={{
-                        marginLeft: this.state.movies.length ? '-20px' : '',
+                        marginLeft: this.state.movies.length ? "-20px" : "",
                         backgroundSize:
                             !this.state.processing && !this.state.movies.length
-                                ? '40%'
-                                : '5%',
+                                ? "40%"
+                                : "5%",
                         backgroundImage:
                             this.state.processing && this.state.movies.length
-                                ? ''
+                                ? ""
                                 : this.state.processing &&
                                   !this.state.movies.length
-                                ? 'url(./assets/imgs/loading.svg)'
+                                ? "url(./assets/imgs/loading.svg)"
                                 : !this.state.processing &&
                                   !this.state.movies.length
-                                ? ''
-                                : '',
+                                ? ""
+                                : "",
                     }}
                 >
                     {!this.state.processing && !this.state.movies.length
@@ -199,8 +199,8 @@ class Genre extends Component {
                         : movies}
                 </div>
             </div>
-        )
+        );
     }
 }
 
-export default Genre
+export default Genre;

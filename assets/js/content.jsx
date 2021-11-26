@@ -1,30 +1,30 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import Fade from 'react-reveal/Fade'
+import Fade from "react-reveal/Fade";
 
-import FeaturedContainer from './featured-container'
-import MovieContainer from './movie-container'
-import TVShowContainer from './tv-show-container'
-import Collection from './collection-container'
-import SearchContainer from './search-container'
+import FeaturedContainer from "./featured-container";
+import MovieContainer from "./movie-container";
+import TVShowContainer from "./tv-show-container";
+import Collection from "./collection-container";
+import SearchContainer from "./search-container";
 
 class Content extends Component {
     constructor(props) {
-        super(props)
+        super(props);
     }
 
     getActiveContainer = () => {
         switch (this.props.active) {
-            case 'Featured':
-                return <FeaturedContainer {...this.props} />
-            case 'Movies':
-                return <MovieContainer {...this.props} />
-            case 'TV Shows':
-                return <TVShowContainer {...this.props} />
-            case 'Collection':
-                return <Collection {...this.props} />
+            case "Featured":
+                return <FeaturedContainer {...this.props} />;
+            case "Movies":
+                return <MovieContainer {...this.props} />;
+            case "TV Shows":
+                return <TVShowContainer {...this.props} />;
+            case "Collection":
+                return <Collection {...this.props} />;
         }
-    }
+    };
 
     getOfflineContainer = () => {
         return (
@@ -37,13 +37,13 @@ class Content extends Component {
                     </span>
                 </div>
             </Fade>
-        )
-    }
+        );
+    };
 
     getSearchContainer = () => {
-        let search = <SearchContainer {...this.props} />
-        return search
-    }
+        let search = <SearchContainer {...this.props} />;
+        return search;
+    };
 
     shouldComponentUpdate(nextProps, nextState) {
         if (
@@ -52,32 +52,32 @@ class Content extends Component {
             nextProps.searchContent !== this.props.searchContent ||
             nextProps.isLoading !== this.props.isLoading
         ) {
-            return true
+            return true;
         } else {
             if (
-                this.props.active === 'Featured' &&
+                this.props.active === "Featured" &&
                 nextProps.featured !== this.props.featured
             ) {
-                return true
+                return true;
             } else if (
-                this.props.active === 'Movies' &&
+                this.props.active === "Movies" &&
                 nextProps.movies !== this.props.movies
             ) {
-                return true
+                return true;
             } else if (
-                this.props.active === 'TV Shows' &&
+                this.props.active === "TV Shows" &&
                 nextProps.shows !== this.props.shows
             ) {
-                return true
+                return true;
             } else if (
-                this.props.active === 'Collection' &&
+                this.props.active === "Collection" &&
                 (nextProps.suggested !== this.props.suggested ||
                     nextProps.favorites !== this.props.favorites ||
                     nextProps.recentlyPlayed !== this.props.recentlyPlayed)
             ) {
-                return true
+                return true;
             } else {
-                return false
+                return false;
             }
         }
     }
@@ -85,28 +85,28 @@ class Content extends Component {
     render() {
         let activeContainer = this.getActiveContainer(),
             offlineContainer = this.getOfflineContainer(),
-            searchContainer = this.getSearchContainer()
+            searchContainer = this.getSearchContainer();
 
         return (
             <div
                 className="content-container"
                 style={{
-                    display: this.props.active == 'Featured' ? 'flex' : 'block',
+                    display: this.props.active == "Featured" ? "flex" : "block",
                     backgroundImage: this.props.isLoading
-                        ? 'url(./assets/imgs/loading.svg)'
-                        : '',
+                        ? "url(./assets/imgs/loading.svg)"
+                        : "",
                 }}
             >
                 {this.props.isLoading
-                    ? ''
+                    ? ""
                     : this.props.offline
                     ? offlineContainer
                     : this.props.searchContent
                     ? searchContainer
                     : activeContainer}
             </div>
-        )
+        );
     }
 }
 
-export default Content
+export default Content;

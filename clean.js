@@ -11,9 +11,8 @@ let getArguments = () => {
 }
 
 let isDeepClean = () => {
-    let arguments = getArguments()
-    let deepClean = arguments.indexOf('--deep-clean') > -1
-    return deepClean
+    let arguments = getArguments();
+    return arguments.indexOf('--deep') > -1
 }
 
 let outputToTerminal = (emoji, text) => {
@@ -23,7 +22,7 @@ let outputToTerminal = (emoji, text) => {
 let cleanDirectory = () => {
     for (let i = 0; i < paths.length; i++) {
         let path = paths[i]
-        let command = `rm -rf ${path}`
+        let command = `npx rimraf ${path}`
         exec(command, (err, stdout, stderr) => {
             if (err) {
                 outputToTerminal(x, `Error removing ${path}`)

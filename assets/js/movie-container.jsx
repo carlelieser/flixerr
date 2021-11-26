@@ -1,12 +1,12 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import uniqid from 'uniqid'
+import uniqid from "uniqid";
 
-import GenreContainer from './genre-container'
+import GenreContainer from "./genre-container";
 
 class MovieContainer extends Component {
     constructor(props) {
-        super(props)
+        super(props);
     }
 
     getMovies = () => {
@@ -15,12 +15,12 @@ class MovieContainer extends Component {
                 this.props.movies.length === 0 ||
                 this.props.movies[0] === undefined
             ) {
-                this.props.loadCategories()
+                this.props.loadCategories();
             }
         } else {
-            this.props.loadCategories()
+            this.props.loadCategories();
         }
-    }
+    };
 
     setHeader = () => {
         if (this.props.movies) {
@@ -30,22 +30,22 @@ class MovieContainer extends Component {
                         this.props.setHeader(
                             this.props.movies[0].movies[0].flixerr_data
                                 .backdrop_path
-                        )
+                        );
                     }
                 }
             }
         }
-    }
+    };
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.movies !== this.props.movies) {
-            this.setHeader()
+            this.setHeader();
         }
     }
 
     componentDidMount() {
-        this.getMovies()
-        this.setHeader()
+        this.getMovies();
+        this.setHeader();
     }
 
     render() {
@@ -56,7 +56,7 @@ class MovieContainer extends Component {
                     activeGenre: item.name,
                     genreID: item.genreID,
                     movies: item.movies,
-                }
+                };
 
                 return (
                     <GenreContainer
@@ -65,9 +65,9 @@ class MovieContainer extends Component {
                         genreInfo={genreInfo}
                         key={uniqid()}
                     />
-                )
+                );
             }
-        })
+        });
 
         return (
             <div
@@ -78,8 +78,8 @@ class MovieContainer extends Component {
             >
                 {movieGenres}
             </div>
-        )
+        );
     }
 }
 
-export default MovieContainer
+export default MovieContainer;

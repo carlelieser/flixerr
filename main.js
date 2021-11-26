@@ -1,21 +1,22 @@
-if (require('electron-squirrel-startup')) return
+if (require("electron-squirrel-startup")) return;
 
-const { app, shell, BrowserWindow, Menu } = require('electron')
+const { app, shell, BrowserWindow, Menu } = require("electron");
 
-const windowStateKeeper = require('electron-window-state')
+const windowStateKeeper = require("electron-window-state");
 
-const path = require('path')
-const { autoUpdater } = require('electron-updater')
+const path = require("path");
 
-let mainWindow
+let mainWindow;
 
-if(process.argv.indexOf('-dev') > -1) global.flixerrDevelop = true
+if (process.argv.indexOf("-dev") > -1) global.flixerrDevelop = true;
+
+app.allowRendererProcessReuse = false;
 
 function createWindow() {
     let mainWindowState = windowStateKeeper({
         defaultWidth: 1200,
         defaultHeight: 700,
-    })
+    });
 
     mainWindow = new BrowserWindow({
         x: mainWindowState.x,
@@ -24,33 +25,33 @@ function createWindow() {
         height: mainWindowState.height,
         minWidth: 1200,
         minHeight: 700,
-        maximizable: process.platform == 'win32',
-        title: 'Flixerr',
-        icon: __dirname + '/assets/imgs/icon.ico',
-        backgroundColor: '#5d16fd',
-        titleBarStyle: 'hiddenInset',
+        maximizable: process.platform == "win32",
+        title: "Flixerr",
+        icon: __dirname + "/assets/imgs/icon.ico",
+        backgroundColor: "#5d16fd",
+        titleBarStyle: "hiddenInset",
         show: false,
-        defaultEncoding: 'utf8',
+        defaultEncoding: "utf8",
         webPreferences: {
             nodeIntegration: true,
         },
-    })
+    });
 
     mainWindow.webContents.session.webRequest.onHeadersReceived(
         (details, callback) => {
-            if (details.responseHeaders['x-frame-options']) {
-                delete details.responseHeaders['x-frame-options']
+            if (details.responseHeaders["x-frame-options"]) {
+                delete details.responseHeaders["x-frame-options"];
             }
             callback({
                 cancel: false,
                 responseHeaders: details.responseHeaders,
-            })
+            });
         }
-    )
+    );
 
-    mainWindowState.manage(mainWindow)
+    mainWindowState.manage(mainWindow);
 
-    var template = [
+    const template = [
         {
             label: app.name,
             submenu: [
@@ -138,37 +139,35 @@ function createWindow() {
         },
     ]
 
-    if (process.platform === 'darwin') {
-        Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+    if (process.platform === "darwin") {
+        Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     } else {
-        Menu.setApplicationMenu(null)
+        Menu.setApplicationMenu(null);
     }
 
-    mainWindow.loadFile(path.join(__dirname, 'index.html'))
+    mainWindow.loadFile(path.join(__dirname, "index.html"));
 
     if (global.flixerrDevelop) {
-        mainWindow.webContents.openDevTools()
+        mainWindow.webContents.openDevTools();
     }
 
-    mainWindow.once('ready-to-show', () => {
-        mainWindow.show()
-    })
+    mainWindow.once("ready-to-show", () => {
+        mainWindow.show();
+    });
 
-    mainWindow.on('closed', function () {
-        mainWindow = null
-    })
-
-    autoUpdater.checkForUpdatesAndNotify()
+    mainWindow.on("closed", function () {
+        mainWindow = null;
+    });
 }
 
-app.on('ready', createWindow)
+app.on("ready", createWindow);
 
-app.on('window-all-closed', function () {
-    app.quit()
-})
+app.on("window-all-closed", function () {
+    app.quit();
+});
 
-app.on('activate', function () {
+app.on("activate", function () {
     if (mainWindow === null) {
-        createWindow()
+        createWindow();
     }
-})
+});

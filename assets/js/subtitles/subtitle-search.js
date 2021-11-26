@@ -1,153 +1,153 @@
 let SubtitleSearch = function () {
-    let axios = require('axios'),
-        cheerio = require('cheerio')
+    let axios = require("axios"),
+        cheerio = require("cheerio");
 
-    let request = axios.create({ timeout: 8000 })
+    let request = axios.create({ timeout: 8000 });
 
     let provider = {
-        name: 'YIFY-Subtitles',
-        baseURL: 'https://www.yifysubtitles.org',
+        name: "YIFY-Subtitles",
+        baseURL: "https://www.yifysubtitles.org",
         url: `https://www.yifysubtitles.org/search?q=`,
         queryFunction: (query) => {
-            return encodeURI(query)
+            return encodeURI(query);
         },
-    }
+    };
 
-    let langs = ['Arabic', 'English', 'Spanish', 'Italian', 'German']
+    let langs = ["Arabic", "English", "Spanish", "Italian", "German"];
 
     let getSubsFromElements = (html) => {
-        let $ = cheerio.load(html)
+        let $ = cheerio.load(html);
 
-        let list = $('.other-subs').children('tbody').children()
-        let subs = []
+        let list = $(".other-subs").children("tbody").children();
+        let subs = [];
         for (let i = 0; i < langs.length; i++) {
-            let lang = langs[i]
+            let lang = langs[i];
             let primaryLink = list
-                .find('a')
+                .find("a")
                 .toArray()
                 .find((element) => {
-                    let link = $(element)
+                    let link = $(element);
                     let isSubLink =
-                        link.attr('href').startsWith('/subtitles') &&
+                        link.attr("href").startsWith("/subtitles") &&
                         link
-                            .attr('href')
+                            .attr("href")
                             .toLowerCase()
-                            .indexOf(lang.toLowerCase()) > -1
-                    return isSubLink
-                })
-            let subURL = primaryLink ? $(primaryLink).attr('href') : null
+                            .indexOf(lang.toLowerCase()) > -1;
+                    return isSubLink;
+                });
+            let subURL = primaryLink ? $(primaryLink).attr("href") : null;
             let subDownloadURL = subURL
-                ? `${subURL.replace('subtitles', 'subtitle')}.zip`
-                : null
+                ? `${subURL.replace("subtitles", "subtitle")}.zip`
+                : null;
 
             let sub = {
                 lang,
                 url: `${provider.baseURL}${subDownloadURL}`,
-            }
-            if (subURL) subs.push(sub)
+            };
+            if (subURL) subs.push(sub);
         }
 
-        return subs
-    }
+        return subs;
+    };
 
     let downloadSubtitle = (metadata) => {
-        let { lang, url } = metadata
-        let download = require('download')
+        let { lang, url } = metadata;
+        let download = require("download");
 
         return download(url).then((data) => {
-            let decompress = require('decompress')
-            let detect = require('charset-detector')
+            let decompress = require("decompress");
+            let detect = require("charset-detector");
 
             return decompress(data).then((files) => {
-                let encoding = require('encoding')
+                let encoding = require("encoding");
                 let srt = files.find((file) => {
                     return (
-                        file.path.indexOf('.srt') > -1 &&
-                        file.path.indexOf('MACOSX') === -1
-                    )
-                })
+                        file.path.indexOf(".srt") > -1 &&
+                        file.path.indexOf("MACOSX") === -1
+                    );
+                });
 
                 if (srt) {
-                    let data = srt.data
-                    let charset = detect(data)[0].charsetName
-                    let converted = encoding.convert(data, 'utf-8', charset)
+                    let data = srt.data;
+                    let charset = detect(data)[0].charsetName;
+                    let converted = encoding.convert(data, "utf-8", charset);
 
                     let file = {
                         data: converted,
                         name: `${lang}.srt`,
                         lang,
-                    }
-                    return file
+                    };
+                    return file;
                 }
 
-                return srt
-            })
-        })
-    }
+                return srt;
+            });
+        });
+    };
 
     let getSubtitlesFromData = (html) => {
         let subs = getSubsFromElements(html),
-            promises = []
+            promises = [];
 
         for (let i = subs.length - 1; i >= 0; i--) {
-            let sub = subs[i]
-            let promise = downloadSubtitle(sub)
-            promises.push(promise)
+            let sub = subs[i];
+            let promise = downloadSubtitle(sub);
+            promises.push(promise);
         }
 
         return Promise.all(promises).then((data) => {
-            return data
-        })
-    }
+            return data;
+        });
+    };
 
     let getIMDB = (movieName, movieYear, html) => {
-        let $ = cheerio.load(html)
+        let $ = cheerio.load(html);
 
-        let movie = $('.media-movie-clickable').filter((index) => {
-            let element = $('.media-movie-clickable')[index]
-            let name = $(element).find('h3').text()
+        let movie = $(".media-movie-clickable").filter((index) => {
+            let element = $(".media-movie-clickable")[index];
+            let name = $(element).find("h3").text();
             let date = $(element)
-                .find('small')
+                .find("small")
                 .first()
                 .parent()
                 .text()
-                .replace('year', '')
+                .replace("year", "");
             if (name == movieName && date == movieYear) {
-                return true
+                return true;
             } else {
-                return false
+                return false;
             }
-        })
+        });
 
-        let imdb = $(movie[0]).find('a')[0].attribs.href
+        let imdb = $(movie[0]).find("a")[0].attribs.href;
 
-        return imdb
-    }
+        return imdb;
+    };
 
     let search = (movieName, movieYear) => {
-        let encodedQuery = provider.queryFunction(movieName)
+        let encodedQuery = provider.queryFunction(movieName);
         let url = `${provider.url}${encodedQuery}`,
-            year = movieYear ? movieYear.substring(0, 4) : false
+            year = movieYear ? movieYear.substring(0, 4) : false;
 
         return request.get(url).then((response) => {
             if (!year) {
-                return false
+                return false;
             } else {
-                let body = response.data
+                let body = response.data;
 
                 let imdb = getIMDB(movieName, year, body),
-                    movieURL = `${provider.baseURL}${imdb}`
+                    movieURL = `${provider.baseURL}${imdb}`;
                 return request.get(movieURL).then((response) => {
-                    let data = response.data
-                    let subtitles = getSubtitlesFromData(data)
+                    let data = response.data;
+                    let subtitles = getSubtitlesFromData(data);
 
-                    return subtitles
-                })
+                    return subtitles;
+                });
             }
-        })
-    }
+        });
+    };
 
-    return { search }
-}
+    return { search };
+};
 
-export default SubtitleSearch
+export default SubtitleSearch;

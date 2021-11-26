@@ -1,9 +1,9 @@
-import React, { Component } from 'react'
-import Fade from 'react-reveal/Fade'
+import React, { Component } from "react";
+import Fade from "react-reveal/Fade";
 
 class CastScreen extends Component {
     constructor(props) {
-        super(props)
+        super(props);
     }
 
     render() {
@@ -17,13 +17,15 @@ class CastScreen extends Component {
                 bottom
             >
                 <div
-                    className={`cast-screen ${this.props.show ? '' : 'no-pointer-events'}`}
+                    className={`cast-screen ${
+                        this.props.show ? "" : "no-pointer-events"
+                    }`}
                 >
                     <div className="cast-screen-bg"></div>
                 </div>
             </Fade>
-        )
+        );
     }
 }
 
-export default CastScreen
+export default CastScreen;

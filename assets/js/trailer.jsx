@@ -1,50 +1,50 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import Fade from 'react-reveal/Fade'
+import Fade from "react-reveal/Fade";
 
 class Trailer extends Component {
     constructor(props) {
-        super(props)
+        super(props);
 
-        this.handleVideoClick.bind(this)
+        this.handleVideoClick.bind(this);
 
         this.state = {
             url: false,
-        }
+        };
     }
 
     getYouTubeEmbed = () => {
-        let url = this.props.url
+        let url = this.props.url;
         if (url) {
-            if (typeof url === 'string') {
-                let id = url.match(/[^v=]*$/g)[0]
-                let embed = `https://www.youtube.com/embed/${id}`
+            if (typeof url === "string") {
+                let id = url.match(/[^v=]*$/g)[0];
+                let embed = `https://www.youtube.com/embed/${id}`;
 
-                this.setState({ url: embed })
+                this.setState({ url: embed });
             }
         }
-    }
+    };
 
     closeTrailer = () => {
-        this.props.setTrailer(false)
-    }
+        this.props.setTrailer(false);
+    };
 
     handleVideoClick = (e) => {
-        e.stopPropagation()
-    }
+        e.stopPropagation();
+    };
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.url !== this.props.url) {
-            this.getYouTubeEmbed()
+            this.getYouTubeEmbed();
         }
     }
 
     componentDidMount() {
-        this.getYouTubeEmbed()
+        this.getYouTubeEmbed();
     }
 
     render() {
-        let { url } = this.props
+        let { url } = this.props;
 
         return (
             <Fade
@@ -57,7 +57,7 @@ class Trailer extends Component {
             >
                 <div
                     className={`trailer-container ${
-                        url ? '' : 'pointer-events'
+                        url ? "" : "pointer-events"
                     }`}
                     onClick={this.closeTrailer}
                 >
@@ -69,8 +69,8 @@ class Trailer extends Component {
                     </div>
                 </div>
             </Fade>
-        )
+        );
     }
 }
 
-export default Trailer
+export default Trailer;

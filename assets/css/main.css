@@ -169,7 +169,7 @@ html {
 .quality > span {
     margin-right: 10px;
     margin-left: 10px;
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-size: 14px;
     color: rgba(255, 255, 255, 0.71);
     transition: all 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
@@ -200,7 +200,7 @@ html {
     transition: all 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 .quality-control-label:before {
-    content: '';
+    content: "";
     display: block;
     width: 26px;
     height: 26px;
@@ -264,14 +264,14 @@ html {
     width: calc(100% - 80px);
     border: none;
     outline: none;
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-size: 18px;
     color: #000;
     background-color: transparent;
 }
 
 .app-header > .app-header-bg > div {
-    font-family: 'Avenir';
+    font-family: "Avenir";
 }
 
 .app-header > .app-header-bg > .app-header-title {
@@ -336,7 +336,7 @@ html {
 .app-menu > div {
     height: 60px;
     line-height: 60px;
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-weight: bold;
     font-size: 14px;
     text-transform: uppercase;
@@ -387,7 +387,7 @@ html {
     left: 0;
     position: fixed;
     background-color: #f2f2f2;
-    background-image: url('../imgs/account-bg.svg');
+    background-image: url("../imgs/account-bg.svg");
     background-size: cover;
     z-index: 998;
     display: flex;
@@ -417,7 +417,7 @@ html {
     box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     position: relative;
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     z-index: 100;
 }
 
@@ -495,7 +495,7 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     font-weight: bold;
     font-size: 16px;
     transition: all 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
@@ -526,13 +526,13 @@ html {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    font-family: 'Avenir';
+    font-family: "Avenir";
 }
 
 .empty-state-container > .empty-state-bg {
     width: 300px;
     height: 300px;
-    background-image: url('../imgs/empty-state.svg');
+    background-image: url("../imgs/empty-state.svg");
     background-size: 300px;
     background-position: center;
     background-repeat: no-repeat;
@@ -716,7 +716,7 @@ html {
     width: 100%;
     height: 100%;
     background-size: 40px;
-    background-image: url('../imgs/loading.svg');
+    background-image: url("../imgs/loading.svg");
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -727,7 +727,7 @@ html {
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     position: absolute;
     top: 0;
     max-height: 100%;
@@ -980,7 +980,7 @@ html {
     flex-direction: column;
     padding: 40px;
     box-sizing: border-box;
-    font-family: 'Avenir';
+    font-family: "Avenir";
     color: inherit;
     text-align: center;
     position: relative;
@@ -1016,7 +1016,7 @@ html {
     padding-right: 20px;
     line-height: 20px;
     border-radius: 9999px;
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     font-weight: 700;
     font-size: 12px;
     text-transform: uppercase;
@@ -1045,7 +1045,7 @@ html {
 
 .open-series > div {
     font-size: 14px;
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     text-transform: uppercase;
     font-weight: bold;
     width: 120px;
@@ -1067,7 +1067,7 @@ html {
 }
 
 .movie-modal > .movie-modal-info > .movie-modal-desc {
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-size: 14px;
     margin-top: 5px;
 }
@@ -1082,7 +1082,7 @@ html {
 .movie-modal > .movie-modal-info > .movie-metadata > .movie-modal-vote,
 .movie-modal > .movie-modal-info > .movie-metadata > .movie-modal-vote > * {
     display: inline-block;
-    font-family: 'Avenir';
+    font-family: "Avenir";
     margin-left: 5px;
     margin-right: 5px;
 }
@@ -1118,7 +1118,7 @@ html {
     width: 100%;
     height: 100%;
     border-radius: inherit;
-    content: '';
+    content: "";
     position: absolute;
     z-index: 2;
     top: 0;
@@ -1168,7 +1168,7 @@ html {
 
 .btn:before,
 .open-series:before {
-    content: '';
+    content: "";
     position: absolute;
     z-index: 0;
     width: 102%;
@@ -1198,7 +1198,7 @@ html {
 }
 
 .btn > div {
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-weight: bold;
     font-size: 0.9em;
     text-transform: uppercase;
@@ -1232,7 +1232,7 @@ html {
     height: 100%;
     top: 0;
     left: 0;
-    background-image: url('../imgs/casting-bg.svg');
+    background-image: url("../imgs/casting-bg.svg");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -1295,7 +1295,7 @@ html {
 }
 
 .cast-screen-modal > .cast-screen-title {
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     font-weight: bold;
     font-size: 1.5em;
     color: rgb(44, 56, 54);
@@ -1303,7 +1303,7 @@ html {
 }
 
 .cast-screen-modal > .cast-screen-desc {
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     font-size: 1em;
     color: rgb(44, 56, 54);
     opacity: 0.81;
@@ -1338,14 +1338,14 @@ html {
 }
 
 .player-dialog-container > .player-dialog-title {
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     font-weight: bold;
     font-size: 1.25em;
     color: #fff;
 }
 
 .player-dialog-subtitle {
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     font-size: 1em;
     color: #fff;
     opacity: 0.71;
@@ -1355,7 +1355,7 @@ html {
 }
 
 .player-dialog-text {
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     font-size: 0.8em;
     color: #fff;
     opacity: 0.61;
@@ -1366,7 +1366,7 @@ html {
 .player-dialog-loading-container {
     width: 100%;
     height: 40px;
-    background-image: url('../imgs//loading.svg');
+    background-image: url("../imgs//loading.svg");
     background-position: center;
     background-size: 24px;
     background-repeat: no-repeat;
@@ -1374,7 +1374,7 @@ html {
 
 .cast-device {
     height: 25px;
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-size: 0.9em;
     color: #fff;
     opacity: 0.81;
@@ -1413,7 +1413,7 @@ html {
     align-items: center;
     color: rgba(255, 255, 255, 0.61);
     text-transform: uppercase;
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     padding-left: 20px;
     padding-right: 20px;
     box-sizing: border-box;
@@ -1433,7 +1433,7 @@ html {
     height: 20px;
     background-size: 20px;
     background-repeat: no-repeat;
-    background-image: url('../imgs/loading.svg');
+    background-image: url("../imgs/loading.svg");
     background-position: center;
 }
 
@@ -1458,7 +1458,7 @@ video::-webkit-media-text-track-background {
 }
 
 video::-webkit-media-text-track-display {
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     font-size: 2.6vw;
     color: #fff;
     text-shadow: 0 0 4px rgba(0, 0, 0, 0.81);
@@ -1496,7 +1496,7 @@ video::-webkit-media-text-track-display {
 }
 
 .backup-container > div {
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
 }
 
 .backup-container > .title {
@@ -1543,7 +1543,7 @@ video::-webkit-media-text-track-display {
     z-index: 100;
 }
 .backup-container > .reload-btn:before {
-    content: '';
+    content: "";
     position: absolute;
     z-index: 0;
     top: 0;
@@ -1584,7 +1584,7 @@ video::-webkit-media-text-track-display {
     overflow: hidden;
 }
 .backup-container > .torrent-container > div:before {
-    content: '';
+    content: "";
     width: 100%;
     height: 100%;
     border-radius: inherit;
@@ -1642,7 +1642,7 @@ video::-webkit-media-text-track-display {
     color: #fff;
     background-color: rgb(46, 46, 46);
     border-radius: 4px;
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     font-size: 12px;
     text-transform: uppercase;
     position: absolute;
@@ -1665,7 +1665,7 @@ video::-webkit-media-text-track-display {
     margin-right: 5px;
 }
 .player-status-container > .dots:after {
-    content: ' .';
+    content: " .";
     margin-right: 10px;
     animation: dots 1s steps(5, end) infinite;
 }
@@ -1760,7 +1760,7 @@ video::-webkit-media-text-track-display {
     position: absolute;
     z-index: 800;
     background-color: rgba(0, 0, 0, 0.6);
-    background-image: url('../imgs/loading.svg');
+    background-image: url("../imgs/loading.svg");
     background-repeat: no-repeat;
     background-position: center;
     background-size: 60px;
@@ -1804,7 +1804,7 @@ video::-webkit-media-text-track-display {
 
 .movie-player > .top-bar-container > .top-bar > div {
     margin-left: 20px;
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-size: 18px;
     color: #fff;
 }
@@ -1982,7 +1982,7 @@ video::-webkit-media-text-track-display {
     width: 60px;
     margin-right: 20px;
     color: #fff;
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-weight: bold;
     text-align: center;
     display: flex;
@@ -1990,7 +1990,7 @@ video::-webkit-media-text-track-display {
     justify-content: center;
 }
 
-input[type='range']::-webkit-slider-runnable-track {
+input[type="range"]::-webkit-slider-runnable-track {
     width: 100%;
     height: 6px;
     background: rgba(255, 255, 255, 0.158);
@@ -1998,7 +1998,7 @@ input[type='range']::-webkit-slider-runnable-track {
     cursor: pointer;
 }
 
-input[type='range']::-webkit-slider-thumb {
+input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 20px;
     height: 20px;
@@ -2007,10 +2007,10 @@ input[type='range']::-webkit-slider-thumb {
     background-color: rgb(253, 31, 31);
     transition: all 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
-input[type='range']:focus {
+input[type="range"]:focus {
     outline: none;
 }
-input[type='range']::-webkit-slider-thumb:hover {
+input[type="range"]::-webkit-slider-thumb:hover {
     width: 30px;
     height: 30px;
     margin-top: -13px;
@@ -2078,9 +2078,9 @@ input[type='range']::-webkit-slider-thumb:hover {
 .loading-container > .logo {
     width: 240px;
     height: 240px;
-    background-size: cover;
+    background-size: contain;
     background-repeat: no-repeat;
-    background-image: url('../imgs/icon.png');
+    background-image: url("../imgs/icon.png");
     will-change: transform;
 }
 
@@ -2117,11 +2117,11 @@ input[type='range']::-webkit-slider-thumb:hover {
     height: 125px;
     background-size: cover;
     background-repeat: no-repeat;
-    background-image: url('../imgs/offline-error.png');
+    background-image: url("../imgs/offline-error.png");
 }
 
 .offline-container > span {
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-size: 24px;
 }
 .offline-container > span:first-of-type {
@@ -2173,14 +2173,14 @@ input[type='range']::-webkit-slider-thumb:hover {
 }
 
 .search-container > .search-title {
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-weight: bold;
     font-size: 65px;
     margin: 20px 20px 0;
 }
 
 .search-container > .search-results > .search-empty {
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-weight: bold;
     font-size: 36px;
     color: rgba(0, 0, 0, 0.61);
@@ -2217,7 +2217,7 @@ input[type='range']::-webkit-slider-thumb:hover {
 
 .genre-container > .movie-genre,
 .search-content > .search-title {
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-weight: bold;
     font-size: 58px;
     color: #000;
@@ -2281,7 +2281,7 @@ input[type='range']::-webkit-slider-thumb:hover {
 }
 
 .genre-container > .movie-scroll-container > .movie-scroll::before {
-    content: '';
+    content: "";
     width: 110%;
     height: 110%;
     border-radius: inherit;
@@ -2371,7 +2371,7 @@ input[type='range']::-webkit-slider-thumb:hover {
 
 .paginated-genre-results > .genre-name {
     color: rgba(0, 0, 0, 0.81);
-    font-family: 'Avenir';
+    font-family: "Avenir";
     font-size: 70px;
     font-weight: bold;
     text-align: center;
@@ -2584,7 +2584,7 @@ input[type='range']::-webkit-slider-thumb:hover {
 }
 
 .movie-item > .movie-item-desc > div {
-    font-family: 'Avenir';
+    font-family: "Avenir";
     text-align: center;
 }
 
@@ -2633,7 +2633,7 @@ input[type='range']::-webkit-slider-thumb:hover {
     border-radius: 9999px;
     background-color: #23202b;
     color: #fff;
-    font-family: 'Roboto';
+    font-family: "Roboto";
     font-weight: 500;
     font-size: 12px;
     position: absolute;
@@ -2675,14 +2675,14 @@ input[type='range']::-webkit-slider-thumb:hover {
 }
 
 .movie-chat-container > .movie-chat-header > .title {
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     font-weight: 700;
     font-size: 36px;
     color: #fff;
 }
 
 .movie-chat-container > .movie-chat-header > .audience-count {
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     font-size: 12px;
 }
 
@@ -2713,14 +2713,14 @@ input[type='range']::-webkit-slider-thumb:hover {
 .movie-chat-container > .chat-list > .chat-empty-state > .chat-empty-state-img {
     width: 100%;
     height: 250px;
-    background-image: url('../imgs/chat-empty-state.svg');
+    background-image: url("../imgs/chat-empty-state.svg");
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
 }
 
 .movie-chat-container > .chat-list > .chat-empty-state > .title {
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     font-weight: 700;
     font-size: 16px;
     color: #fff;
@@ -2728,7 +2728,7 @@ input[type='range']::-webkit-slider-thumb:hover {
 }
 
 .movie-chat-container > .chat-list > .chat-empty-state > .subtitle {
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     font-weight: 500;
     font-size: 12px;
     color: #fff;
@@ -2765,7 +2765,7 @@ input[type='range']::-webkit-slider-thumb:hover {
     border-radius: 100%;
     text-align: center;
     line-height: 28px;
-    font-family: 'Avenir', sans-serif;
+    font-family: "Avenir", sans-serif;
     font-weight: 700;
     font-size: 14px;
     color: rgba(0, 0, 0, 0.81);
@@ -2788,7 +2788,7 @@ input[type='range']::-webkit-slider-thumb:hover {
     > .message-content
     > span
     > .alias {
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     font-weight: 500;
     font-size: 12px;
     color: #fff;
@@ -2800,7 +2800,7 @@ input[type='range']::-webkit-slider-thumb:hover {
     > .message-content
     > span
     > .date {
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     font-weight: 300;
     font-size: 10px;
     color: rgba(255, 255, 255, 0.51);
@@ -2808,7 +2808,7 @@ input[type='range']::-webkit-slider-thumb:hover {
 }
 
 .movie-chat-container > .chat-list > .message > .message-content > .text {
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     color: rgba(255, 255, 255, 0.81);
     display: inline-block;
     width: 100%;
@@ -2836,7 +2836,7 @@ input[type='range']::-webkit-slider-thumb:hover {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
     border: none;
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     font-weight: 400;
     background-color: transparent;
     resize: none;
@@ -2908,12 +2908,12 @@ input[type='range']::-webkit-slider-thumb:hover {
 }
 
 @font-face {
-    src: url('../fonts/AvenirLTStd-Black.otf');
-    font-family: 'Avenir';
+    src: url("../fonts/AvenirLTStd-Black.otf");
+    font-family: "Avenir";
     font-weight: bold;
 }
 @font-face {
-    src: url('../fonts/AvenirLTStd-Roman.otf');
-    font-family: 'Avenir';
+    src: url("../fonts/AvenirLTStd-Roman.otf");
+    font-family: "Avenir";
     font-weight: normal;
 }

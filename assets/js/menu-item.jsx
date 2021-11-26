@@ -1,23 +1,23 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
 class MenuItem extends Component {
     constructor(props) {
-        super(props)
+        super(props);
     }
 
     handleMenuClick = () => {
         if (this.props.item.action) {
-            this.props.item.action()
+            this.props.item.action();
         } else {
-            this.props.toggleItem(this.props.item.name)
+            this.props.toggleItem(this.props.item.name);
         }
-    }
+    };
 
     render() {
         return (
             <div
                 className={`menu-item ${
-                    this.props.active ? 'menu-active' : ''
+                    this.props.active ? "menu-active" : ""
                 }`}
                 onClick={this.handleMenuClick}
             >
@@ -26,11 +26,11 @@ class MenuItem extends Component {
                 {this.props.item.beta ? (
                     <div className="beta-tag">Beta</div>
                 ) : (
-                    ''
+                    ""
                 )}
             </div>
-        )
+        );
     }
 }
 
-export default MenuItem
+export default MenuItem;

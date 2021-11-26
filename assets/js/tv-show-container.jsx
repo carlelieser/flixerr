@@ -1,23 +1,23 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import uniqid from 'uniqid'
+import uniqid from "uniqid";
 
-import GenreContainer from './genre-container'
+import GenreContainer from "./genre-container";
 
 class TVShowContainer extends Component {
     constructor(props) {
-        super(props)
+        super(props);
     }
 
     getTVShows = () => {
         if (this.props.shows) {
             if (!this.props.shows.length || this.props.shows[0] === undefined) {
-                this.props.loadCategories(true)
+                this.props.loadCategories(true);
             }
         } else {
-            this.props.loadCategories(true)
+            this.props.loadCategories(true);
         }
-    }
+    };
 
     setHeader = () => {
         if (this.props.shows) {
@@ -27,23 +27,23 @@ class TVShowContainer extends Component {
                         this.props.setHeader(
                             this.props.shows[0].movies[0].flixerr_data
                                 .backdrop_path
-                        )
+                        );
                     }
                 }
             }
         }
-    }
+    };
 
     componentDidUpdate(prevProps, prevState) {
-        this.getTVShows()
+        this.getTVShows();
         if (prevProps.shows !== this.props.shows) {
-            this.setHeader()
+            this.setHeader();
         }
     }
 
     componentDidMount() {
-        this.getTVShows()
-        this.setHeader()
+        this.getTVShows();
+        this.setHeader();
     }
 
     render() {
@@ -55,7 +55,7 @@ class TVShowContainer extends Component {
                     genreID: item.genreID,
                     shows: true,
                     movies: item.movies,
-                }
+                };
 
                 return (
                     <GenreContainer
@@ -65,9 +65,9 @@ class TVShowContainer extends Component {
                         genreInfo={genreInfo}
                         key={uniqid()}
                     />
-                )
+                );
             }
-        })
+        });
 
         return (
             <div
@@ -78,8 +78,8 @@ class TVShowContainer extends Component {
             >
                 {tvShowGenres}
             </div>
-        )
+        );
     }
 }
 
-export default TVShowContainer
+export default TVShowContainer;

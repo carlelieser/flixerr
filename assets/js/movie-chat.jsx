@@ -1,91 +1,92 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import Fade from 'react-reveal/Fade'
-import TextareaAutosize from 'react-textarea-autosize'
+import Fade from "react-reveal/Fade";
+import TextareaAutosize from "react-textarea-autosize";
 
-let moment = require('moment')
-let usernameGenerator = require('username-generator')
-let randomColor = require('randomcolor')
+let moment = require("moment");
+let usernameGenerator = require("username-generator");
+let randomColor = require("randomcolor");
 
 class MovieChat extends Component {
     constructor(props) {
-        super(props)
+        super(props);
 
-        this.chatListRef = React.createRef()
+        this.chatListRef = React.createRef();
 
         this.state = {
-            currentMessage: '',
-            chatUsername: '',
-            chatProfileColor: '#FFF',
-        }
+            currentMessage: "",
+            chatUsername: "",
+            chatProfileColor: "#FFF",
+        };
     }
 
     initializeChatData = () => {
-        let username = usernameGenerator.generateUsername()
-        let color = randomColor()
+        let username = usernameGenerator.generateUsername();
+        let color = randomColor();
 
-        this.setState({ chatUsername: username, chatProfileColor: color })
-    }
+        this.setState({ chatUsername: username, chatProfileColor: color });
+    };
 
     setCurrentMessage = (currentMessage) => {
-        this.setState({ currentMessage })
-    }
+        this.setState({ currentMessage });
+    };
 
     resetMessage = () => {
-        this.setCurrentMessage('')
-    }
+        this.setCurrentMessage("");
+    };
 
     handleTextareaChange = (e) => {
-        let value = e.currentTarget.value
-        this.setCurrentMessage(value)
-    }
+        let value = e.currentTarget.value;
+        this.setCurrentMessage(value);
+    };
 
     handleSendMessage = () => {
-        let movie = this.props.movie
-        let id = (movie.id || movie.rg_id).toString()
+        let movie = this.props.movie;
+        let id = (movie.id || movie.rg_id).toString();
         this.props.sendMovieMessage(
             id,
             this.state.currentMessage,
             this.state.chatUsername,
             this.state.chatProfileColor
-        )
-        this.resetMessage()
-    }
+        );
+        this.resetMessage();
+    };
 
     getReadableDate = (time) => {
-        return moment(time).fromNow()
-    }
+        return moment(time).fromNow();
+    };
 
     adjustChatScroll = () => {
-        this.chatListRef.current.scrollTop = this.chatListRef.current.scrollHeight
-    }
+        this.chatListRef.current.scrollTop =
+            this.chatListRef.current.scrollHeight;
+    };
 
     handleKeyUp = (e) => {
         if (e.keyCode === 13) {
-            e.preventDefault()
+            e.preventDefault();
             if (e.shiftKey) {
                 this.setState((prevState) => {
-                    let message = prevState.currentMessage
-                    let newMessage = message + '\n'
+                    let message = prevState.currentMessage;
+                    let newMessage = message + "\n";
                     return {
                         currentMessage: newMessage,
-                    }
-                })
+                    };
+                });
             } else {
-                this.handleSendMessage()
+                this.handleSendMessage();
             }
         }
-    }
+    };
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.messages !== this.props.messages) {
-            this.adjustChatScroll()
+            this.adjustChatScroll();
         }
     }
 
     componentDidMount() {
-        this.initializeChatData()
-        this.adjustChatScroll()
+        this.initializeChatData();
+        this.adjustChatScroll();
     }
 
     render() {
@@ -95,7 +96,7 @@ class MovieChat extends Component {
                       <div
                           className="message"
                           key={message.id}
-                          style={{ marginTop: index === 0 ? 'auto' : '0.5em' }}
+                          style={{ marginTop: index === 0 ? "auto" : "0.5em" }}
                       >
                           <div
                               className="profile-photo"
@@ -112,12 +113,12 @@ class MovieChat extends Component {
                                               message.from === null
                                                   ? message.alias ===
                                                     this.state.chatUsername
-                                                      ? '#a58cff'
-                                                      : '#FFF'
+                                                      ? "#a58cff"
+                                                      : "#FFF"
                                                   : message.from ===
                                                     this.props.email
-                                                  ? '#a58cff'
-                                                  : '#FFF',
+                                                  ? "#a58cff"
+                                                  : "#FFF",
                                       }}
                                   >
                                       {message.alias}
@@ -131,7 +132,7 @@ class MovieChat extends Component {
                       </div>
                   </Fade>
               ))
-            : null
+            : null;
         return (
             <div className="movie-chat-container">
                 <span className="movie-chat-header">
@@ -178,8 +179,8 @@ class MovieChat extends Component {
                     </div>
                 </div>
             </div>
-        )
+        );
     }
 }
 
-export default MovieChat
+export default MovieChat;

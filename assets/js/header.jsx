@@ -1,59 +1,59 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
 
-import Fade from 'react-reveal/Fade'
+import Fade from "react-reveal/Fade";
 
 class Header extends Component {
     constructor(props) {
-        super(props)
+        super(props);
 
-        this.searchRef = React.createRef()
-        this.searchTimer = false
+        this.searchRef = React.createRef();
+        this.searchTimer = false;
 
-        this.handleInput.bind(this)
-        this.toggleMenu.bind(this)
+        this.handleInput.bind(this);
+        this.toggleMenu.bind(this);
 
         this.state = {
             active: false,
-        }
+        };
     }
 
     activateFocus = () => {
-        this.setState({ active: true })
-    }
+        this.setState({ active: true });
+    };
 
     deactivateFocus = () => {
-        this.setState({ active: false })
-    }
+        this.setState({ active: false });
+    };
 
     handleQualityControl = () => {
-        if (this.props.videoQuality == 'HD') {
-            this.props.setQuality('FULL HD')
+        if (this.props.videoQuality == "HD") {
+            this.props.setQuality("FULL HD");
         } else {
-            this.props.setQuality('HD')
+            this.props.setQuality("HD");
         }
-    }
+    };
 
     toggleMenu = (e) => {
-        e.stopPropagation()
-        this.props.toggleMenu()
-    }
+        e.stopPropagation();
+        this.props.toggleMenu();
+    };
 
     handleSearch = () => {
-        clearTimeout(this.searchTimer)
+        clearTimeout(this.searchTimer);
         this.searchTimer = setTimeout(() => {
-            this.props.searchMovies()
-        }, 400)
-    }
+            this.props.searchMovies();
+        }, 400);
+    };
 
     handleInput = (e) => {
-        let value = e.currentTarget.value
-        this.props.setInputValue(value)
-    }
+        let value = e.currentTarget.value;
+        this.props.setInputValue(value);
+    };
 
     handleSearchClose = () => {
-        this.props.closeSearch()
-        this.searchRef.current.focus()
-    }
+        this.props.closeSearch();
+        this.searchRef.current.focus();
+    };
 
     shouldComponentUpdate(nextProps, nextState) {
         if (
@@ -66,18 +66,18 @@ class Header extends Component {
             nextProps.subtitle === this.props.subtitle &&
             nextState.active === this.state.active
         ) {
-            return false
+            return false;
         } else {
-            return true
+            return true;
         }
     }
 
     componentWillUnmount() {
-        clearTimeout(this.searchTimer)
+        clearTimeout(this.searchTimer);
     }
 
     render() {
-        let version = require('electron').remote.app.getVersion()
+        let version = require("electron").remote.app.getVersion();
 
         return (
             <div className="app-header">
@@ -102,13 +102,13 @@ class Header extends Component {
                     >
                         <div className="app-header-title">
                             <div>{`Flixerr ${
-                                this.props.isPremiumUser ? 'Premium' : ''
+                                this.props.isPremiumUser ? "Premium" : ""
                             } v${version} ·`}</div>
                             <div className="user-email">
                                 {this.props.user
                                     ? this.props.user.name ||
                                       this.props.user.email
-                                    : 'Guest'}
+                                    : "Guest"}
                             </div>
                         </div>
                     </Fade>
@@ -125,19 +125,19 @@ class Header extends Component {
                     <i
                         className={`app-menu-button mdi mdi-light mdi-${
                             this.props.menuActive
-                                ? 'keyboard-backspace'
-                                : 'menu'
+                                ? "keyboard-backspace"
+                                : "menu"
                         }`}
                         onClick={this.toggleMenu}
                         style={{
                             transform: `rotate(${
-                                this.props.menuActive ? '0' : '360'
+                                this.props.menuActive ? "0" : "360"
                             }deg)`,
                         }}
                     />
                     <div
                         className={`search-bar-container ${
-                            this.state.active ? 'search-on' : ''
+                            this.state.active ? "search-on" : ""
                         }`}
                     >
                         <i className="mdi mdi-24px mdi-magnify" />
@@ -150,28 +150,28 @@ class Header extends Component {
                             value={this.props.inputValue}
                             onChange={this.handleInput}
                             onKeyUp={this.handleSearch}
-                        />{' '}
+                        />{" "}
                         {this.props.searchContent ? (
                             <i
                                 className="mdi mdi-24px mdi-close"
                                 onClick={this.handleSearchClose}
                             />
                         ) : (
-                            ''
+                            ""
                         )}
                     </div>
                     {this.props.isPremiumUser ? (
                         <div className="premium-quality-indicator">
                             <span>Ultra HD</span>
-							<span className="active-indicator"></span>
+                            <span className="active-indicator"></span>
                         </div>
                     ) : (
                         <div>
                             <div
                                 className={`quality ${
-                                    this.props.videoQuality == 'HD'
-                                        ? 'hd-active'
-                                        : 'full-active'
+                                    this.props.videoQuality == "HD"
+                                        ? "hd-active"
+                                        : "full-active"
                                 }`}
                             >
                                 <span>HD</span>
@@ -179,7 +179,7 @@ class Header extends Component {
                                     <input
                                         readOnly
                                         checked={
-                                            this.props.videoQuality == 'FULL HD'
+                                            this.props.videoQuality == "FULL HD"
                                                 ? true
                                                 : false
                                         }
@@ -198,8 +198,8 @@ class Header extends Component {
                     )}
                 </div>
             </div>
-        )
+        );
     }
 }
 
-export default Header
+export default Header;
