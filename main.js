@@ -109,7 +109,6 @@ function createWindow() {
     if (global.dev) mainWindow.webContents.openDevTools();
 
     mainWindow.webContents.once("dom-ready", () => {
-        console.log("ready");
         mainWindow.show();
     });
 
