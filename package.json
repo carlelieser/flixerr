@@ -20,7 +20,7 @@
             "icon": "./assets/img/icon.icns"
         },
         "dmg": {
-            "artifactName": "${name}.installer.${ext}"
+            "artifactName": "${name}-${version}.${os}.installer.${ext}"
         },
         "win": {
             "target": [
@@ -33,7 +33,7 @@
             "createDesktopShortcut": true,
             "createStartMenuShortcut": true,
             "shortcutName": "Flixerr",
-            "artifactName": "flixerr-${version}.Windows.${ext}"
+            "artifactName": "${name}-${version}.${os}.${ext}"
         },
         "linux": {
             "target": [
