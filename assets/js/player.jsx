@@ -111,7 +111,7 @@ class Player extends Component {
         if (!this.props.openBackup && !this.state.showSubtitles) {
             this.toggleOverlay(true);
             clearTimeout(this.mouseTimeout);
-            this.mouseTimeout = setTimeout(this.mouseStopped, 5000);
+            this.mouseTimeout = setTimeout(this.mouseStopped, 3000);
         }
     };
 
@@ -178,7 +178,7 @@ class Player extends Component {
     handleVideoPlayback = (toggle, play) => {
         if (this.videoElement.current) {
             if (toggle) {
-                if (this.videoElement.current.paused == true) {
+                if (this.videoElement.current.paused === true) {
                     this.playVideoElement();
                 } else {
                     this.pauseVideoElement();
@@ -226,9 +226,9 @@ class Player extends Component {
     };
 
     handleKeyPress = (e) => {
-        if (e.keyCode == 32 && e.target.nodeName !== "TEXTAREA") {
+        if (e.keyCode === 32 && e.target.nodeName !== "TEXTAREA") {
             this.toggleVideoPlayback();
-        } else if (e.keyCode == 27) {
+        } else if (e.keyCode === 27) {
             if (this.state.fullScreen) {
                 this.toggleFullscreen();
             } else {
@@ -236,12 +236,12 @@ class Player extends Component {
             }
         }
 
-        if (e.keyCode == 37) {
+        if (e.keyCode === 37) {
             let time = this.props.currentTime - 10;
             this.setVideoTime(time);
         }
 
-        if (e.keyCode == 39) {
+        if (e.keyCode === 39) {
             let time = this.props.currentTime + 30;
             this.setVideoTime(time);
         }
@@ -574,7 +574,7 @@ class Player extends Component {
                             this.props.loading
                                 ? this.props.error
                                     ? "none"
-                                    : "url(assets/imgs/loading.svg)"
+                                    : "url(assets/img/loading.svg)"
                                 : "none"
                         }`,
                     }}

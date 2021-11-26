@@ -25,7 +25,7 @@ class CastScreenModal extends Component {
                 <div className="cast-screen-modal-container">
                     <div className="cast-screen-modal">
                         <i className="mdi mdi-36px mdi-cast"></i>
-                        <img src="./assets/imgs/casting-illustration.svg" />
+                        <img src="./assets/img/casting-illustration.svg" />
                         <div className="cast-screen-title">
                             Hey there hot stuff.
                         </div>

@@ -1,7 +1,5 @@
 import React, { Component } from "react";
-
 import uniqid from "uniqid";
-
 import Torrent from "./torrent";
 
 class BackupTorrents extends Component {
@@ -23,14 +21,10 @@ class BackupTorrents extends Component {
     };
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (
+        return (
             nextProps.torrents !== this.props.torrents ||
             nextProps.movie.magnet !== this.props.movie.magnet
-        ) {
-            return true;
-        }
-
-        return false;
+        );
     }
 
     render() {
@@ -44,7 +38,7 @@ class BackupTorrents extends Component {
                           key={uniqid()}
                           torrent={torrent}
                           name={`torrent ${
-                              this.props.getCurrentMagnet() == torrent.magnet
+                              this.props.getCurrentMagnet() === torrent.magnet
                                   ? "active"
                                   : ""
                           }`}

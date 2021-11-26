@@ -1,14 +1,10 @@
-if (require("electron-squirrel-startup")) return;
-
 const { app, shell, BrowserWindow, Menu } = require("electron");
-
 const windowStateKeeper = require("electron-window-state");
-
 const path = require("path");
 
-let mainWindow;
+let mainWindow = null;
 
-if (process.argv.indexOf("-dev") > -1) global.flixerrDevelop = true;
+if (process.argv.indexOf("-dev") > -1) global.dev = true;
 
 app.allowRendererProcessReuse = false;
 
@@ -25,15 +21,16 @@ function createWindow() {
         height: mainWindowState.height,
         minWidth: 1200,
         minHeight: 700,
-        maximizable: process.platform == "win32",
+        maximizable: process.platform === "win32",
         title: "Flixerr",
-        icon: __dirname + "/assets/imgs/icon.ico",
-        backgroundColor: "#5d16fd",
+        icon: __dirname + "/assets/img/icon.ico",
+        backgroundColor: "#FFF",
         titleBarStyle: "hiddenInset",
         show: false,
         defaultEncoding: "utf8",
         webPreferences: {
             nodeIntegration: true,
+            enableRemoteModule: true,
         },
     });
 
@@ -46,7 +43,7 @@ function createWindow() {
                 cancel: false,
                 responseHeaders: details.responseHeaders,
             });
-        }
+        },
     );
 
     mainWindowState.manage(mainWindow);
@@ -56,88 +53,50 @@ function createWindow() {
             label: app.name,
             submenu: [
                 {
-                    label: 'About Flixerr',
-                    role: 'about',
+                    label: "About Flixerr",
+                    role: "about",
                 },
                 {
-                    type: 'separator',
+                    type: "separator",
                 },
                 {
-                    role: 'services',
+                    role: "services",
                 },
                 {
-                    type: 'separator',
+                    type: "separator",
                 },
                 {
-                    label: 'Hide Flixerr',
-                    role: 'hide',
+                    label: "Hide Flixerr",
+                    role: "hide",
                 },
                 {
-                    role: 'hideothers',
+                    role: "hideothers",
                 },
                 {
-                    label: 'Unhide Flixerr',
-                    role: 'unhide',
+                    label: "Show Flixerr",
+                    role: "show",
                 },
                 {
-                    type: 'separator',
+                    type: "separator",
                 },
                 {
-                    label: 'Quit Flixerr',
-                    role: 'quit',
-                },
-            ],
-        },
-        {
-            label: 'Edit',
-            submenu: [
-                {
-                    label: 'Undo',
-                    accelerator: 'CmdOrCtrl+Z',
-                    selector: 'undo:',
-                },
-                {
-                    label: 'Redo',
-                    accelerator: 'Shift+CmdOrCtrl+Z',
-                    selector: 'redo:',
-                },
-                {
-                    type: 'separator',
-                },
-                {
-                    label: 'Cut',
-                    accelerator: 'CmdOrCtrl+X',
-                    selector: 'cut:',
-                },
-                {
-                    label: 'Copy',
-                    accelerator: 'CmdOrCtrl+C',
-                    selector: 'copy:',
-                },
-                {
-                    label: 'Paste',
-                    accelerator: 'CmdOrCtrl+V',
-                    selector: 'paste:',
-                },
-                {
-                    label: 'Select All',
-                    accelerator: 'CmdOrCtrl+A',
-                    selector: 'selectAll:',
+                    label: "Quit Flixerr",
+                    role: "quit",
                 },
             ],
         },
         {
-            role: 'help',
+            role: "help",
             submenu: [
                 {
-                    label: 'Learn More',
+                    label: "Learn More",
                     click() {
-                        shell.openExternal('https://www.flixerr.co')
+                        shell.openExternal("https://www.flixerr.co");
                     },
                 },
             ],
         },
-    ]
+    ];
 
     if (process.platform === "darwin") {
         Menu.setApplicationMenu(Menu.buildFromTemplate(template));
@@ -147,27 +106,24 @@ function createWindow() {
 
     mainWindow.loadFile(path.join(__dirname, "index.html"));
 
-    if (global.flixerrDevelop) {
-        mainWindow.webContents.openDevTools();
-    }
+    if (global.dev) mainWindow.webContents.openDevTools();
 
-    mainWindow.once("ready-to-show", () => {
+    mainWindow.webContents.once("dom-ready", () => {
+        console.log("ready");
         mainWindow.show();
     });
 
-    mainWindow.on("closed", function () {
+    mainWindow.on("closed", function() {
         mainWindow = null;
     });
 }
 
 app.on("ready", createWindow);
 
-app.on("window-all-closed", function () {
+app.on("window-all-closed", function() {
     app.quit();
 });
 
-app.on("activate", function () {
-    if (mainWindow === null) {
-        createWindow();
-    }
+app.on("activate", function() {
+    if (mainWindow === null) createWindow();
 });

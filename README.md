@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/icon.png?raw=true=" width="128" height="128"/>
+<img src="https://github.com/carlelieser/Flixerr/blob/master/assets/img/icon.png?raw=true=" width="128" height="128"/>
 </p>
 
 # Flixerr
@@ -8,7 +8,7 @@ The best free movie & tv series torrent streaming app.
 ### Join us on <a href="https://discord.gg/vQPuPjS"> Discord. </a>
 
 <p align="center">
-<img src="https://github.com/carlelieser/Flixerr/blob/master/assets/imgs/new-mac-mockup.png?raw=true=">
+<img src="https://github.com/carlelieser/Flixerr/blob/master/assets/img/new-mac-mockup.png?raw=true=">
 </p>
 
 ### Installation

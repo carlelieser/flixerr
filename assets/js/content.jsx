@@ -41,8 +41,7 @@ class Content extends Component {
     };
 
     getSearchContainer = () => {
-        let search = <SearchContainer {...this.props} />;
-        return search;
+        return <SearchContainer {...this.props} />;
     };
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -91,9 +90,10 @@ class Content extends Component {
             <div
                 className="content-container"
                 style={{
-                    display: this.props.active == "Featured" ? "flex" : "block",
+                    display:
+                        this.props.active === "Featured" ? "flex" : "block",
                     backgroundImage: this.props.isLoading
-                        ? "url(./assets/imgs/loading.svg)"
+                        ? "url(./assets/img/loading.svg)"
                         : "",
                 }}
             >

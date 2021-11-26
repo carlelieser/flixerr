@@ -2538,7 +2538,7 @@ class App extends Component {
     loadLogo = () => {
         let tempImage = new Image();
         tempImage.onload = this.handleLogo;
-        tempImage.src = "assets/imgs/icon.png";
+        tempImage.src = "assets/img/icon.png";
     };
 
     requireTorrent = () => {

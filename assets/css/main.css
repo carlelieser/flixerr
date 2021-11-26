@@ -387,7 +387,7 @@ html {
     left: 0;
     position: fixed;
     background-color: #f2f2f2;
-    background-image: url("../imgs/account-bg.svg");
+    background-image: url("../img/account-bg.svg");
     background-size: cover;
     z-index: 998;
     display: flex;
@@ -532,7 +532,7 @@ html {
 .empty-state-container > .empty-state-bg {
     width: 300px;
     height: 300px;
-    background-image: url("../imgs/empty-state.svg");
+    background-image: url("../img/empty-state.svg");
     background-size: 300px;
     background-position: center;
     background-repeat: no-repeat;
@@ -716,7 +716,7 @@ html {
     width: 100%;
     height: 100%;
     background-size: 40px;
-    background-image: url("../imgs/loading.svg");
+    background-image: url("../img/loading.svg");
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -1232,7 +1232,7 @@ html {
     height: 100%;
     top: 0;
     left: 0;
-    background-image: url("../imgs/casting-bg.svg");
+    background-image: url("../img/casting-bg.svg");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -1366,7 +1366,7 @@ html {
 .player-dialog-loading-container {
     width: 100%;
     height: 40px;
-    background-image: url("../imgs//loading.svg");
+    background-image: url("../img//loading.svg");
     background-position: center;
     background-size: 24px;
     background-repeat: no-repeat;
@@ -1433,7 +1433,7 @@ html {
     height: 20px;
     background-size: 20px;
     background-repeat: no-repeat;
-    background-image: url("../imgs/loading.svg");
+    background-image: url("../img/loading.svg");
     background-position: center;
 }
 
@@ -1479,6 +1479,7 @@ video::-webkit-media-text-track-display {
 .backup-container {
     width: 380px;
     height: auto;
+    max-height: 90vh;
     background-color: #fff;
     padding: 40px;
     border-radius: 4px;
@@ -1760,7 +1761,7 @@ video::-webkit-media-text-track-display {
     position: absolute;
     z-index: 800;
     background-color: rgba(0, 0, 0, 0.6);
-    background-image: url("../imgs/loading.svg");
+    background-image: url("../img/loading.svg");
     background-repeat: no-repeat;
     background-position: center;
     background-size: 60px;
@@ -2080,7 +2081,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     height: 240px;
     background-size: contain;
     background-repeat: no-repeat;
-    background-image: url("../imgs/icon.png");
+    background-image: url("../img/icon.png");
     will-change: transform;
 }
 
@@ -2117,7 +2118,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     height: 125px;
     background-size: cover;
     background-repeat: no-repeat;
-    background-image: url("../imgs/offline-error.png");
+    background-image: url("../img/offline-error.png");
 }
 
 .offline-container > span {
@@ -2713,7 +2714,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .movie-chat-container > .chat-list > .chat-empty-state > .chat-empty-state-img {
     width: 100%;
     height: 250px;
-    background-image: url("../imgs/chat-empty-state.svg");
+    background-image: url("../img/chat-empty-state.svg");
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;

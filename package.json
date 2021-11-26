@@ -17,7 +17,7 @@
                 "zip"
             ],
             "category": "public.app-category.entertainment",
-            "icon": "./assets/imgs/icon.icns"
+            "icon": "./assets/img/icon.icns"
         },
         "dmg": {
             "artifactName": "${name}.installer.${ext}"
@@ -26,13 +26,7 @@
             "target": [
                 "nsis"
             ],
-            "icon": "./assets/imgs/icon.ico"
-        },
-        "squirrelWindows": {
-            "iconUrl": "https://raw.githubusercontent.com/carlelieser/Flixerr/master/assets/imgs/icon.ico",
-            "loadingGif": "./assets/imgs/package.gif",
-            "remoteReleases": true,
-            "artifactName": "flixerr-${version}.Windows.${ext}"
+            "icon": "./assets/img/icon.ico"
         },
         "nsis": {
             "deleteAppDataOnUninstall": true,
@@ -51,17 +45,18 @@
     "scripts": {
         "start": "npm run compile && electron .",
         "init": "npm install && npm run rebuild && npm run compile",
-        "develop": "electron . -dev",
+        "dev": "electron . -dev",
         "format": "prettier --config ./.prettierrc --write ./assets/js ./assets/css",
         "clean": "node clean.js",
         "deep-clean": "node clean.js -- --deep",
         "compile": "babel ./assets/js --out-dir dist/js",
         "rebuild": "electron-rebuild",
-        "build": "electron-builder --dir",
-        "build-all": "electron-builder --dir -mwl",
-        "pack": "electron-builder",
-        "pack-all": "electron-builder -mwl",
-        "publish": "npm run clean ; npm run format ; npm run compile && npm run pack-all"
+        "build": "npm run compile && electron-builder --dir",
+        "build-all": "npm run compile && electron-builder --dir -mwl",
+        "pack": "npm run compile && electron-builder",
+        "pack-all": "npm run compile && electron-builder -mwl",
+        "publish": "npm run clean ; npm run format ; npm run compile && npm run pack",
+        "publish-all": "npm run clean ; npm run format ; npm run compile && npm run pack-all"
     },
     "author": "Carlos Santos <carloseliesersantos@gmail.com>",
     "devDependencies": {
@@ -89,7 +84,6 @@
         "decompress": "^4.2.1",
         "download": "^7.1.0",
         "electron-json-storage": "^4.1.8",
-        "electron-squirrel-startup": "^1.0.0",
         "electron-titlebar": "0.0.3",
         "electron-window-state": "^5.0.3",
         "encoding": "^0.1.12",
@@ -106,6 +100,7 @@
         "movie-trailer": "^2.0.6",
         "network-address": "^1.1.2",
         "node-emoji": "^1.10.0",
+        "parse-torrent": "^9.1.4",
         "parse-torrent-name": "^0.5.4",
         "pluralize": "^8.0.0",
         "puppeteer": "^2.1.1",

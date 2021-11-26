@@ -80,7 +80,6 @@ let TorrentSearch = function () {
 
     let getMagnetData = (magnet) => {
         return new Promise((resolve, reject) => {
-            console.log(magnet);
             webtorrentHealth(magnet)
                 .then((data) => {
                     let parsed = parseTorrent(magnet);

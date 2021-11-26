@@ -187,7 +187,7 @@ class Genre extends Component {
                                 ? ""
                                 : this.state.processing &&
                                   !this.state.movies.length
-                                ? "url(./assets/imgs/loading.svg)"
+                                ? "url(./assets/img/loading.svg)"
                                 : !this.state.processing &&
                                   !this.state.movies.length
                                 ? ""
