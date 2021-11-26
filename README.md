@@ -16,7 +16,7 @@ The best free movie & tv series torrent streaming app.
 ### Installation
 To install Flixerr, click the appropriate link for your system in the releases page. Alternatively, you can click the download button on our website.
 
-As of update 1.6.0, it is recommended to run `npm run rebuild` after running `npm install` for the first time. If you're on Windows, it is also necessary to install Apple's [Bonjour Services](https://download.developer.apple.com/Developer_Tools/bonjour_sdk_for_windows_v3.0/bonjoursdksetup.exe) before installing the project's dependencies. The `mdns` package used for casting fails on Windows if Bonjour is not installed.
+As of update 1.6.0, it is **required** to run `npm run rebuild` after running `npm install` for the first time. If you're on Windows, you must install Apple's [Bonjour Services](https://download.developer.apple.com/Developer_Tools/bonjour_sdk_for_windows_v3.0/bonjoursdksetup.exe) before installing the project's dependencies. The `mdns` package used for casting fails on Windows if Bonjour is not installed.
 
 ### Features
 Flixerr makes it easy to stream movies straight from your desktop. Just find the movie you want to watch, and click play.
