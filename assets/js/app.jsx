@@ -878,8 +878,7 @@ class App extends Component {
     };
 
     getBufferAsText = (buffer) => {
-        let utf8 = buffer.toString();
-        return utf8;
+        return buffer.toString();
     };
 
     getVttURL = (bufferText) => {
@@ -917,12 +916,10 @@ class App extends Component {
                     fileClone.data = false;
                 }
 
-                let newFile = {
+                return {
                     ...fileClone,
                     src,
                 };
-
-                return newFile;
             } else {
                 return false;
             }
@@ -949,10 +946,8 @@ class App extends Component {
         let movie = this.getCurrentMovie();
         let { title, release_date } = movie;
         let subtitleSearch = new SubtitleSearch();
-        let subtitles = await subtitleSearch.search(title, release_date),
-            sanitized = await this.sanitizeSubtitles(subtitles);
-
-        return sanitized;
+        let subtitles = await subtitleSearch.search(title, release_date);
+        return await this.sanitizeSubtitles(subtitles);
     };
 
     initSubtitles = async () => {
@@ -1236,7 +1231,7 @@ class App extends Component {
     prepareMovieTitle = (title) => {
         return title
             .replace(/[^a-zA-Z0-9\s\-]/g, "")
-            .replace(/\-/g, " ")
+            .replace(/-/g, " ")
             .toLowerCase();
     };
 
@@ -1366,8 +1361,7 @@ class App extends Component {
         console.log(arr);
         console.log(season, episode);
         let found = arr.find((item) => {
-            let isEpisode = item.episode === episode && item.season === season;
-            return isEpisode;
+            return item.episode === episode && item.season === season;
         });
 
         console.log("Episode found:", found);
@@ -1377,12 +1371,10 @@ class App extends Component {
     getPopcornSource = (popcornData, movie) => {
         let isSeries = this.isSeries(movie);
         let { episodes } = popcornData;
-        let source = {
+        return {
             lang: isSeries ? false : "en",
             path: isSeries ? this.findEpisode(episodes, movie) : popcornData,
         };
-
-        return source;
     };
 
     fetchFromPopcorn = (id, movie) => {
@@ -1402,7 +1394,7 @@ class App extends Component {
 
     getVideoQualities = () => {
         let videoQuality = this.getQualityinProgressive();
-        let arr = [
+        return [
             videoQuality,
             "1080p",
             "720p",
@@ -1411,8 +1403,6 @@ class App extends Component {
             "240p",
             "180p",
         ];
-
-        return arr;
     };
 
     checkPopcornPath = (source, quality) => {
@@ -1452,10 +1442,9 @@ class App extends Component {
             let magnet = this.getPopcornMagnet(source);
             console.log("Chosen magnet", magnet);
             if (!magnet) return;
-            let torrent = {
+            return {
                 magnet,
             };
-            return torrent;
         });
     };
 
@@ -1499,11 +1488,10 @@ class App extends Component {
             ...seriesData,
         };
         if (quality) params.quality = quality;
-        let url = this.constructUrlWithParams(
+        return this.constructUrlWithParams(
             `https://flixerrtv.com/api/${endpoint}`,
             params,
         );
-        return url;
     };
 
     checkUserPremiumAvailability = async () => {
@@ -1727,8 +1715,8 @@ class App extends Component {
 
     isSeries = (movie) => {
         if (movie) {
-            let isSeriesorEpisode = movie.isSeries || movie.show;
-            if (isSeriesorEpisode) {
+            let isSeriesOrEpisode = movie.isSeries || movie.show;
+            if (isSeriesOrEpisode) {
                 return true;
             }
         }
@@ -1766,7 +1754,7 @@ class App extends Component {
                         downloadPercent: false,
                         isStreaming: false,
                         paused: true,
-                        playerLoading: backUp ? true : false,
+                        playerLoading: !!backUp,
                         subtitleOptions: [],
                         showIntro: false,
                     },
@@ -2062,8 +2050,8 @@ class App extends Component {
 
     setMovieItemProperties = (item) => {
         item.title = item.name ? item.name : item.title;
-        item.isNetflix = item.imdb_rating ? true : false;
-        item.isSeries = item.first_air_date ? true : false;
+        item.isNetflix = !!item.imdb_rating;
+        item.isSeries = !!item.first_air_date;
         item.vote_average = item.imdb_rating
             ? item.imdb_rating
             : item.vote_average;
@@ -2077,7 +2065,7 @@ class App extends Component {
     };
 
     getMovieItemProperties = () => {
-        let props = [
+        return [
             "title",
             "id",
             "rg_id",
@@ -2090,8 +2078,6 @@ class App extends Component {
             "isSeries",
             "popularity",
         ];
-
-        return props;
     };
 
     cleanMovieItem = (item) => {
@@ -2109,10 +2095,8 @@ class App extends Component {
 
     sanitizeMovie = (movie) => {
         let item = this.getObjectClone(movie),
-            updated = this.setMovieItemProperties(item),
-            cleaned = this.cleanMovieItem(updated);
-
-        return cleaned;
+            updated = this.setMovieItemProperties(item);
+        return this.cleanMovieItem(updated);
     };
 
     getNetflixReponse = (response) => {
@@ -2147,8 +2131,7 @@ class App extends Component {
             array[index] = movie;
         });
 
-        let shuffledArray = this.shuffleArray(array);
-        return shuffledArray;
+        return this.shuffleArray(array);
     };
 
     extractMovies = (response, data, shuffle) => {
@@ -2171,11 +2154,9 @@ class App extends Component {
             }
         }
 
-        let finalizedMovies = shuffle
+        return shuffle
             ? this.shuffleArray(sanitized)
             : sanitized;
-
-        return finalizedMovies;
     };
 
     createGenreComplete = (genre, genreID, movieData) => {
@@ -2184,13 +2165,11 @@ class App extends Component {
             genreID: genreID,
         };
 
-        let updated = this.setGenreCompleteMovies(
+        return this.setGenreCompleteMovies(
             genreID,
             genreComplete,
             movieData,
         );
-
-        return updated;
     };
 
     setGenreCompleteMovies = (genreID, genreComplete, movieData) => {
@@ -2216,10 +2195,9 @@ class App extends Component {
             primaryRelease = isSeries
                 ? ""
                 : `&primary_release_date.lte=${this.getDateForURL(1)}`;
-        let url = isNetflix
+        return isNetflix
             ? "https://reelgood.com/movies/source/netflix?filter-sort=1"
             : `https://api.themoviedb.org/3/discover/${type}?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&timezone=America%2FNew_York&with_genres=${genreID}&with_original_language=en${primaryRelease}`;
-        return url;
     };
 
     getMovies = (genre, genreID, isSeries) => {
