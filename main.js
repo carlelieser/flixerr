@@ -1,4 +1,4 @@
-const { app, shell, BrowserWindow, Menu } = require("electron");
+const { app, shell, BrowserWindow, Menu, nativeImage } = require("electron");
 const windowStateKeeper = require("electron-window-state");
 const path = require("path");
 
@@ -23,7 +23,6 @@ function createWindow() {
         minHeight: 700,
         maximizable: process.platform === "win32",
         title: "Flixerr",
-        icon: __dirname + "/assets/img/icon.ico",
         backgroundColor: "#FFF",
         titleBarStyle: "hiddenInset",
         show: false,
@@ -33,6 +32,8 @@ function createWindow() {
             enableRemoteModule: true,
         },
     });
+    const icon = nativeImage.createFromPath(__dirname + "/assets/img/icon.ico");
+    mainWindow.setIcon(icon);
 
     mainWindow.webContents.session.webRequest.onHeadersReceived(
         (details, callback) => {
