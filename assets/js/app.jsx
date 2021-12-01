@@ -3,6 +3,8 @@ import React, { Component } from "react";
 import { CSSTransitionGroup } from "react-transition-group";
 import Fade from "react-reveal/Fade";
 import storage from "electron-json-storage";
+import path from "path";
+import fs from "fs";
 import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/database";
@@ -25,7 +27,8 @@ import VideoStream from "./video-stream";
 
 import uniqid from "uniqid";
 
-let accurateInterval = require("accurate-interval");
+const exec = require("child_process").execFile;
+const accurateInterval = require("accurate-interval");
 
 class App extends Component {
     constructor(props) {
@@ -43,6 +46,7 @@ class App extends Component {
 
         this.state = {
             apiKey: "22b4015cb2245d35a9c1ad8cd48e314c",
+            bonjourInstalled: true,
             darkMode: false,
             readyToStream: false,
             willClose: false,
@@ -132,7 +136,7 @@ class App extends Component {
                 () => {
                     clearTimeout(this.introTimeout);
                     this.introTimeout = setTimeout(resolve, 6000);
-                },
+                }
             );
         });
     };
@@ -147,7 +151,7 @@ class App extends Component {
                 this.qualityTimeout = setTimeout(() => {
                     this.setStorage("videoQuality");
                 }, 250);
-            },
+            }
         );
     };
 
@@ -184,15 +188,15 @@ class App extends Component {
                 {
                     playerStatus: status
                         ? {
-                            status,
-                            loading,
-                        }
+                              status,
+                              loading,
+                          }
                         : false,
                 },
                 () => {
                     clearTimeout(this.playerTimeout);
                     this.playerTimeout = setTimeout(() => resolve(), 2500);
-                },
+                }
             );
         });
     };
@@ -218,7 +222,7 @@ class App extends Component {
                 if (error) {
                     throw error;
                 }
-            },
+            }
         );
     };
 
@@ -240,7 +244,7 @@ class App extends Component {
                     },
                     async () => {
                         this.startFireBase();
-                    },
+                    }
                 );
             }
         });
@@ -283,15 +287,15 @@ class App extends Component {
         if (this.state.user.email) {
             let data = {
                 recentlyPlayed: this.cleanMovieArrays(
-                    this.state.recentlyPlayed,
+                    this.state.recentlyPlayed
                 ),
                 movieTimeArray: this.cleanMovieArrays(
-                    this.state.movieTimeArray,
+                    this.state.movieTimeArray
                 ),
                 favorites: this.cleanMovieArrays(this.state.favorites),
                 videoQuality: this.setPropertyOrDefault(
                     this.state.videoQuality,
-                    "HD",
+                    "HD"
                 ),
                 darkMode: this.setPropertyOrDefault(this.state.darkMode, false),
             };
@@ -464,7 +468,7 @@ class App extends Component {
                     this.setEverything = false;
                     this.setBucket(key);
                 }
-            },
+            }
         );
     };
 
@@ -494,15 +498,15 @@ class App extends Component {
                 favorites: this.setPropertyOrDefault(storage.favorites, []),
                 recentlyPlayed: this.setPropertyOrDefault(
                     storage.recentlyPlayed,
-                    [],
+                    []
                 ),
                 movieTimeArray: this.setPropertyOrDefault(
                     storage.movieTimeArray,
-                    [],
+                    []
                 ),
                 videoQuality: this.setPropertyOrDefault(
                     storage.videoQuality,
-                    "HD",
+                    "HD"
                 ),
                 darkMode: this.setPropertyOrDefault(storage.darkMode, false),
             },
@@ -510,8 +514,28 @@ class App extends Component {
                 if (callback) {
                     callback();
                 }
-            },
+            }
         );
+    };
+
+    checkBonjourInstallation = (callback) => {
+        this.setState(
+            {
+                bonjourInstalled: fs.existsSync(
+                    path.join("C:", "Program Files", "Bonjour")
+                ),
+            },
+            () => {
+                console.log("bonjour-installed: ", this.state.bonjourInstalled);
+                if (this.state.bonjourInstalled) {
+                    if (callback) callback();
+                }
+            }
+        );
+    };
+
+    runBonjourInstaller = () => {
+        exec(path.join(__dirname, "../", "../", "bonjoursdksetup.exe"));
     };
 
     getStorage = () => {
@@ -522,11 +546,13 @@ class App extends Component {
                 } else {
                     if (data) {
                         data = this.checkData(data);
-                        this.setStateFromStorage(data, () => {
-                            setTimeout(() => {
-                                this.setState({ appLoading: false });
-                            }, 1000);
-                            resolve();
+                        this.checkBonjourInstallation(() => {
+                            this.setStateFromStorage(data, () => {
+                                setTimeout(() => {
+                                    this.setState({ appLoading: false });
+                                }, 1000);
+                                resolve();
+                            });
                         });
                     }
                 }
@@ -593,12 +619,12 @@ class App extends Component {
                         item.health = Math.round(
                             item.leechers > 0
                                 ? item.seeders / item.leechers
-                                : item.seeders,
+                                : item.seeders
                         );
 
                         return (
                             title.match(
-                                /^(?=.*(1080|720|HD|YIFY))(?!.*(3D|HDTS|HDTC|HD\.TS|HD\.TC|HD\-TS|HD\-TC|CAM))/g,
+                                /^(?=.*(1080|720|HD|YIFY))(?!.*(3D|HDTS|HDTC|HD\.TS|HD\.TC|HD\-TS|HD\-TC|CAM))/g
                             ) ||
                             item.magnet.toUpperCase().match(/^(?=.*(DVDRIP))/g)
                         );
@@ -642,7 +668,7 @@ class App extends Component {
         let ms = 1000 * 30;
         this.autoSaveInterval = accurateInterval(
             this.updateMovieTimeWithCurrentTime,
-            ms,
+            ms
         );
     };
 
@@ -741,7 +767,7 @@ class App extends Component {
                 this.state.client.on("error", () => {
                     this.applyTimeout();
                 });
-            },
+            }
         );
     };
 
@@ -771,7 +797,7 @@ class App extends Component {
         clearTimeout(this.streamTimeout);
         this.setPlayerLoading(false);
         this.setPlayerStatus(
-            `We've found a reason for your meaningless existence`,
+            `We've found a reason for your meaningless existence`
         ).then(() => {
             this.setPlayerStatus(false);
         });
@@ -803,10 +829,10 @@ class App extends Component {
             this.fileStart = accurateInterval(
                 () => {
                     let percent = Math.floor(
-                        (file.downloaded / lengthToDownload) * 100,
+                        (file.downloaded / lengthToDownload) * 100
                     );
                     let speed = Math.floor(
-                        this.state.client.downloadSpeed / 1000,
+                        this.state.client.downloadSpeed / 1000
                     );
 
                     if (percent > 100) {
@@ -821,7 +847,7 @@ class App extends Component {
                     }
                 },
                 100,
-                { aligned: true, immediate: true },
+                { aligned: true, immediate: true }
             );
         });
     };
@@ -838,7 +864,7 @@ class App extends Component {
                     this.applyTimeout();
                 }
             },
-            ms ? ms : 15000,
+            ms ? ms : 15000
         );
     };
 
@@ -861,7 +887,7 @@ class App extends Component {
                 }
             },
             100,
-            { aligned: true, immediate: true },
+            { aligned: true, immediate: true }
         );
     };
 
@@ -992,7 +1018,7 @@ class App extends Component {
                 this.setFileLoadedTimeout();
                 this.setPlayerStatus(
                     "Retrieving from the owl postal service",
-                    true,
+                    true
                 );
                 torrent.deselect(0, torrent.pieces.length - 1, false);
 
@@ -1188,7 +1214,7 @@ class App extends Component {
                             let results = this.extractMovies(
                                 response,
                                 false,
-                                true,
+                                true
                             );
                             resolve(results);
                         })
@@ -1258,7 +1284,7 @@ class App extends Component {
                 },
                 () => {
                     resolve();
-                },
+                }
             );
         });
     };
@@ -1309,15 +1335,15 @@ class App extends Component {
         torrent = torrent
             ? torrent
             : clone.find((item) => {
-                if (item.resolution || item.videoQuality) {
-                    if (
-                        item.resolution === videoQuality ||
-                        item.videoQuality === videoQuality
-                    ) {
-                        return item;
-                    }
-                }
-            });
+                  if (item.resolution || item.videoQuality) {
+                      if (
+                          item.resolution === videoQuality ||
+                          item.videoQuality === videoQuality
+                      ) {
+                          return item;
+                      }
+                  }
+              });
 
         return torrent ? torrent : clone[0];
     };
@@ -1394,15 +1420,7 @@ class App extends Component {
 
     getVideoQualities = () => {
         let videoQuality = this.getQualityinProgressive();
-        return [
-            videoQuality,
-            "1080p",
-            "720p",
-            "480p",
-            "360p",
-            "240p",
-            "180p",
-        ];
+        return [videoQuality, "1080p", "720p", "480p", "360p", "240p", "180p"];
     };
 
     checkPopcornPath = (source, quality) => {
@@ -1490,7 +1508,7 @@ class App extends Component {
         if (quality) params.quality = quality;
         return this.constructUrlWithParams(
             `https://flixerrtv.com/api/${endpoint}`,
-            params,
+            params
         );
     };
 
@@ -1517,10 +1535,10 @@ class App extends Component {
             "content",
             isSeries
                 ? {
-                    season: movie.season_number,
-                    episode: movie.episode_number_formatted,
-                }
-                : null,
+                      season: movie.season_number,
+                      episode: movie.episode_number_formatted,
+                  }
+                : null
         );
         this.setStreaming();
         this.setStreamTimeout(20000);
@@ -1554,7 +1572,7 @@ class App extends Component {
 
                     this.setPlayerStatus(
                         `Searching the entire universe for "${title}"`,
-                        true,
+                        true
                     );
 
                     this.getIMDBID(movie)
@@ -1568,7 +1586,7 @@ class App extends Component {
                                 this.streamTorrent(torrent);
                             } else {
                                 throw new Error(
-                                    "Couldn't find a torrent with Popcorn API.",
+                                    "Couldn't find a torrent with Popcorn API."
                                 );
                             }
                         })
@@ -1581,7 +1599,7 @@ class App extends Component {
                                         ["1337x", "Rarbg"],
                                         query,
                                         movieData.urlParams.type,
-                                        20,
+                                        20
                                     )
                                     .catch((err) => {
                                         console.log(err);
@@ -1602,7 +1620,7 @@ class App extends Component {
                                             if (
                                                 (data[0].message ||
                                                     typeof data[0] ===
-                                                    "string") &&
+                                                        "string") &&
                                                 data.length <= 2
                                             ) {
                                                 this.searchTorrent(movie, true);
@@ -1620,10 +1638,10 @@ class App extends Component {
                                                         ) {
                                                             let promise =
                                                                 this.torrentSearch.getMagnetFromLink(
-                                                                    magnetTorrent,
+                                                                    magnetTorrent
                                                                 );
                                                             magnetPromises.push(
-                                                                promise,
+                                                                promise
                                                             );
                                                         }
                                                     }
@@ -1644,19 +1662,19 @@ class App extends Component {
                                                                     ) {
                                                                         return torrent.magnet;
                                                                     }
-                                                                },
+                                                                }
                                                             );
 
                                                         if (
                                                             cleanResults.length
                                                         ) {
                                                             this.getPreferredTorrents(
-                                                                cleanResults,
+                                                                cleanResults
                                                             ).then(
                                                                 (torrents) => {
                                                                     let torrent =
                                                                         this.getQualityTorrent(
-                                                                            torrents,
+                                                                            torrents
                                                                         );
                                                                     if (
                                                                         torrent
@@ -1666,7 +1684,7 @@ class App extends Component {
                                                                         ) {
                                                                             let movie =
                                                                                 this.getObjectClone(
-                                                                                    currentMovie,
+                                                                                    currentMovie
                                                                                 );
                                                                             movie.preferredTorrents =
                                                                                 torrents;
@@ -1674,31 +1692,31 @@ class App extends Component {
                                                                                 movie,
                                                                                 () => {
                                                                                     this.changeCurrentMagnet(
-                                                                                        torrent.magnet,
+                                                                                        torrent.magnet
                                                                                     );
                                                                                     this.updateMovieTimeArray(
                                                                                         movie,
-                                                                                        true,
+                                                                                        true
                                                                                     );
                                                                                     this.streamTorrent(
-                                                                                        torrent,
+                                                                                        torrent
                                                                                     );
-                                                                                },
+                                                                                }
                                                                             );
                                                                         }
                                                                     } else {
                                                                         this.applyTimeout(
-                                                                            1,
+                                                                            1
                                                                         );
                                                                     }
-                                                                },
+                                                                }
                                                             );
                                                         } else {
                                                             this.applyTimeout();
                                                         }
                                                     })
                                                     .catch((err) =>
-                                                        console.log(err),
+                                                        console.log(err)
                                                     );
                                             }
                                         } else {
@@ -1770,7 +1788,7 @@ class App extends Component {
                                 resolve();
                             }
                         }, 250);
-                    },
+                    }
                 );
             }
         }).catch((err) => console.log(err));
@@ -1796,14 +1814,14 @@ class App extends Component {
                     return {
                         movieTimeArray: this.setPropertyOrDefault(
                             newArray,
-                            this.state.movieTimeArray,
+                            this.state.movieTimeArray
                         ),
                     };
                 }
             },
             () => {
                 this.setStorage("movieTimeArray");
-            },
+            }
         );
     };
 
@@ -1901,7 +1919,7 @@ class App extends Component {
                     .then((result) => {
                         console.log(result);
                     });
-            },
+            }
         );
         this.setFullScreen();
     };
@@ -1976,7 +1994,7 @@ class App extends Component {
                 },
                 () => {
                     setTimeout(resolve, 250);
-                },
+                }
             );
         });
     };
@@ -2011,7 +2029,7 @@ class App extends Component {
         let url = `https://api.themoviedb.org/3/discover/movie?api_key=${
             this.state.apiKey
         }&region=US&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&release_date.lte=${this.getDateForURL(
-            1,
+            1
         )}`;
         return new Promise((resolve, reject) => {
             this.fetchContent(url)
@@ -2058,8 +2076,8 @@ class App extends Component {
         item.release_date = item.released_on
             ? item.released_on
             : item.first_air_date
-                ? item.first_air_date
-                : item.release_date;
+            ? item.first_air_date
+            : item.release_date;
 
         return item;
     };
@@ -2101,8 +2119,8 @@ class App extends Component {
 
     getNetflixReponse = (response) => {
         return response.substring(
-            response.indexOf("\"entities\""),
-            response.indexOf("\"meta\""),
+            response.indexOf('"entities"'),
+            response.indexOf('"meta"')
         );
     };
 
@@ -2154,9 +2172,7 @@ class App extends Component {
             }
         }
 
-        return shuffle
-            ? this.shuffleArray(sanitized)
-            : sanitized;
+        return shuffle ? this.shuffleArray(sanitized) : sanitized;
     };
 
     createGenreComplete = (genre, genreID, movieData) => {
@@ -2165,11 +2181,7 @@ class App extends Component {
             genreID: genreID,
         };
 
-        return this.setGenreCompleteMovies(
-            genreID,
-            genreComplete,
-            movieData,
-        );
+        return this.setGenreCompleteMovies(genreID, genreComplete, movieData);
     };
 
     setGenreCompleteMovies = (genreID, genreComplete, movieData) => {
@@ -2208,7 +2220,7 @@ class App extends Component {
                     let genreComplete = this.createGenreComplete(
                         genre,
                         genreID,
-                        movieData,
+                        movieData
                     );
                     resolve(genreComplete);
                 })
@@ -2267,11 +2279,11 @@ class App extends Component {
     getCollection = (data) => {
         const favorites = this.chooseRandom(
             data ? data.favorites : this.state.favorites,
-            5,
+            5
         );
         const recents = this.chooseRandom(
             data ? data.recentlyPlayed : this.state.recentlyPlayed,
-            5,
+            5
         );
         return favorites.concat(recents);
     };
@@ -2363,7 +2375,7 @@ class App extends Component {
                         if (this.usersRef) {
                             this.setBucket();
                         }
-                    },
+                    }
                 );
             })
             .catch(() => {
@@ -2388,7 +2400,7 @@ class App extends Component {
             },
             () => {
                 this.setStorage("favorites");
-            },
+            }
         );
     };
 
@@ -2407,7 +2419,7 @@ class App extends Component {
             },
             () => {
                 this.setStorage("favorites");
-            },
+            }
         );
     };
 
@@ -2428,7 +2440,7 @@ class App extends Component {
                 },
                 () => {
                     this.setStorage("recentlyPlayed");
-                },
+                }
             );
         } else {
             let index = this.returnCorrectMovie(clone, movie, true);
@@ -2441,7 +2453,7 @@ class App extends Component {
                 },
                 () => {
                     this.setStorage("recentlyPlayed");
-                },
+                }
             );
         }
     };
@@ -2466,7 +2478,7 @@ class App extends Component {
             let promise = this.getMovies(
                 movieGenres[j].name,
                 movieGenres[j].id,
-                shows,
+                shows
             );
             promiseArray.push(promise);
         }
@@ -2529,13 +2541,13 @@ class App extends Component {
         let email = this.state.inputEmail.length
                 ? this.state.inputEmail
                 : this.state.user
-                    ? this.state.user.email
-                    : "",
+                ? this.state.user.email
+                : "",
             password = this.state.inputPass.length
                 ? this.state.inputPass
                 : this.state.user
-                    ? this.state.user.password
-                    : "";
+                ? this.state.user.password
+                : "";
 
         firebase
             .auth()
@@ -2574,7 +2586,7 @@ class App extends Component {
 
         this.movieAudienceId = userId;
         connections.on("value", (snapshot) =>
-            this.setCurrentAudienceCount(snapshot.numChildren()),
+            this.setCurrentAudienceCount(snapshot.numChildren())
         );
     };
 
@@ -2649,7 +2661,7 @@ class App extends Component {
                     let isPremiumUser =
                         await this.checkUserPremiumAvailability();
                     this.setState({ isPremiumUser });
-                },
+                }
             );
         });
 
@@ -2674,7 +2686,7 @@ class App extends Component {
                 },
                 () => {
                     resolve();
-                },
+                }
             );
         });
     };
@@ -2685,7 +2697,7 @@ class App extends Component {
         if (
             errorMessage ===
             "There is no user record corresponding to this identifier. The user may have been" +
-            " deleted."
+                " deleted."
         ) {
             errorMessage = `We can't find a user associated with that email. Please try again.`;
         }
@@ -2738,7 +2750,7 @@ class App extends Component {
             },
             () => {
                 this.setUserCredentials();
-            },
+            }
         );
     };
 
@@ -2762,7 +2774,7 @@ class App extends Component {
     handleInput = (e) => {
         let value = e.target.value;
         let isEmail = value.match(
-            /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/g,
+            /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/g
         );
 
         this.setState({
@@ -2824,7 +2836,7 @@ class App extends Component {
             },
             () => {
                 this.setStorage("darkMode");
-            },
+            }
         );
     };
 
@@ -2903,12 +2915,12 @@ class App extends Component {
                 active={active}
                 updateMenu={this.updateMenu}
                 resetSearch={this.resetSearch}
-            />,
+            />
         );
 
         let movieBackDrop = this.showElementBasedOnValue(
             showBox,
-            <div className="movie-container-bg" onClick={this.closeBackdrop} />,
+            <div className="movie-container-bg" onClick={this.closeBackdrop} />
         );
 
         let movieModal = this.showElementBasedOnValue(
@@ -2922,7 +2934,7 @@ class App extends Component {
                 addToFavorites={this.addToFavorites}
                 removeFromFavorites={this.removeFromFavorites}
                 setTrailer={this.setTrailer}
-            />,
+            />
         );
 
         let playerModal = this.showElementBasedOnValue(
@@ -2976,7 +2988,7 @@ class App extends Component {
                 seekValue={seekValue}
                 updateMovieTime={this.updateMovieTime}
                 user={this.state.user}
-            />,
+            />
         );
 
         let fullGenreContainer = this.showElementBasedOnValue(
@@ -2993,7 +3005,7 @@ class App extends Component {
                 openBox={this.openBox}
                 setOffline={this.setOffline}
                 closeGenre={this.closeGenre}
-            />,
+            />
         );
 
         let loadingContainer = (
@@ -3005,6 +3017,56 @@ class App extends Component {
                 <Fade when={logoLoaded} distance="10%" bottom>
                     <div className="logo" />
                 </Fade>
+                {this.state.bonjourInstalled ? null : (
+                    <div
+                        className={"flex items-center justify-center flex-col"}
+                    >
+                        <div
+                            className={"badge"}
+                            style={{
+                                backgroundColor: "#fd4b4b",
+                                color: "#FFF",
+                                marginTop: "1em",
+                            }}
+                        >
+                            <i
+                                className={
+                                    "mdi mdi-24px mdi-alert-circle-outline"
+                                }
+                                style={{ marginRight: "1em" }}
+                            ></i>
+                            <div className={"font-sans"}>
+                                Bonjour services are required for the player to
+                                work properly.
+                            </div>
+                        </div>
+                        <div className={"flex"}>
+                            <div
+                                className={"btn btn-blue"}
+                                style={{
+                                    marginRight: "1em",
+                                    paddingLeft: "1em",
+                                    paddingRight: "1em",
+                                }}
+                                onClick={this.runBonjourInstaller}
+                            >
+                                <i className={"mdi mdi-download"}></i>
+                                <div>Install Bonjour</div>
+                            </div>
+                            <div
+                                className={"btn"}
+                                style={{
+                                    paddingLeft: "1em",
+                                    paddingRight: "1em",
+                                }}
+                                onClick={this.getSettings}
+                            >
+                                <i className={"mdi mdi-check-all"}></i>
+                                <div>Verify installation</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         );
 
@@ -3014,7 +3076,7 @@ class App extends Component {
                 type="text/css"
                 rel="stylesheet"
                 href="./assets/css/dark-mode.css"
-            />,
+            />
         );
 
         return (
