@@ -6,8 +6,11 @@
     "build": {
         "appId": "com.flixerr.app",
         "productName": "Flixerr",
+        "asar": false,
         "directories": {
-            "output": "./build"
+            "app": ".",
+            "output": "./build",
+            "buildResources": "./"
         },
         "publish": {
             "provider": "github"
@@ -24,7 +27,8 @@
         },
         "win": {
             "target": [
-                "nsis"
+                "nsis",
+                "appx"
             ],
             "icon": "./assets/img/icon.ico"
         },
@@ -34,6 +38,13 @@
             "createStartMenuShortcut": true,
             "shortcutName": "Flixerr",
             "artifactName": "${name}-${version}.${os}.${ext}"
+        },
+        "appx": {
+            "applicationId": "CarlosSantos.Flixerr",
+            "identityName": "1661CarlosSantos.Flixerr",
+            "publisherDisplayName": "Carlos Santos",
+            "publisher": "CN=7A2BC485-9E2D-4207-AF2F-90FC34238C7D",
+            "displayName": "Flixerr"
         },
         "linux": {
             "target": [
@@ -54,9 +65,9 @@
         "build": "npm run compile && electron-builder --dir",
         "build-all": "npm run compile && electron-builder --dir -mwl",
         "pack": "npm run compile && electron-builder",
-        "pack-all": "npm run compile && electron-builder -mwl",
-        "publish": "npm run clean ; npm run format ; npm run compile && npm run pack",
-        "publish-all": "npm run clean ; npm run format ; npm run compile && npm run pack-all"
+        "pack-all": "npm run pack -- -mwl",
+        "publish": "npm run clean && npm run format && npm run pack",
+        "publish-all": "npm run clean && npm run format && npm run pack-all"
     },
     "author": "Carlos Santos <carloseliesersantos@gmail.com>",
     "devDependencies": {
