@@ -5,7 +5,8 @@
 # Flixerr
 The best free movie & tv series torrent streaming app.
 
-### Join us on <a href="https://discord.gg/vQPuPjS"> Discord. </a>
+### Join us on <a href="https://discord.gg/vQPuPjS">Discord.</a>
+### If you'd like to support development, purchase Flixerr on the <a href="https://www.microsoft.com/store/productId/9N5J7TNJ5XCS">Microsoft Store.</a> To be honest, we don't know we did it either.
 
 <p align="center">
 <img src="https://github.com/carlelieser/Flixerr/blob/master/assets/img/new-mac-mockup.png?raw=true=">
